@@ -1,23 +1,17 @@
 package config
 
 import (
-	"bufio"
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
 	"fmt"
-	"os"
 	"strings"
-
-	"golang.org/x/crypto/scrypt"
 )
 
 type Config struct {
-	Command uint8  // 1 - encode; 2 - decode
+	Command uint8  // 1 - encrypt; 2 - decrypt
+	Algr    string // encryption algorithm
 	Input   string // nil - stdin
 	Output  string // nil - stdout
 	Key     string // secret key file path
-	Algr    string // encryption algorithm
+	Genkey  bool   // generate key enabled
 	Passwd  bool   // interactively input password
 	Verbose bool
 }
@@ -36,6 +30,7 @@ func Usage() string {
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-k FILE | --key=FILE}\n" +
+		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {-v | --verbose}"
 }
@@ -56,6 +51,8 @@ func Help() string {
 		"       name of the output file, omitting means output to stdout\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       name of the key file\n"+
+		"    -g, --generate\n"+
+		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
 		"       indicate a password is input interactively\n"+
 		"    -v, --verbose\n"+
@@ -154,6 +151,8 @@ func Parse(args []string) (cfg *Config, err error) {
 			} else {
 				cfg.Key = args[i][6:]
 			}
+		case args[i] == "-g" || args[i] == "--generate":
+			cfg.Genkey = true
 		case args[i] == "-p" || args[i] == "--password":
 			cfg.Passwd = true
 		default:
@@ -162,94 +161,5 @@ func Parse(args []string) (cfg *Config, err error) {
 		}
 	}
 
-	return
-}
-
-// Validate validate inputs
-func Validate(cfg *Config) (err error) {
-	errs := make([]error, 0)
-
-	if cfg.Input != "" {
-		if _, err = os.Stat(cfg.Input); errors.Is(err, os.ErrNotExist) {
-			errs = append(errs, fmt.Errorf("input file '%v' does not exist", cfg.Input))
-		} else if err != nil {
-			return
-		}
-	}
-
-	if cfg.Output != "" {
-		if _, err = os.Stat(cfg.Output); err == nil {
-			errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Output))
-		} else if !errors.Is(err, os.ErrNotExist) {
-			return
-		}
-	}
-
-	if cfg.Key != "" {
-		if _, err = os.Stat(cfg.Key); errors.Is(err, os.ErrNotExist) {
-			errs = append(errs, fmt.Errorf("key file '%v' does not exist", cfg.Key))
-		} else if err != nil {
-			return
-		}
-	} else if !cfg.Passwd {
-		errs = append(errs, fmt.Errorf("encryption key missing"))
-	}
-
-	if err = validateAlg(cfg.Algr); err != nil {
-		errs = append(errs, err)
-	}
-
-	if len(errs) > 0 {
-		var buf strings.Builder
-		fmt.Fprintf(&buf, "[\n - %v", errs[0])
-		for _, err := range errs[1:] {
-			fmt.Fprintf(&buf, "\n - %v", err)
-		}
-		err = fmt.Errorf("%v\n]", buf.String())
-	}
-	return
-}
-
-const SALT = "salt.txt"
-const N = 65536
-const R = 16
-const P = 1
-
-func GetKeyFromPwd(pwd []byte, keyLen, saltLen int) (
-	key []byte,
-	err error,
-) {
-	var sfile *os.File
-	var salt []byte
-	if _, err = os.Stat(SALT); errors.Is(err, os.ErrNotExist) {
-		// salt file not exists
-		salt = make([]byte, saltLen)
-		_, err = rand.Read(salt)
-		if err != nil {
-			return
-		}
-		sfile, err = os.Create(SALT)
-		if err != nil {
-			return
-		}
-		wtr := bufio.NewWriter(sfile)
-		defer sfile.Close()
-		fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(salt))
-		wtr.Flush()
-	} else if err != nil {
-		return
-	} else {
-		// salt file found
-		var sstr []byte
-		sstr, err = os.ReadFile(SALT)
-		if err != nil {
-			return
-		}
-		salt, err = base64.StdEncoding.DecodeString(string(sstr))
-		if err != nil {
-			return
-		}
-	}
-	key, err = scrypt.Key(pwd, salt, N, R, P, keyLen)
 	return
 }

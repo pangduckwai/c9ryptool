@@ -16,6 +16,8 @@ func validateAlg(algr string) (err error) {
 	return
 }
 
+// Algorithm return details of the given encryption algorithm
+// TODO NOTE!!!! add GCM/CBC etc.
 func Algorithm(algr string) (
 	keyLen int,
 	ivLen int,
