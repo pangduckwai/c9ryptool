@@ -14,18 +14,18 @@ import (
 func main() {
 	cfg, err := config.Parse(os.Args)
 	if err != nil {
-		log.Fatalf("%v\n%v\n%v\n", err, config.Desc(), config.Usage())
+		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, config.Desc(), config.Usage())
 	}
 
 	err = config.Validate(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[MAIN]%v", err)
 	}
 
 	var keyLen, ivLen int
 	keyLen, ivLen, err = config.Algorithm(cfg.Algr)
 	if err != nil {
-		return
+		log.Fatalf("[MAIN]%v", err)
 	}
 
 	var key []byte
@@ -35,26 +35,26 @@ func main() {
 		fmt.Print("Enter password: ")
 		str, err := rdr.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("[MAIN]%v", err)
 		}
 		key, err = crypto.FromPassword([]byte(str[:len(str)-1]), keyLen, crypto.SALTLEN)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("[MAIN]%v", err)
 		}
 	} else if cfg.Genkey {
 		key, err = crypto.GenerateKey(cfg.Key, keyLen)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("[MAIN]%v", err)
 		}
 	} else {
 		var kecd []byte
 		kecd, err = os.ReadFile(cfg.Key)
 		if err != nil {
-			return
+			log.Fatalf("[MAIN]%v", err)
 		}
 		key, err = base64.StdEncoding.DecodeString(string(kecd))
 		if err != nil {
-			return
+			log.Fatalf("[MAIN]%v", err)
 		}
 	}
 
@@ -70,6 +70,6 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[MAIN]%v", err)
 	}
 }

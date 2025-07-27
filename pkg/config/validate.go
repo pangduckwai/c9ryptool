@@ -32,7 +32,7 @@ func Validate(cfg *Config) (err error) {
 
 	if cfg.Key != "" {
 		if cfg.Passwd {
-			err = fmt.Errorf("incompatable options")
+			err = fmt.Errorf("[VLDT] incompatable options")
 			return
 		}
 		if _, err = os.Stat(cfg.Key); errors.Is(err, os.ErrNotExist) {
@@ -58,7 +58,7 @@ func Validate(cfg *Config) (err error) {
 		for _, err := range errs[1:] {
 			fmt.Fprintf(&buf, "\n - %v", err)
 		}
-		err = fmt.Errorf("%v\n]", buf.String())
+		err = fmt.Errorf("[VLDT]%v\n]", buf.String())
 	}
 	return
 }

@@ -11,7 +11,7 @@ var ALGORITHMS = [...]string{
 
 func validateAlg(algr string) (err error) {
 	if !slices.Contains(ALGORITHMS[:], algr) {
-		err = fmt.Errorf("unsupported encryption algorithm '%v'", algr)
+		err = fmt.Errorf("[ALGR] unsupported encryption algorithm '%v'", algr)
 	}
 	return
 }
