@@ -11,7 +11,8 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-const SALT = "salt.txt"
+const SALTPATH = "salt.txt"
+const SALTLEN = 16
 const N = 65536
 const R = 16
 const P = 1
@@ -25,14 +26,14 @@ func FromPassword(pwd []byte, keyLen, saltLen int) (
 ) {
 	var sfile *os.File
 	var salt []byte
-	if _, err = os.Stat(SALT); errors.Is(err, os.ErrNotExist) {
+	if _, err = os.Stat(SALTPATH); errors.Is(err, os.ErrNotExist) {
 		// salt file not exists
 		salt = make([]byte, saltLen)
 		_, err = rand.Read(salt)
 		if err != nil {
 			return
 		}
-		sfile, err = os.Create(SALT)
+		sfile, err = os.Create(SALTPATH)
 		if err != nil {
 			return
 		}
@@ -45,7 +46,7 @@ func FromPassword(pwd []byte, keyLen, saltLen int) (
 	} else {
 		// salt file found
 		var sstr []byte
-		sstr, err = os.ReadFile(SALT)
+		sstr, err = os.ReadFile(SALTPATH)
 		if err != nil {
 			return
 		}

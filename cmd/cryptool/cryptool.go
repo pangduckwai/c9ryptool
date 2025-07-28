@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"sea9.org/go/cryptool/pkg/algr"
 	"sea9.org/go/cryptool/pkg/config"
 	"sea9.org/go/cryptool/pkg/crypto"
 )
@@ -22,10 +23,9 @@ func main() {
 		log.Fatalf("[MAIN]%v", err)
 	}
 
-	var keyLen, ivLen int
-	keyLen, ivLen, err = config.Algorithm(cfg.Algr)
-	if err != nil {
-		log.Fatalf("[MAIN]%v", err)
+	algr := algr.Parse(cfg.Algr)
+	if algr == nil {
+		log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 	}
 
 	var key []byte
@@ -37,12 +37,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
-		key, err = crypto.FromPassword([]byte(str[:len(str)-1]), keyLen, crypto.SALTLEN)
+		key, err = crypto.FromPassword([]byte(str[:len(str)-1]), algr.K, crypto.SALTLEN)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
 	} else if cfg.Genkey {
-		key, err = crypto.GenerateKey(cfg.Key, keyLen)
+		key, err = crypto.GenerateKey(cfg.Key, algr.K)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
@@ -60,9 +60,9 @@ func main() {
 
 	switch cfg.Command {
 	case 0:
-		err = crypto.Encrypt(cfg, key, ivLen)
+		err = crypto.Encrypt(cfg, algr, key)
 	case 1:
-		err = crypto.Decrypt(cfg, key, ivLen)
+		err = crypto.Decrypt(cfg, algr, key)
 	case 2:
 		fmt.Printf("%v\n%v\n", config.Desc(), config.Help())
 	case 3:

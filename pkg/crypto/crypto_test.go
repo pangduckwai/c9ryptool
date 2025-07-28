@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
+	"sea9.org/go/cryptool/pkg/config"
 )
 
 func TestRandom(t *testing.T) {
@@ -67,4 +68,17 @@ func TestReadfile(t *testing.T) {
 		fmt.Println("File exists")
 	}
 	f.Close()
+}
+
+func TestRead(t *testing.T) {
+	cfg := &config.Config{
+		Input:   "../../README.md",
+		Buffer:  16,
+		Verbose: true,
+	}
+	buff, err := read(cfg)
+	if err != nil {
+		t.Fatalf("TestRead() %v", err)
+	}
+	fmt.Printf("TestRead():\n%v\n", string(buff))
 }

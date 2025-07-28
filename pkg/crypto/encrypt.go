@@ -1,23 +1,146 @@
 package crypto
 
 import (
+	"bufio"
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/base64"
 	"fmt"
+	"io"
+	"os"
 
+	"sea9.org/go/cryptool/pkg/algr"
 	"sea9.org/go/cryptool/pkg/config"
 )
 
-const SALTLEN = 16
+func read(
+	cfg *config.Config,
+) (
+	dat []byte,
+	err error,
+) {
+	inp := os.Stdin
+	if cfg.Input != "" {
+		inp, err = os.Open(cfg.Input)
+		if err != nil {
+			return
+		}
+		defer inp.Close()
+	}
+
+	rdr := bufio.NewReaderSize(inp, cfg.Buffer)
+	if rdr.Size() != cfg.Buffer {
+		if cfg.Verbose {
+			fmt.Printf("Read buffer size %v mismatching with the specified size %v, changing buffer size...\n", rdr.Size(), cfg.Buffer)
+		}
+		cfg.Buffer = rdr.Size()
+		rdr = bufio.NewReaderSize(inp, cfg.Buffer)
+	}
+
+	cnt, off := 0, 0
+	var err1 error
+	buf := make([]byte, 0, cfg.Buffer)
+	dat = make([]byte, 0, cfg.Buffer*2)
+	for idx := 0; ; idx++ {
+		// As described in the doc, handle read data first if n > 0 before handling error,
+		// it is because the returned error could have been EOF
+		if err1 == nil { // When loop for the last time, skip read
+			cnt, err = rdr.Read(buf[:cap(buf)])
+		}
+
+		if cnt > 0 && cfg.Input == "" {
+			// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
+			if buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
+				if cnt == 2 && buf[:cnt][1] == 10 { // ASCII code 10 is line feed LF ('\n')
+					cnt = 0
+					off = 1
+					err = io.EOF
+				} else if cnt == 3 && buf[:cnt][1] == 13 && buf[:cnt][2] == 10 { // ASCII code 13 is carriage return CR
+					cnt = 0
+					off = 2
+					err = io.EOF
+				}
+			}
+			if off > len(dat) {
+				off = len(dat)
+			}
+		}
+
+		if err1 != nil {
+			if err1 == io.EOF {
+				err = nil
+				break // Done
+			} else {
+				dat = nil
+				err = err1
+				return
+			}
+		}
+
+		dat = append(dat[:len(dat)-off], buf[:cnt]...)
+		err1 = err
+		// fmt.Printf("TEMP!!! cnt:%3v off:%3v '%v'\n", cnt, off, string(buf[:cnt]))
+	}
+	return
+}
+
+func write(
+	cfg *config.Config,
+	dat []byte,
+) (err error) {
+	var out *os.File
+	var wtr *bufio.Writer
+	if cfg.Output != "" {
+		out, err = os.Create(cfg.Output)
+		if err != nil {
+			return
+		}
+		wtr = bufio.NewWriter(out)
+		defer out.Close()
+	}
+
+	if wtr == nil {
+		fmt.Println(base64.StdEncoding.EncodeToString(dat))
+	} else {
+		fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(dat))
+		wtr.Flush()
+	}
+	return
+}
 
 func Encrypt(
 	cfg *config.Config,
+	alg *algr.Algorithm,
 	key []byte,
-	ivLen int,
 ) (err error) {
-	iv, err := Generate(ivLen)
+	var iv []byte
+	if alg.V > 0 {
+		iv, err = Generate(alg.V)
+		if err != nil {
+			return
+		}
+	}
+
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return
 	}
 
-	fmt.Printf("TEMP!!!\n%s\n%s\n", key, iv)
+	switch alg.M {
+	case 0:
+		gcm, errr := cipher.NewGCM(block)
+		if errr != nil {
+			return errr
+		}
+
+		iv, err = Generate(gcm.NonceSize())
+		if err != nil {
+			return
+		}
+
+		err = write(cfg, gcm.Seal(iv, iv, []byte("Hello world"), nil))
+	default:
+		err = fmt.Errorf("[ENC]unknown mode of operation %v", alg.M)
+	}
 	return
 }

@@ -2,8 +2,13 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+
+	"sea9.org/go/cryptool/pkg/algr"
 )
+
+const bUFFER = 1048576 // 1024x1024
 
 type Config struct {
 	Command uint8  // 1 - encrypt; 2 - decrypt
@@ -13,6 +18,7 @@ type Config struct {
 	Key     string // secret key file path
 	Genkey  bool   // generate key enabled
 	Passwd  bool   // interactively input password
+	Buffer  int    // buffer size
 	Verbose bool
 }
 
@@ -30,6 +36,7 @@ func Usage() string {
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-k FILE | --key=FILE}\n" +
+		"   {-b SIZE | --buffer=SIZE}\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {-v | --verbose}"
@@ -51,6 +58,8 @@ func Help() string {
 		"       name of the output file, omitting means output to stdout\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       name of the key file\n"+
+		"    -b SIZE, --buffer=SIZE\n"+
+		"       size of the read buffer (SIZE default: %vKB)\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
@@ -58,7 +67,7 @@ func Help() string {
 		"    -v, --verbose\n"+
 		"       display detail operation messages during processing\n\n"+
 		"  NOTE: type a period (.) then press <enter> in a new line to finish\n"+
-		"        when inputting interactively from stdin", ALGORITHMS[1], ALGORITHMS)
+		"        when inputting interactively from stdin", algr.ALGORITHMS[1], algr.ALGORITHMS, bUFFER/1024)
 }
 
 func Parse(args []string) (cfg *Config, err error) {
@@ -68,7 +77,8 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		Algr:    ALGORITHMS[1],
+		Algr:    algr.ALGORITHMS[1],
+		Buffer:  bUFFER,
 		Passwd:  false,
 		Verbose: false,
 	}
@@ -87,6 +97,7 @@ func Parse(args []string) (cfg *Config, err error) {
 		return
 	}
 
+	var val int
 	for i := 2; i < len(args); i++ {
 		switch {
 		case args[i] == "-v" || args[i] == "--verbose":
@@ -150,6 +161,27 @@ func Parse(args []string) (cfg *Config, err error) {
 				return
 			} else {
 				cfg.Key = args[i][6:]
+			}
+		case args[i] == "-b":
+			i++
+			if i >= len(args) {
+				err = fmt.Errorf("[CONF] Missing buffer size argument")
+				return
+			} else {
+				val, err = strconv.Atoi(args[i])
+				if err == nil {
+					cfg.Buffer = val
+				}
+			}
+		case strings.HasPrefix(args[i], "--buffer="):
+			if len(args[i]) <= 9 {
+				err = fmt.Errorf("[CONF] Missing buffer size")
+				return
+			} else {
+				val, err = strconv.Atoi(args[i][9:])
+				if err == nil {
+					cfg.Buffer = val
+				}
 			}
 		case args[i] == "-g" || args[i] == "--generate":
 			cfg.Genkey = true

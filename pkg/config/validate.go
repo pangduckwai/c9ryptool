@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"sea9.org/go/cryptool/pkg/algr"
 )
 
 // Validate validate parameters.
@@ -48,7 +50,7 @@ func Validate(cfg *Config) (err error) {
 		errs = append(errs, fmt.Errorf("encryption key filename missing"))
 	}
 
-	if err = validateAlg(cfg.Algr); err != nil {
+	if err = algr.Validate(cfg.Algr); err != nil {
 		errs = append(errs, err)
 	}
 
