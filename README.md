@@ -35,3 +35,13 @@ A simple encryption tool
 ### interactive input
 > If the option `-i` or `--in=` is omitted, the input text to be encryption is read from stdin.
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
+
+## Changelog
+### v0.3.0
+- finish all initially planned features
+
+### v0.2.0
+- first usable version
+
+### v0.1.0
+- initial commit
