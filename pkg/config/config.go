@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/algr"
+	"sea9.org/go/cryptool/pkg/algorithm"
 )
 
 const bUFFER = 1048576 // 1024x1024
@@ -23,7 +23,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "0.1.0"
+	return "0.2.0"
 }
 
 func Desc() string {
@@ -45,29 +45,34 @@ func Usage() string {
 func Help() string {
 	return fmt.Sprintf("Usage: cryptool [commands] {options}\n"+
 		" * commands:\n"+
-		"    encrypt - encrypt input using the provided secret key\n"+
-		"    decrypt - decrypt encrypted file back to the original form\n"+
-		"    version - display current version of 'basesf'\n"+
+		"    encrypt - encrypt input using the provided encryption key\n"+
+		"    decrypt - decrypt encrypted input back to the original form\n"+
+		"    version - display current version of 'cryptool'\n"+
 		"    help    - display this message\n\n"+
 		" * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default %v, supports %v\n"+
 		"    -i FILE, --in=FILE\n"+
-		"       name of the input file, omitting means input from stdin\n"+
+		"       path of the input file, omitting means input from stdin\n"+
 		"    -o FILE, --out=FILE\n"+
-		"       name of the output file, omitting means output to stdout\n"+
+		"       path of the output file, omitting means output to stdout\n"+
 		"    -k FILE, --key=FILE\n"+
-		"       name of the key file\n"+
+		"       path of the file containing the encryption key\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
-		"       size of the read buffer (SIZE default: %vKB)\n"+
+		"       size of the read buffer in # of bytes (SIZE default: %vKB)\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
-		"       indicate a password is input interactively\n"+
+		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    -v, --verbose\n"+
 		"       display detail operation messages during processing\n\n"+
-		"  NOTE: type a period (.) then press <enter> in a new line to finish\n"+
-		"        when inputting interactively from stdin", algr.ALGORITHMS[1], algr.ALGORITHMS, bUFFER/1024)
+		"  NOTE 1: a prompt will appear for typing in the password when password\n"+
+		"        generated key is used\n\n"+
+		"  NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
+		"        when inputting interactively from stdin",
+		algorithm.Default(),
+		algorithm.List(),
+		bUFFER/1024)
 }
 
 func Parse(args []string) (cfg *Config, err error) {
@@ -77,7 +82,7 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		Algr:    algr.ALGORITHMS[1],
+		Algr:    algorithm.Default(),
 		Buffer:  bUFFER,
 		Passwd:  false,
 		Verbose: false,

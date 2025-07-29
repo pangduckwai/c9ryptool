@@ -1,0 +1,97 @@
+package algorithm
+
+import (
+	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
+)
+
+type Algorithm struct {
+	Length  int                                  // key length
+	Encrypt func([]byte, []byte) ([]byte, error) // mode of operation
+	Decrypt func([]byte, []byte) ([]byte, error) // mode of operation
+}
+
+var aLGORITHMS = map[string]*Algorithm{
+	"AES-128-GCM": {
+		Length:  128,
+		Encrypt: EncryptGcm,
+		Decrypt: DecryptGcm,
+	},
+	"AES-192-GCM": {
+		Length:  192,
+		Encrypt: EncryptGcm,
+		Decrypt: DecryptGcm,
+	},
+	"AES-256-GCM": {
+		Length:  256,
+		Encrypt: EncryptGcm,
+		Decrypt: DecryptGcm,
+	},
+}
+
+func Default() string {
+	return "AES-256-GCM"
+}
+
+func List() (list []string) {
+	list = make([]string, 0)
+	for k := range aLGORITHMS {
+		list = append(list, k)
+	}
+	sort.Strings(list)
+	return
+}
+
+func Get(inp string) *Algorithm {
+	return aLGORITHMS[inp]
+}
+
+func (a *Algorithm) KeyLength() int {
+	return a.Length / 8
+}
+
+var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]+)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
+
+func Validate(algr string) (err error) {
+	if !algrPattern.MatchString(algr) {
+		err = fmt.Errorf("[ALGR] invalid encryption algorithm name pattern '%v'", algr)
+	} else if _, okay := aLGORITHMS[algr]; !okay {
+		err = fmt.Errorf("[ALGR] unsupported encryption algorithm '%v'", algr)
+	}
+	return
+}
+
+// Parse return details of the given encryption algorithm
+// TODO NOTE!!!! add GCM/CBC etc.
+func Parse(inp string) (name string) {
+	parts := algrPattern.FindStringSubmatch(inp)
+	if len(parts) < 5 {
+		return
+	}
+
+	switch parts[1] {
+	case "A":
+		fallthrough
+	case "AES":
+		l, err := strconv.Atoi(parts[2])
+		if err != nil {
+			return
+		}
+		mo := parts[3]
+		if parts[4] != "" {
+			s0 := ""
+			if mo != "" {
+				s0 = "-"
+			}
+			mo = fmt.Sprintf("%v%v%v", mo, s0, parts[4])
+		}
+		s1 := ""
+		if mo != "" {
+			s1 = "-"
+		}
+		name = fmt.Sprintf("AES-%v%v%v", l, s1, mo)
+	}
+	return
+}

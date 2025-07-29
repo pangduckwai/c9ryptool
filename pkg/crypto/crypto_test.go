@@ -76,7 +76,7 @@ func TestRead(t *testing.T) {
 		Buffer:  16,
 		Verbose: true,
 	}
-	buff, err := read(cfg)
+	buff, err := read(cfg, false)
 	if err != nil {
 		t.Fatalf("TestRead() %v", err)
 	}

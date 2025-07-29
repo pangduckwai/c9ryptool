@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/algr"
+	"sea9.org/go/cryptool/pkg/algorithm"
 )
 
 // Validate validate parameters.
@@ -50,8 +50,12 @@ func Validate(cfg *Config) (err error) {
 		errs = append(errs, fmt.Errorf("encryption key filename missing"))
 	}
 
-	if err = algr.Validate(cfg.Algr); err != nil {
+	if err = algorithm.Validate(cfg.Algr); err != nil {
 		errs = append(errs, err)
+	}
+
+	if cfg.Command == 1 && cfg.Genkey {
+		errs = append(errs, fmt.Errorf("cannot generate new key for decryption"))
 	}
 
 	if len(errs) > 0 {

@@ -1,10 +1,10 @@
-package main
+package crypto
 
 import (
 	"bufio"
+	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"sea9.org/go/cryptool/pkg/config"
@@ -12,6 +12,7 @@ import (
 
 func read(
 	cfg *config.Config,
+	decode bool,
 ) (
 	dat []byte,
 	err error,
@@ -74,31 +75,51 @@ func read(
 			}
 		}
 
-		dat = append(dat[:len(dat)-off], buf[:cnt]...)
+		if decode {
+			decoded, errr := base64.StdEncoding.DecodeString(string(buf[:cnt]))
+			if errr != nil {
+				err = errr
+				return
+			}
+			dat = append(dat[:len(dat)-off], decoded...)
+		} else {
+			dat = append(dat[:len(dat)-off], buf[:cnt]...)
+		}
 		err1 = err
 		// fmt.Printf("TEMP!!! cnt:%3v off:%3v '%v'\n", cnt, off, string(buf[:cnt]))
 	}
 	return
 }
 
-func main() {
-	// fmt.Println("Test command line input...")
-	// rdr := bufio.NewReader(os.Stdin)
-	// fmt.Print(" enter input: ")
-	// inp, err := rdr.ReadString('\n')
-	// if err != nil {
-	// 	log.Fatalf("[TEST]%v", err)
-	// }
-	// fmt.Printf("Your input is '%v' (%v)\n", inp[:len(inp)-1], len(inp))
+func write(
+	cfg *config.Config,
+	encode bool,
+	dat []byte,
+) (err error) {
+	var out *os.File
+	var wtr *bufio.Writer
+	if cfg.Output != "" {
+		out, err = os.Create(cfg.Output)
+		if err != nil {
+			return
+		}
+		wtr = bufio.NewWriter(out)
+		defer out.Close()
+	}
 
-	fmt.Println("Test read multiple lines...")
-	cfg := &config.Config{
-		Buffer:  32768,
-		Verbose: true,
+	if wtr == nil {
+		if encode {
+			fmt.Println(base64.StdEncoding.EncodeToString(dat))
+		} else {
+			fmt.Printf("%s", dat)
+		}
+	} else {
+		if encode {
+			fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(dat))
+		} else {
+			fmt.Fprintf(wtr, "%s", dat)
+		}
+		wtr.Flush()
 	}
-	buff, err := read(cfg)
-	if err != nil {
-		log.Fatalf("[TEST]%v", err)
-	}
-	fmt.Printf("Result:\n'%v'\n", string(buff))
+	return
 }
