@@ -21,6 +21,8 @@ A simple encryption tool
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key |
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
+| - | `--salt=SALT` | `SALT` is the base64 encoded salt value to be used to generate encryption key from password |
+| - | `--salt-file=FILE` | `FILE` is the path of the file containing the salt to be used to generate key from password |
 | `-g` | `--generate` | generate a new encrytpion key |
 | `-p` | `--password` | indicate a password is input interactively |
 | `-v` | `--verbose` |  display detail operation messages during processing |

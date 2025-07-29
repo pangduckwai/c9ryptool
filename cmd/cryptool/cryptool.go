@@ -34,7 +34,7 @@ func run(cfg *config.Config) (err error) {
 		if err != nil {
 			return
 		}
-		key, err = algorithm.FromPassword([]byte(str[:len(str)-1]), algr.KeyLength(), algorithm.SALTLEN)
+		key, err = algorithm.FromPassword([]byte(str[:len(str)-1]), algr.KeyLength(), algorithm.SALTLEN, cfg.Salt, cfg.SaltFile)
 		if err != nil {
 			return
 		}

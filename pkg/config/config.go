@@ -11,19 +11,21 @@ import (
 const bUFFER = 1048576 // 1024x1024
 
 type Config struct {
-	Command uint8  // 1 - encrypt; 2 - decrypt
-	Algr    string // encryption algorithm
-	Input   string // nil - stdin
-	Output  string // nil - stdout
-	Key     string // secret key file path
-	Genkey  bool   // generate key enabled
-	Passwd  bool   // interactively input password
-	Buffer  int    // buffer size
-	Verbose bool
+	Command  uint8  // 1 - encrypt; 2 - decrypt
+	Algr     string // encryption algorithm
+	Input    string // nil - stdin
+	Output   string // nil - stdout
+	Key      string // secret key file path
+	Genkey   bool   // generate key enabled
+	Passwd   bool   // interactively input password
+	Buffer   int    // buffer size
+	Salt     string // base64 encoded salt for key generation from password
+	SaltFile string // path of the file containing the salt to be used to generate key from password
+	Verbose  bool
 }
 
 func Version() string {
-	return "0.2.0"
+	return "v0.3.0 b2025072916"
 }
 
 func Desc() string {
@@ -37,6 +39,8 @@ func Usage() string {
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {-b SIZE | --buffer=SIZE}\n" +
+		"   {--salt=SALT}\n" +
+		"   {--salt-file=FILE}\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {-v | --verbose}"
@@ -51,7 +55,7 @@ func Help() string {
 		"    help    - display this message\n\n"+
 		" * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
-		"       encryption algorithm to use, default %v, supports %v\n"+
+		"       encryption algorithm to use, default '%v', supports %v\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
 		"    -o FILE, --out=FILE\n"+
@@ -59,14 +63,18 @@ func Help() string {
 		"    -k FILE, --key=FILE\n"+
 		"       path of the file containing the encryption key\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
-		"       size of the read buffer in # of bytes (SIZE default: %vKB)\n"+
+		"       size of the read buffer in # of bytes, default: %vKB\n"+
+		"    --salt=SALT\n"+
+		"       base64 encoded salt value to be used to generate encryption key from password\n"+
+		"    --salt-file=FILE\n"+
+		"       path of the file containing the salt to be used to generate key from password, default: 'salt.txt'\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
 		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    -v, --verbose\n"+
 		"       display detail operation messages during processing\n\n"+
-		"  NOTE 1: a prompt will appear for typing in the password when password\n"+
+		"  NOTE 1: a prompt will appear for typing in the password when password-\n"+
 		"        generated key is used\n\n"+
 		"  NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"        when inputting interactively from stdin",
@@ -82,10 +90,11 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		Algr:    algorithm.Default(),
-		Buffer:  bUFFER,
-		Passwd:  false,
-		Verbose: false,
+		Algr:     algorithm.Default(),
+		Buffer:   bUFFER,
+		Passwd:   false,
+		SaltFile: "salt.txt",
+		Verbose:  false,
 	}
 
 	switch args[1][0:1] {
@@ -187,6 +196,20 @@ func Parse(args []string) (cfg *Config, err error) {
 				if err == nil {
 					cfg.Buffer = val
 				}
+			}
+		case strings.HasPrefix(args[i], "--salt="):
+			if len(args[i]) <= 7 {
+				err = fmt.Errorf("[CONF] Missing salt value")
+				return
+			} else {
+				cfg.Salt = args[i][7:]
+			}
+		case strings.HasPrefix(args[i], "--salt-file="):
+			if len(args[i]) <= 12 {
+				err = fmt.Errorf("[CONF] Missing salt filename")
+				return
+			} else {
+				cfg.SaltFile = args[i][12:]
 			}
 		case args[i] == "-g" || args[i] == "--generate":
 			cfg.Genkey = true
