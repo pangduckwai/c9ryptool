@@ -29,10 +29,15 @@ var aLGORITHMS = map[string]*Algorithm{
 		Encrypt: EncryptGcm,
 		Decrypt: DecryptGcm,
 	},
+	"ChaCha20-Poly1305": {
+		Length:  256,
+		Encrypt: EncryptChacha,
+		Decrypt: DecryptChacha,
+	},
 }
 
 func Default() string {
-	return "AES-256-GCM"
+	return "ChaCha20-Poly1305" //"AES-256-GCM"
 }
 
 func List() (list []string) {
@@ -92,6 +97,10 @@ func Parse(inp string) (name string) {
 			s1 = "-"
 		}
 		name = fmt.Sprintf("AES-%v%v%v", l, s1, mo)
+	case "ChaCha":
+		if parts[2] == "20" && parts[4] == "Poly1305" {
+			name = inp
+		}
 	}
 	return
 }
