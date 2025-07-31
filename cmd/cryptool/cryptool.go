@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -24,32 +22,22 @@ func run(cfg *config.Config) (err error) {
 		return
 	}
 
-	var key []byte
-	var str string
 	if cfg.Passwd {
-		rdr := bufio.NewReader(os.Stdin)
-		fmt.Printf("%v:\n", config.Desc())
-		fmt.Print("Enter password: ")
-		str, err = rdr.ReadString('\n')
-		if err != nil {
-			return
+		if cfg.Salt != "" {
+			err = algr.PopulateKey(2, cfg.Salt)
+		} else {
+			err = algr.PopulateKey(3, cfg.SaltFile)
 		}
-		key, err = algorithm.FromPassword([]byte(str[:len(str)-1]), algr.KeyLength(), algorithm.SALTLEN, cfg.Salt, cfg.SaltFile)
 		if err != nil {
 			return
 		}
 	} else if cfg.Genkey {
-		key, err = algorithm.GenerateKey(cfg.Key, algr.KeyLength())
+		err = algr.PopulateKey(0, cfg.Key)
 		if err != nil {
 			return
 		}
 	} else {
-		var kecd []byte
-		kecd, err = os.ReadFile(cfg.Key)
-		if err != nil {
-			return
-		}
-		key, err = base64.StdEncoding.DecodeString(string(kecd))
+		err = algr.PopulateKey(1, cfg.Key)
 		if err != nil {
 			return
 		}
@@ -57,9 +45,9 @@ func run(cfg *config.Config) (err error) {
 
 	switch cfg.Command {
 	case 0:
-		err = crypt.Encrypt(cfg, algr, key)
+		err = crypt.Encrypt(cfg, algr)
 	case 1:
-		err = crypt.Decrypt(cfg, algr, key)
+		err = crypt.Decrypt(cfg, algr)
 	}
 	return
 }

@@ -1,4 +1,4 @@
-package algorithm
+package keys
 
 import (
 	"bufio"
@@ -15,6 +15,16 @@ const SALTLEN = 16
 const N = 65536
 const R = 16
 const P = 1
+
+// TODO HERE!!!!!!!
+// rdr := bufio.NewReader(os.Stdin)
+// fmt.Printf("%v:\n", config.Desc())
+// fmt.Print("Enter password: ")
+// str, err = rdr.ReadString('\n')
+// if err != nil {
+// 	return
+// }
+// key, err = algorithm.FromPassword([]byte(str[:len(str)-1]), algr.KeyLength(), algorithm.SALTLEN, cfg.Salt, cfg.SaltFile)
 
 func SaltFileExists(path string) (bool, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {

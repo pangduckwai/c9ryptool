@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"sea9.org/go/cryptool/pkg/algorithm"
+	"sea9.org/go/cryptool/pkg/algorithm/keys"
 )
 
 // Validate validate parameters.
@@ -62,7 +63,7 @@ func Validate(cfg *Config) (err error) {
 			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > cryptool d -g {-k key.txt} -i README.md
 		} else if cfg.Passwd && cfg.Salt == "" {
 			var okay bool
-			if okay, err = algorithm.SaltFileExists(cfg.SaltFile); !okay || err != nil {
+			if okay, err = keys.SaltFileExists(cfg.SaltFile); !okay || err != nil {
 				errs = append(errs, fmt.Errorf("password salt file missing for decryption")) // > cryptool d -p -i README.md (when salt.txt not exists)
 			}
 		}

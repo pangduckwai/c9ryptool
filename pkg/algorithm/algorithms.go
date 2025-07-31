@@ -5,41 +5,54 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+
+	"sea9.org/go/cryptool/pkg/algorithm/sym"
 )
 
-type Algorithm struct {
-	Symmetric bool // is symmetric encryption
-	Length    int  // key length in bits
-	Encrypt   func([]byte, []byte) ([]byte, error)
-	Decrypt   func([]byte, []byte) ([]byte, error)
+type Algorithm interface {
+	Name() string
+	Type() bool // true: symmetric; false: asymmetric
+	KeyLength() int
+	// GenerateKey(string) error
+	// ReadKey(string) error
+	PopulateKey(int, string) error
+	Encrypt([]byte) ([]byte, error)
+	Decrypt([]byte) ([]byte, error)
 }
 
-var aLGORITHMS = map[string]*Algorithm{
-	"AES-128-GCM": {
-		Symmetric: true,
-		Length:    128,
-		Encrypt:   EncryptGcm,
-		Decrypt:   DecryptGcm,
-	},
-	"AES-192-GCM": {
-		Symmetric: true,
-		Length:    192,
-		Encrypt:   EncryptGcm,
-		Decrypt:   DecryptGcm,
-	},
-	"AES-256-GCM": {
-		Symmetric: true,
-		Length:    256,
-		Encrypt:   EncryptGcm,
-		Decrypt:   DecryptGcm,
-	},
-	"ChaCha20-Poly1305": {
-		Symmetric: true,
-		Length:    256,
-		Encrypt:   EncryptChacha,
-		Decrypt:   DecryptChacha,
-	},
+var aLGORITHMS = map[string]Algorithm{
+	"AES-128-GCM":       &sym.AesGcm128{},
+	"AES-192-GCM":       &sym.AesGcm192{},
+	"AES-256-GCM":       &sym.AesGcm256{},
+	"ChaCha20-Poly1305": &sym.ChaCha20Poly1305{},
 }
+
+// var aLGORITHMS = map[string]*Algorithm{
+// 	"AES-128-GCM": {
+// 		Symmetric: true,
+// 		Length:    128,
+// 		Encrypt:   EncryptGcm,
+// 		Decrypt:   DecryptGcm,
+// 	},
+// 	"AES-192-GCM": {
+// 		Symmetric: true,
+// 		Length:    192,
+// 		Encrypt:   EncryptGcm,
+// 		Decrypt:   DecryptGcm,
+// 	},
+// 	"AES-256-GCM": {
+// 		Symmetric: true,
+// 		Length:    256,
+// 		Encrypt:   EncryptGcm,
+// 		Decrypt:   DecryptGcm,
+// 	},
+// 	"ChaCha20-Poly1305": {
+// 		Symmetric: true,
+// 		Length:    256,
+// 		Encrypt:   EncryptChacha,
+// 		Decrypt:   DecryptChacha,
+// 	},
+// }
 
 func Default() string {
 	return "ChaCha20-Poly1305" //"AES-256-GCM"
@@ -54,12 +67,8 @@ func List() (list []string) {
 	return
 }
 
-func Get(inp string) *Algorithm {
+func Get(inp string) Algorithm {
 	return aLGORITHMS[inp]
-}
-
-func (a *Algorithm) KeyLength() int {
-	return a.Length / 8
 }
 
 var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")

@@ -7,8 +7,7 @@ import (
 
 func Encrypt(
 	cfg *config.Config,
-	alg *algorithm.Algorithm,
-	key []byte,
+	alg algorithm.Algorithm,
 ) (err error) {
 	var input, result []byte
 
@@ -17,7 +16,7 @@ func Encrypt(
 		return
 	}
 
-	result, err = alg.Encrypt(key, input)
+	result, err = alg.Encrypt(input)
 	if err != nil {
 		return
 	}

@@ -1,4 +1,4 @@
-package algorithm
+package keys
 
 import (
 	"bufio"
@@ -36,5 +36,35 @@ func GenerateKey(path string, keyLen int) (
 	defer kfile.Close()
 	fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(key))
 	wtr.Flush()
+	return
+}
+
+// ReadKey read key
+func ReadKey(
+	path string,
+) (
+	key []byte,
+	err error,
+) {
+	kecd, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	key, err = base64.StdEncoding.DecodeString(string(kecd))
+	return
+}
+
+func PopulateKey(typ, lgth int, str string) (
+	key []byte,
+	err error,
+) {
+	switch typ {
+	case 0: // generate key
+		key, err = GenerateKey(str, lgth)
+	case 1: // read key
+		key, err = ReadKey(str)
+	case 2: // from password
+		// key, err = keys.FromPassword([]byte(str), lgth, keys.SALTLEN, cfg.Salt, cfg.SaltFile)
+	}
 	return
 }
