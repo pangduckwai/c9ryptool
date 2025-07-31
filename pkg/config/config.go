@@ -25,7 +25,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "v0.3.0 b2025072917"
+	return "v0.3.0 b2025073118"
 }
 
 func Desc() string {

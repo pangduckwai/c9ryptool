@@ -9,7 +9,7 @@ import (
 
 	"sea9.org/go/cryptool/pkg/algorithm"
 	"sea9.org/go/cryptool/pkg/config"
-	"sea9.org/go/cryptool/pkg/crypto"
+	"sea9.org/go/cryptool/pkg/crypt"
 )
 
 func run(cfg *config.Config) (err error) {
@@ -57,9 +57,9 @@ func run(cfg *config.Config) (err error) {
 
 	switch cfg.Command {
 	case 0:
-		err = crypto.Encrypt(cfg, algr, key)
+		err = crypt.Encrypt(cfg, algr, key)
 	case 1:
-		err = crypto.Decrypt(cfg, algr, key)
+		err = crypt.Decrypt(cfg, algr, key)
 	}
 	return
 }

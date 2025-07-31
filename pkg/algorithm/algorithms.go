@@ -8,31 +8,36 @@ import (
 )
 
 type Algorithm struct {
-	Length  int                                  // key length
-	Encrypt func([]byte, []byte) ([]byte, error) // mode of operation
-	Decrypt func([]byte, []byte) ([]byte, error) // mode of operation
+	Symmetric bool // is symmetric encryption
+	Length    int  // key length in bits
+	Encrypt   func([]byte, []byte) ([]byte, error)
+	Decrypt   func([]byte, []byte) ([]byte, error)
 }
 
 var aLGORITHMS = map[string]*Algorithm{
 	"AES-128-GCM": {
-		Length:  128,
-		Encrypt: EncryptGcm,
-		Decrypt: DecryptGcm,
+		Symmetric: true,
+		Length:    128,
+		Encrypt:   EncryptGcm,
+		Decrypt:   DecryptGcm,
 	},
 	"AES-192-GCM": {
-		Length:  192,
-		Encrypt: EncryptGcm,
-		Decrypt: DecryptGcm,
+		Symmetric: true,
+		Length:    192,
+		Encrypt:   EncryptGcm,
+		Decrypt:   DecryptGcm,
 	},
 	"AES-256-GCM": {
-		Length:  256,
-		Encrypt: EncryptGcm,
-		Decrypt: DecryptGcm,
+		Symmetric: true,
+		Length:    256,
+		Encrypt:   EncryptGcm,
+		Decrypt:   DecryptGcm,
 	},
 	"ChaCha20-Poly1305": {
-		Length:  256,
-		Encrypt: EncryptChacha,
-		Decrypt: DecryptChacha,
+		Symmetric: true,
+		Length:    256,
+		Encrypt:   EncryptChacha,
+		Decrypt:   DecryptChacha,
 	},
 }
 
@@ -57,7 +62,7 @@ func (a *Algorithm) KeyLength() int {
 	return a.Length / 8
 }
 
-var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]+)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
+var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
 
 func Validate(algr string) (err error) {
 	if !algrPattern.MatchString(algr) {

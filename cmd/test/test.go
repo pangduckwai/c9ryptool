@@ -2,6 +2,13 @@ package main
 
 import (
 	"bufio"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +19,7 @@ import (
 
 func read(
 	cfg *config.Config,
+	decode bool,
 ) (
 	dat []byte,
 	err error,
@@ -74,7 +82,16 @@ func read(
 			}
 		}
 
-		dat = append(dat[:len(dat)-off], buf[:cnt]...)
+		if decode {
+			decoded, errr := base64.StdEncoding.DecodeString(string(buf[:cnt]))
+			if errr != nil {
+				err = errr
+				return
+			}
+			dat = append(dat[:len(dat)-off], decoded...)
+		} else {
+			dat = append(dat[:len(dat)-off], buf[:cnt]...)
+		}
 		err1 = err
 		// fmt.Printf("TEMP!!! cnt:%3v off:%3v '%v'\n", cnt, off, string(buf[:cnt]))
 	}
@@ -82,23 +99,96 @@ func read(
 }
 
 func main() {
-	// fmt.Println("Test command line input...")
-	// rdr := bufio.NewReader(os.Stdin)
-	// fmt.Print(" enter input: ")
-	// inp, err := rdr.ReadString('\n')
-	// if err != nil {
-	// 	log.Fatalf("[TEST]%v", err)
-	// }
-	// fmt.Printf("Your input is '%v' (%v)\n", inp[:len(inp)-1], len(inp))
+	/*
+		fmt.Println("Test command line input...")
+		rdr := bufio.NewReader(os.Stdin)
+		fmt.Print(" enter input: ")
+		inp, err := rdr.ReadString('\n')
+		if err != nil {
+			log.Fatalf("[TEST] %v", err)
+		}
+		fmt.Printf("Your input is '%v' (%v)\n", inp[:len(inp)-1], len(inp))
+	*/
 
-	fmt.Println("Test read multiple lines...")
+	/*
+		fmt.Println("Test read multiple lines...")
+		cfg := &config.Config{
+			Buffer:  32768,
+			Verbose: true,
+		}
+		buff, err := read(cfg)
+		if err != nil {
+			log.Fatalf("[TEST] %v", err)
+		}
+		fmt.Printf("Result:\n'%v'\n", string(buff))
+	*/
+
+	/*
+		fmt.Println("Test encrypt with CR public key...")
+		cfg := &config.Config{
+			Buffer:  32768,
+			Verbose: true,
+			Input:   "cr.pem",
+		}
+		buff, err := read(cfg, false)
+		if err != nil {
+			log.Fatalf("[TEST] %v", err)
+		}
+		fmt.Printf("[TEST] pkey read:\n%s\n", buff)
+
+		blck, _ := pem.Decode(buff)
+		pkey, err := x509.ParsePKIXPublicKey(blck.Bytes)
+		if err != nil {
+			log.Fatalf("[TEST] %v", err)
+		}
+
+		cipher, err := rsa.EncryptOAEP(
+			sha256.New(),
+			rand.Reader,
+			pkey.(*rsa.PublicKey),
+			[]byte("CrUat001Pa55w0rd"),
+			nil,
+		)
+		if err != nil {
+			log.Fatalf("[TEST] %v", err)
+		}
+		fmt.Printf("[TEST] cipher text:\n%v\n", base64.StdEncoding.EncodeToString(cipher))
+	*/
+
+	fmt.Println("Test encrypt with public key then decrypt with private key...")
 	cfg := &config.Config{
 		Buffer:  32768,
 		Verbose: true,
+		Input:   "self.key",
 	}
-	buff, err := read(cfg)
+	buff, err := read(cfg, false)
 	if err != nil {
-		log.Fatalf("[TEST]%v", err)
+		log.Fatalf("[TEST] %v", err)
 	}
-	fmt.Printf("Result:\n'%v'\n", string(buff))
+	fmt.Printf("[TEST] key read:\n%s\n", buff)
+
+	block, _ := pem.Decode(buff)
+	k, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		log.Fatalf("[TEST] %v", err)
+	}
+
+	var key *rsa.PrivateKey
+	var pkey *rsa.PublicKey
+	var okay bool
+	if key, okay = k.(*rsa.PrivateKey); okay {
+		pkey = &key.PublicKey
+	}
+
+	cipher, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pkey, []byte("This is top secret... really!"), nil)
+	if err != nil {
+		log.Fatalf("[TEST] %v", err)
+	}
+	fmt.Printf("[TEST] cipher text:\n%v\n", base64.StdEncoding.EncodeToString(cipher))
+
+	plainx, err := key.Decrypt(rand.Reader, cipher, &rsa.OAEPOptions{Hash: crypto.SHA256})
+	if err != nil {
+		log.Fatalf("[TEST] %v", err)
+	}
+	fmt.Printf("[TEST] the secret is:\n%s\n", plainx)
 }

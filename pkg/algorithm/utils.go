@@ -18,7 +18,7 @@ func Generate(lgth int) (result []byte, err error) {
 	return
 }
 
-// GenerateKey generate a random key of 'keyLen' bytes long, and store the key
+// GenerateKey generate a random symmetric key of 'keyLen' bytes long, and store the key
 // as base64 encoded text in the file of the given path.
 func GenerateKey(path string, keyLen int) (
 	key []byte,
