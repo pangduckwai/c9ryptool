@@ -64,7 +64,7 @@ func PopulateKey(typ, lgth int, str string) (
 	case 1: // read key
 		key, err = ReadKey(str)
 	case 2: // from password
-		// key, err = keys.FromPassword([]byte(str), lgth, keys.SALTLEN, cfg.Salt, cfg.SaltFile)
+		key = []byte(str)
 	}
 	return
 }

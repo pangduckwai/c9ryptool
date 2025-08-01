@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"sea9.org/go/cryptool/pkg/algorithm"
+	"sea9.org/go/cryptool/pkg/algorithm/keys"
 	"sea9.org/go/cryptool/pkg/config"
 	"sea9.org/go/cryptool/pkg/crypt"
 )
@@ -23,11 +24,11 @@ func run(cfg *config.Config) (err error) {
 	}
 
 	if cfg.Passwd {
-		if cfg.Salt != "" {
-			err = algr.PopulateKey(2, cfg.Salt)
-		} else {
-			err = algr.PopulateKey(3, cfg.SaltFile)
-		}
+		err = keys.PopulateKeyFromPassword(
+			config.Desc(), cfg.Salt, cfg.SaltFile,
+			algr.KeyLength(), keys.SALTLEN,
+			algr.PopulateKey,
+		)
 		if err != nil {
 			return
 		}

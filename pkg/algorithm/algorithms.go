@@ -10,13 +10,25 @@ import (
 )
 
 type Algorithm interface {
+	// Name algorithm name.
 	Name() string
-	Type() bool // true: symmetric; false: asymmetric
+
+	// Type type of algorithm. 'true' is symmetric, false is asymmetric
+	Type() bool
+
+	// KeyLength may be in bytes or bits, depends on algorithm.
 	KeyLength() int
-	// GenerateKey(string) error
-	// ReadKey(string) error
+
+	// PopulateKey 1st parameter is flag:
+	//  - 0 - generate key, 2nd parameter is the file path to write the new key;
+	//  - 1 - read key, 2nd parameter is the file path to read the key from;
+	//  - 2 - save 2nd parameter as key
 	PopulateKey(int, string) error
+
+	// Encrypt encrypt the given parameter, returns the encrypted result.
 	Encrypt([]byte) ([]byte, error)
+
+	// Decrypt decrypt the given parameter, returns the decrypted result.
 	Decrypt([]byte) ([]byte, error)
 }
 
