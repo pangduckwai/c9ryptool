@@ -50,6 +50,10 @@ func run(cfg *config.Config) (err error) {
 	case 1:
 		err = crypt.Decrypt(cfg, algr)
 	}
+
+	if cfg.Verbose {
+		fmt.Printf("%v finished using '%v'\n", config.Desc(), algr.Name())
+	}
 	return
 }
 

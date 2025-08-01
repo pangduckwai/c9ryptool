@@ -66,5 +66,6 @@ func PopulateKey(typ, lgth int, str string) (
 	case 2: // from password
 		key = []byte(str)
 	}
+
 	return
 }

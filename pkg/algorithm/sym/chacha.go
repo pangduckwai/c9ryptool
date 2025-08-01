@@ -7,7 +7,7 @@ import (
 	"sea9.org/go/cryptool/pkg/algorithm/keys"
 )
 
-func EncryptChacha(
+func encryptChacha20Poly1305(
 	key []byte,
 	input []byte,
 ) (
@@ -33,7 +33,7 @@ func EncryptChacha(
 	return
 }
 
-func DecryptChacha(
+func decryptChacha20Poly1305(
 	key []byte,
 	input []byte,
 ) (
@@ -55,32 +55,32 @@ func DecryptChacha(
 	return
 }
 
-// ///////////////
-// AES-128-GCM
-// ///////////////
+// ///////////////// //
+// ChaCha20-Poly1305
+// ///////////////// //
 type ChaCha20Poly1305 []byte
 
-func (a ChaCha20Poly1305) Name() string {
+func (a *ChaCha20Poly1305) Name() string {
 	return "ChaCha20-Poly1305"
 }
 
-func (a ChaCha20Poly1305) Type() bool {
+func (a *ChaCha20Poly1305) Type() bool {
 	return true
 }
 
-func (a ChaCha20Poly1305) KeyLength() int {
+func (a *ChaCha20Poly1305) KeyLength() int {
 	return 256 / 8
 }
 
-func (a ChaCha20Poly1305) PopulateKey(typ int, path string) (err error) {
-	a, err = keys.PopulateKey(typ, a.KeyLength(), path)
+func (a *ChaCha20Poly1305) PopulateKey(typ int, path string) (err error) {
+	*a, err = keys.PopulateKey(typ, a.KeyLength(), path)
 	return
 }
 
-func (a ChaCha20Poly1305) Encrypt(input []byte) ([]byte, error) {
-	return EncryptGcm(a, input)
+func (a *ChaCha20Poly1305) Encrypt(input []byte) ([]byte, error) {
+	return encryptChacha20Poly1305(*a, input)
 }
 
-func (a ChaCha20Poly1305) Decrypt(input []byte) (result []byte, err error) {
-	return DecryptGcm(a, input)
+func (a *ChaCha20Poly1305) Decrypt(input []byte) (result []byte, err error) {
+	return decryptChacha20Poly1305(*a, input)
 }

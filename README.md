@@ -37,6 +37,9 @@ A simple encryption tool
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
 
 ## Changelog
+### v0.4.1
+- fix issue causing populating keys to fail
+
 ### v0.4.0
 - change `algorithm` to interface
 
