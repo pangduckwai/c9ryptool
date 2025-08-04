@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"golang.org/x/crypto/chacha20poly1305"
-	"sea9.org/go/cryptool/pkg/algorithm/keys"
 )
 
 func encryptChacha20Poly1305(
@@ -24,7 +23,7 @@ func encryptChacha20Poly1305(
 		return
 	}
 
-	iv, err := keys.Generate(aead.NonceSize())
+	iv, err := Generate(aead.NonceSize())
 	if err != nil {
 		return
 	}
@@ -57,7 +56,6 @@ func decryptChacha20Poly1305(
 
 // ///////////////// //
 // ChaCha20-Poly1305
-// ///////////////// //
 type ChaCha20Poly1305 []byte
 
 func (a *ChaCha20Poly1305) Name() string {
@@ -73,7 +71,7 @@ func (a *ChaCha20Poly1305) KeyLength() int {
 }
 
 func (a *ChaCha20Poly1305) PopulateKey(typ int, path string) (err error) {
-	*a, err = keys.PopulateKey(typ, a.KeyLength(), path)
+	*a, err = PopulateKey(typ, a.KeyLength(), path)
 	return
 }
 

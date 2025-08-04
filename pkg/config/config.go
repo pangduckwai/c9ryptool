@@ -11,7 +11,7 @@ import (
 const bUFFER = 1048576 // 1024x1024
 
 type Config struct {
-	Command  uint8  // 1 - encrypt; 2 - decrypt
+	Command  uint8  // 0 - encrypt; 1 - decrypt
 	Algr     string // encryption algorithm
 	Input    string // nil - stdin
 	Output   string // nil - stdout
@@ -25,7 +25,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "v0.4.1 b2025080112"
+	return "v0.5.0 b2025080417"
 }
 
 func Desc() string {

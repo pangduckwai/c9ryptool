@@ -4,8 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
-
-	"sea9.org/go/cryptool/pkg/algorithm/keys"
 )
 
 func encryptAesGcm(
@@ -30,7 +28,7 @@ func encryptAesGcm(
 		return
 	}
 
-	iv, err := keys.Generate(gcm.NonceSize())
+	iv, err := Generate(gcm.NonceSize())
 	if err != nil {
 		return
 	}
@@ -70,7 +68,6 @@ func decryptAesGcm(
 
 // /////////// //
 // AES-128-GCM
-// /////////// //
 type AesGcm128 []byte
 
 func (a *AesGcm128) Name() string {
@@ -86,7 +83,7 @@ func (a *AesGcm128) KeyLength() int {
 }
 
 func (a *AesGcm128) PopulateKey(typ int, path string) (err error) {
-	*a, err = keys.PopulateKey(typ, a.KeyLength(), path)
+	*a, err = PopulateKey(typ, a.KeyLength(), path)
 	return
 }
 
@@ -100,7 +97,6 @@ func (a *AesGcm128) Decrypt(input []byte) (result []byte, err error) {
 
 // /////////// //
 // AES-192-GCM
-// /////////// //
 type AesGcm192 []byte
 
 func (a *AesGcm192) Name() string {
@@ -116,7 +112,7 @@ func (a *AesGcm192) KeyLength() int {
 }
 
 func (a *AesGcm192) PopulateKey(typ int, path string) (err error) {
-	*a, err = keys.PopulateKey(typ, a.KeyLength(), path)
+	*a, err = PopulateKey(typ, a.KeyLength(), path)
 	return
 }
 
@@ -130,7 +126,6 @@ func (a *AesGcm192) Decrypt(input []byte) (result []byte, err error) {
 
 // /////////// //
 // AES-256-GCM
-// /////////// //
 type AesGcm256 []byte
 
 func (a *AesGcm256) Name() string {
@@ -146,7 +141,7 @@ func (a *AesGcm256) KeyLength() int {
 }
 
 func (a *AesGcm256) PopulateKey(typ int, path string) (err error) {
-	*a, err = keys.PopulateKey(typ, a.KeyLength(), path)
+	*a, err = PopulateKey(typ, a.KeyLength(), path)
 	return
 }
 

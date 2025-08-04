@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"sea9.org/go/cryptool/pkg/algorithm"
-	"sea9.org/go/cryptool/pkg/algorithm/keys"
+	"sea9.org/go/cryptool/pkg/algorithm/sym"
 )
 
 // Validate validate parameters.
@@ -17,6 +17,7 @@ import (
 // - Passwd : mutally exclusive with 'Genkey' (gen new key), generate encryption key from a passphrase which is input interactively
 // - Algr : encryption algorithm name
 func Validate(cfg *Config) (err error) {
+	var typ int
 	errs := make([]error, 0)
 
 	if cfg.Input != "" {
@@ -63,13 +64,17 @@ func Validate(cfg *Config) (err error) {
 			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > cryptool d -g {-k key.txt} -i README.md
 		} else if cfg.Passwd && cfg.Salt == "" {
 			var okay bool
-			if okay, err = keys.SaltFileExists(cfg.SaltFile); !okay || err != nil {
+			if okay, err = sym.SaltFileExists(cfg.SaltFile); !okay || err != nil {
 				errs = append(errs, fmt.Errorf("password salt file missing for decryption")) // > cryptool d -p -i README.md (when salt.txt not exists)
 			}
 		}
 	}
 
-	if err = algorithm.Validate(cfg.Algr); err != nil {
+	if cfg.Passwd {
+		typ = 1 // must be symmetric algorithm if encryption key is generated from a passphrase
+	}
+
+	if err = algorithm.Validate(cfg.Algr, typ); err != nil {
 		errs = append(errs, err)
 	}
 

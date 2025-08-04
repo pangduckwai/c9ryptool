@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 
+	"sea9.org/go/cryptool/pkg/algorithm/asym"
 	"sea9.org/go/cryptool/pkg/algorithm/sym"
 )
 
@@ -33,38 +34,13 @@ type Algorithm interface {
 }
 
 var aLGORITHMS = map[string]Algorithm{
-	"AES-128-GCM":       &sym.AesGcm128{},
-	"AES-192-GCM":       &sym.AesGcm192{},
-	"AES-256-GCM":       &sym.AesGcm256{},
-	"ChaCha20-Poly1305": &sym.ChaCha20Poly1305{},
+	"AES-128-GCM":          &sym.AesGcm128{},
+	"AES-192-GCM":          &sym.AesGcm192{},
+	"AES-256-GCM":          &sym.AesGcm256{},
+	"ChaCha20-Poly1305":    &sym.ChaCha20Poly1305{},
+	"RSA-2048-OAEP-SHA256": &asym.Rsa2048OaepSha256{},
+	"RSA-4096-OAEP-SHA512": &asym.Rsa4096OaepSha512{},
 }
-
-// var aLGORITHMS = map[string]*Algorithm{
-// 	"AES-128-GCM": {
-// 		Symmetric: true,
-// 		Length:    128,
-// 		Encrypt:   EncryptGcm,
-// 		Decrypt:   DecryptGcm,
-// 	},
-// 	"AES-192-GCM": {
-// 		Symmetric: true,
-// 		Length:    192,
-// 		Encrypt:   EncryptGcm,
-// 		Decrypt:   DecryptGcm,
-// 	},
-// 	"AES-256-GCM": {
-// 		Symmetric: true,
-// 		Length:    256,
-// 		Encrypt:   EncryptGcm,
-// 		Decrypt:   DecryptGcm,
-// 	},
-// 	"ChaCha20-Poly1305": {
-// 		Symmetric: true,
-// 		Length:    256,
-// 		Encrypt:   EncryptChacha,
-// 		Decrypt:   DecryptChacha,
-// 	},
-// }
 
 func Default() string {
 	return "ChaCha20-Poly1305" //"AES-256-GCM"
@@ -85,17 +61,28 @@ func Get(inp string) Algorithm {
 
 var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
 
-func Validate(algr string) (err error) {
-	if !algrPattern.MatchString(algr) {
+// Validate validate the given algorithm name.
+// typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
+func Validate(algr string, typ int) (err error) {
+	real := Parse(algr)
+	if real == "" {
 		err = fmt.Errorf("[ALGR] invalid encryption algorithm name pattern '%v'", algr)
-	} else if _, okay := aLGORITHMS[algr]; !okay {
-		err = fmt.Errorf("[ALGR] unsupported encryption algorithm '%v'", algr)
+	} else if alg, okay := aLGORITHMS[real]; !okay {
+		err = fmt.Errorf("[ALGR] unsupported encryption algorithm '%v'", real)
+	} else if (typ < 0 && alg.Type()) || (typ > 0 && !alg.Type()) {
+		art := "a"
+		pfx := ""
+		if typ < 0 {
+			art = "an"
+			pfx = "a"
+		}
+		err = fmt.Errorf("[ALGR] %v is not %v %vsymmetric algorithm as expected", alg.Name(), art, pfx)
 	}
 	return
 }
 
 // Parse return details of the given encryption algorithm
-// TODO NOTE!!!! add GCM/CBC etc.
+// TODO NOTE!!!! add CBC etc.
 func Parse(inp string) (name string) {
 	parts := algrPattern.FindStringSubmatch(inp)
 	if len(parts) < 5 {
@@ -126,6 +113,24 @@ func Parse(inp string) (name string) {
 	case "ChaCha":
 		if parts[2] == "20" && parts[4] == "Poly1305" {
 			name = inp
+		}
+
+	case "RSA":
+		var err error
+		var l, h int
+		if parts[2] != "" {
+			if l, err = strconv.Atoi(parts[2]); err != nil {
+				return
+			}
+		} else {
+			l = 2048
+		}
+		hsh := parts[4]
+		if h, err = strconv.Atoi(hsh); err == nil {
+			hsh = fmt.Sprintf("SHA%v", h)
+		}
+		if parts[3] == "OAEP" {
+			name = fmt.Sprintf("RSA-%v-%v-%v", l, parts[3], hsh)
 		}
 	}
 	return
