@@ -2,6 +2,7 @@ package sym
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -19,16 +20,26 @@ const P = 1
 // scrypt method. The salt to use is stored in the file 'salt.txt'. If 'salt.txt' doesn't
 // exist, one with random value will be created.
 func PopulateKeyFromPassword(
-	prompt, salts string,
+	prompt string,
+	input []byte,
 	keyLen, saltLen int,
 	populate func(int, string) error,
 ) (
 	salt []byte,
 	err error,
 ) {
-	if salts != "" {
-		salt, err = base64.StdEncoding.DecodeString(salts)
-		if err != nil {
+	if input != nil {
+		idx := bytes.LastIndex(input, []byte("."))
+		if idx < 0 || idx > len(input)-2 {
+			err = fmt.Errorf("[PWD] salt missing: %v", idx)
+			return
+		}
+
+		sln := len(input) - saltLen
+		if idx == sln-1 {
+			salt = input[sln:]
+		} else {
+			err = fmt.Errorf("[PWD] salt with length %v, expecting %v", sln-1, saltLen)
 			return
 		}
 	} else {

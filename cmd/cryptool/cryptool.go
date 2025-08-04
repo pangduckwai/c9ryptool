@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"sea9.org/go/cryptool/pkg/algorithm"
-	"sea9.org/go/cryptool/pkg/algorithm/sym"
 	"sea9.org/go/cryptool/pkg/config"
 	"sea9.org/go/cryptool/pkg/crypt"
 )
@@ -21,27 +20,6 @@ func run(cfg *config.Config) (err error) {
 	if algr == nil {
 		err = fmt.Errorf(" unsupported algorithm '%v'", cfg.Algr)
 		return
-	}
-
-	if cfg.Passwd {
-		_, err = sym.PopulateKeyFromPassword(
-			config.Desc(), "TEMP!!!!!!!!!!!!!", // TODO HERE!!!!!!!!!!!!!
-			algr.KeyLength(), cfg.SaltLen,
-			algr.PopulateKey,
-		)
-		if err != nil {
-			return
-		}
-	} else if cfg.Genkey {
-		err = algr.PopulateKey(0, cfg.Key)
-		if err != nil {
-			return
-		}
-	} else {
-		err = algr.PopulateKey(1, cfg.Key)
-		if err != nil {
-			return
-		}
 	}
 
 	switch cfg.Command {

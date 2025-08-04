@@ -14,7 +14,7 @@ func encryptChacha20Poly1305(
 	err error,
 ) {
 	if len(key) <= 0 {
-		err = fmt.Errorf("[CHA-CHA] not ready")
+		err = fmt.Errorf("[CHACHA] not ready")
 		return
 	}
 
@@ -40,7 +40,7 @@ func decryptChacha20Poly1305(
 	err error,
 ) {
 	if len(key) <= 0 {
-		err = fmt.Errorf("[CHA-CHA] not ready")
+		err = fmt.Errorf("[CHACHA] not ready")
 		return
 	}
 
