@@ -6,22 +6,22 @@ import (
 	"strings"
 
 	"sea9.org/go/cryptool/pkg/algorithm"
+	"sea9.org/go/cryptool/pkg/algorithm/sym"
 )
 
 const bUFFER = 1048576 // 1024x1024
 
 type Config struct {
-	Command  uint8  // 0 - encrypt; 1 - decrypt
-	Algr     string // encryption algorithm
-	Input    string // nil - stdin
-	Output   string // nil - stdout
-	Key      string // secret key file path
-	Genkey   bool   // generate key enabled
-	Passwd   bool   // interactively input password
-	Buffer   int    // buffer size
-	Salt     string // base64 encoded salt for key generation from password
-	SaltFile string // path of the file containing the salt to be used to generate key from password
-	Verbose  bool
+	Command uint8  // 0 - encrypt; 1 - decrypt
+	Algr    string // encryption algorithm
+	Input   string // nil - stdin
+	Output  string // nil - stdout
+	Key     string // secret key file path
+	Genkey  bool   // generate key enabled
+	Passwd  bool   // interactively input password
+	Buffer  int    // buffer size
+	SaltLen int    // length of salt to use for generating keys from password
+	Verbose bool
 }
 
 func Version() string {
@@ -39,8 +39,7 @@ func Usage() string {
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {-b SIZE | --buffer=SIZE}\n" +
-		"   {--salt=SALT}\n" +
-		"   {--salt-file=FILE}\n" +
+		"   {--salt=LEN}\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {-v | --verbose}"
@@ -65,10 +64,8 @@ func Help() string {
 		"       path of the file containing the encryption key\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
 		"       size of the read buffer in # of bytes, default: %vKB\n"+
-		"    --salt=SALT\n"+
-		"       base64 encoded salt value to be used to generate encryption key from password\n"+
-		"    --salt-file=FILE\n"+
-		"       path of the file containing the salt to be used to generate key from password, default: 'salt.txt'\n"+
+		"    --salt=LEN\n"+
+		"       length of salt to use for generating keys from password, default: %v\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
@@ -80,7 +77,9 @@ func Help() string {
 		"  NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"        when inputting interactively from stdin",
 		algorithm.Default(),
-		bUFFER/1024)
+		bUFFER/1024,
+		sym.SALTLEN,
+	)
 }
 
 func Parse(args []string) (cfg *Config, err error) {
@@ -90,11 +89,11 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		Algr:     algorithm.Default(),
-		Buffer:   bUFFER,
-		Passwd:   false,
-		SaltFile: "salt.txt",
-		Verbose:  false,
+		Algr:    algorithm.Default(),
+		Buffer:  bUFFER,
+		Passwd:  false,
+		SaltLen: sym.SALTLEN,
+		Verbose: false,
 	}
 
 	switch args[1][0:1] {
@@ -204,14 +203,10 @@ func Parse(args []string) (cfg *Config, err error) {
 				err = fmt.Errorf("[CONF] Missing salt value")
 				return
 			} else {
-				cfg.Salt = args[i][7:]
-			}
-		case strings.HasPrefix(args[i], "--salt-file="):
-			if len(args[i]) <= 12 {
-				err = fmt.Errorf("[CONF] Missing salt filename")
-				return
-			} else {
-				cfg.SaltFile = args[i][12:]
+				val, err = strconv.Atoi(args[i][7:])
+				if err == nil {
+					cfg.SaltLen = val
+				}
 			}
 		case args[i] == "-g" || args[i] == "--generate":
 			cfg.Genkey = true

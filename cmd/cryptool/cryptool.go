@@ -24,9 +24,9 @@ func run(cfg *config.Config) (err error) {
 	}
 
 	if cfg.Passwd {
-		err = sym.PopulateKeyFromPassword(
-			config.Desc(), cfg.Salt, cfg.SaltFile,
-			algr.KeyLength(), sym.SALTLEN,
+		_, err = sym.PopulateKeyFromPassword(
+			config.Desc(), "TEMP!!!!!!!!!!!!!", // TODO HERE!!!!!!!!!!!!!
+			algr.KeyLength(), cfg.SaltLen,
 			algr.PopulateKey,
 		)
 		if err != nil {

@@ -30,7 +30,7 @@ A simple encryption tool
 
 ## console input
 ### password
-> Specify the option `-p` or `--password` to use password generated key for the encryption. When
+> Specify the option `-p` or `--password` to use keys generated from password for the encryption. When
 > these options are specified, a prompt will appear for the user to type in the password.
 
 ### interactive input
