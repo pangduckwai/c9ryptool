@@ -25,7 +25,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "v0.5.0 b2025080417"
+	return "v0.5.1 b2025080418"
 }
 
 func Desc() string {
@@ -33,7 +33,7 @@ func Desc() string {
 }
 
 func Usage() string {
-	return "Usage:\n cryptool [encrypt | decrypt | version | help]\n" +
+	return "Usage:\n cryptool [encrypt | decrypt | algorithms | version | help]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
@@ -49,13 +49,14 @@ func Usage() string {
 func Help() string {
 	return fmt.Sprintf("Usage: cryptool [commands] {options}\n"+
 		" * commands:\n"+
-		"    encrypt - encrypt input using the provided encryption key\n"+
-		"    decrypt - decrypt encrypted input back to the original form\n"+
-		"    version - display current version of 'cryptool'\n"+
-		"    help    - display this message\n\n"+
+		"    encrypt    - encrypt input using the provided encryption key\n"+
+		"    decrypt    - decrypt encrypted input back to the original form\n"+
+		"    algorithms - list supported encryption algorithms\n"+
+		"    version    - display current version of 'cryptool'\n"+
+		"    help       - display this message\n\n"+
 		" * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
-		"       encryption algorithm to use, default '%v', supports %v\n"+
+		"       encryption algorithm to use, default: '%v'\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
 		"    -o FILE, --out=FILE\n"+
@@ -79,7 +80,6 @@ func Help() string {
 		"  NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"        when inputting interactively from stdin",
 		algorithm.Default(),
-		algorithm.List(),
 		bUFFER/1024)
 }
 
@@ -106,6 +106,8 @@ func Parse(args []string) (cfg *Config, err error) {
 		cfg.Command = 2
 	case "v":
 		cfg.Command = 3
+	case "a":
+		cfg.Command = 4
 	default:
 		err = fmt.Errorf("[CONF] Invalid command '%v'", args[1])
 		return

@@ -10,6 +10,7 @@ A simple encryption tool
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
+| `algorithms` | list names of the supported algorithms |
 | `version` | display current version of `cryptool` |
 | `help` | display the help message |
 
@@ -37,6 +38,12 @@ A simple encryption tool
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
 
 ## Changelog
+### v0.5.1
+- add command to list supported algorithms
+
+### v0.5.0
+- add asymmetric encryption (RSA)
+
 ### v0.4.1
 - fix issue causing populating keys to fail
 

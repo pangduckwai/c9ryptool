@@ -97,7 +97,7 @@ type Rsa2048OaepSha256 struct {
 }
 
 func (a *Rsa2048OaepSha256) Name() string {
-	return "RAS-2048-OAEP-SHA256"
+	return "RSA-2048-OAEP-SHA256"
 }
 
 func (a *Rsa2048OaepSha256) Type() bool {
@@ -139,11 +139,60 @@ func (a *Rsa2048OaepSha256) Decrypt(input []byte) ([]byte, error) {
 }
 
 // //////////////////// //
-// RSA 2048 OAEP SHA256
+// RSA 2048 OAEP SHA512
+type Rsa2048OaepSha512 struct {
+	PrivateKey *rsa.PrivateKey
+	PublicKey  *rsa.PublicKey
+}
+
+func (a *Rsa2048OaepSha512) Name() string {
+	return "RSA-2048-OAEP-SHA512"
+}
+
+func (a *Rsa2048OaepSha512) Type() bool {
+	return false
+}
+
+func (a *Rsa2048OaepSha512) KeyLength() int {
+	return 2048
+}
+
+func (a *Rsa2048OaepSha512) PopulateKey(typ int, str string) (err error) {
+	var key *rsa.PrivateKey
+	var pkey *rsa.PublicKey
+	switch typ {
+	case 0: // generate key
+		key, err = generateRsaKey(a.KeyLength(), str)
+		if err != nil {
+			return
+		}
+		a.PrivateKey = key
+		a.PublicKey = &key.PublicKey
+	case 1: // read key
+		key, pkey, err = readRsaKey(str)
+		if err != nil {
+			return
+		}
+		a.PrivateKey = key
+		a.PublicKey = pkey
+	}
+	return
+}
+
+func (a *Rsa2048OaepSha512) Encrypt(input []byte) ([]byte, error) {
+	return encryptRsa(a.PublicKey, input, sha512.New())
+}
+
+func (a *Rsa2048OaepSha512) Decrypt(input []byte) ([]byte, error) {
+	return decryptRsa(a.PrivateKey, input, crypto.SHA512)
+}
+
+// //////////////////// //
+// RSA 4096 OAEP SHA512
 type Rsa4096OaepSha512 rsa.PrivateKey
 
 func (a *Rsa4096OaepSha512) Name() string {
-	return "RAS-4096-OAEP-SHA512"
+	return "RSA-4096-OAEP-SHA512"
 }
 
 func (a *Rsa4096OaepSha512) Type() bool {

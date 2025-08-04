@@ -72,6 +72,16 @@ func main() {
 		fmt.Printf("%v\n%v\n", config.Desc(), config.Help())
 	case 3:
 		fmt.Println(config.Desc())
+	case 4:
+		fmt.Println(config.Desc())
+		for i, n := range algorithm.List() {
+			a := algorithm.Get(n)
+			if a.Type() {
+				fmt.Printf(" %2v sym  %v\n", i+1, n)
+			} else {
+				fmt.Printf(" %2v asym %v\n", i+1, n)
+			}
+		}
 	default:
 		err = fmt.Errorf(" unknown command '%v'", cfg.Command)
 	}
