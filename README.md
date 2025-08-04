@@ -32,6 +32,12 @@ A simple encryption tool
 > Specify the option `-p` or `--password` to use keys generated from password for the encryption. When
 > these options are specified, a prompt will appear for the user to type in the password.
 
+### salt
+> To enhance security of the keys used, a random value known as `salt` is needed when generating keys
+> from passwords. A new, random `salt` is generated during encryption. This salt is written to the
+> output at the end of the cipher text, separated with a dot (`.`). During decryption this `salt` is
+> read from the input cipher text.
+
 ### interactive input
 > If the option `-i` or `--in=` is omitted, the input text to be encryption is read from stdin.
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.

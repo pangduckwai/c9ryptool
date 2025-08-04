@@ -16,9 +16,9 @@ const N = 65536
 const R = 16
 const P = 1
 
-// PopulateKeyFromPassword get a key of 'keyLen' bytes long from the given passpharse using the
-// scrypt method. The salt to use is stored in the file 'salt.txt'. If 'salt.txt' doesn't
-// exist, one with random value will be created.
+// PopulateKeyFromPassword get a key of 'keyLen' bytes long from the given passpharse
+// using the scrypt method. The salt to use is stored at the end of the cipher text,
+// separated by a dot (`.`)
 func PopulateKeyFromPassword(
 	prompt string,
 	input []byte,
