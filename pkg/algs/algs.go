@@ -1,4 +1,4 @@
-package algorithm
+package algs
 
 import (
 	"fmt"
@@ -6,18 +6,18 @@ import (
 	"sort"
 	"strconv"
 
-	"sea9.org/go/cryptool/pkg/algorithm/asym"
-	"sea9.org/go/cryptool/pkg/algorithm/sym"
+	"sea9.org/go/cryptool/pkg/algs/asym"
+	"sea9.org/go/cryptool/pkg/algs/sym"
 )
 
 type Algorithm interface {
 	// Name algorithm name.
 	Name() string
 
-	// Type type of algorithm. 'true' is symmetric, false is asymmetric
+	// Type type of algs. 'true' is symmetric, false is asymmetric
 	Type() bool
 
-	// KeyLength may be in bytes or bits, depends on algorithm.
+	// KeyLength may be in bytes or bits, depends on algs.
 	KeyLength() int
 
 	// PopulateKey 1st parameter is flag:

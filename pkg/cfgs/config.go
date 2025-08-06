@@ -1,12 +1,12 @@
-package config
+package cfgs
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/algorithm"
-	"sea9.org/go/cryptool/pkg/algorithm/sym"
+	"sea9.org/go/cryptool/pkg/algs"
+	"sea9.org/go/cryptool/pkg/algs/sym"
 )
 
 const bUFFER = 1048576 // 1024x1024
@@ -25,7 +25,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "v0.5.2 b2025080423"
+	return "v0.5.3 b2025080609"
 }
 
 func Desc() string {
@@ -76,7 +76,7 @@ func Help() string {
 		"        generated key is used\n\n"+
 		"  NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"        when inputting interactively from stdin",
-		algorithm.Default(),
+		algs.Default(),
 		bUFFER/1024,
 		sym.SALTLEN,
 	)
@@ -89,7 +89,7 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		Algr:    algorithm.Default(),
+		Algr:    algs.Default(),
 		Buffer:  bUFFER,
 		Passwd:  false,
 		SaltLen: sym.SALTLEN,

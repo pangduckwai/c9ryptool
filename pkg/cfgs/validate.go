@@ -1,4 +1,4 @@
-package config
+package cfgs
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/algorithm"
+	"sea9.org/go/cryptool/pkg/algs"
 )
 
 // Validate validate parameters.
@@ -66,7 +66,7 @@ func Validate(cfg *Config) (err error) {
 		typ = 1 // must be symmetric algorithm if encryption key is generated from a passphrase
 	}
 
-	if err = algorithm.Validate(cfg.Algr, typ); err != nil {
+	if err = algs.Validate(cfg.Algr, typ); err != nil {
 		errs = append(errs, err)
 	}
 

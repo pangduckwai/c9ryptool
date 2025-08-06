@@ -1,4 +1,4 @@
-package crypt
+package cryptool
 
 import (
 	"crypto/rand"
@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
-	"sea9.org/go/cryptool/pkg/config"
+	cfgs "sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func TestRandom(t *testing.T) {
@@ -71,7 +71,7 @@ func TestReadfile(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	cfg := &config.Config{
+	cfg := &cfgs.Config{
 		Input:   "../../README.md",
 		Buffer:  16,
 		Verbose: true,

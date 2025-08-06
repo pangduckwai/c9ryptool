@@ -1,18 +1,18 @@
-package crypt
+package cryptool
 
 import (
-	"sea9.org/go/cryptool/pkg/algorithm"
-	"sea9.org/go/cryptool/pkg/algorithm/sym"
-	"sea9.org/go/cryptool/pkg/config"
+	"sea9.org/go/cryptool/pkg/algs"
+	"sea9.org/go/cryptool/pkg/algs/sym"
+	cfgs "sea9.org/go/cryptool/pkg/cfgs"
 )
 
-func Decrypt(
-	cfg *config.Config,
-	alg algorithm.Algorithm,
+func Encrypt(
+	cfg *cfgs.Config,
+	alg algs.Algorithm,
 ) (err error) {
 	var input, result []byte
 
-	input, err = read(cfg, true)
+	input, err = read(cfg, false)
 	if err != nil {
 		return
 	}
@@ -20,8 +20,8 @@ func Decrypt(
 	var salt []byte
 	if cfg.Passwd {
 		salt, err = sym.PopulateKeyFromPassword(
-			config.Desc(),
-			input,
+			cfgs.Desc(),
+			nil,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,
 		)
@@ -40,11 +40,13 @@ func Decrypt(
 		}
 	}
 
-	result, err = alg.Decrypt(input[:len(input)-len(salt)-1])
+	result, err = alg.Encrypt(input)
 	if err != nil {
 		return
 	}
 
-	err = write(cfg, false, result)
+	result = append(result, '.')
+	result = append(result, salt...)
+	err = write(cfg, true, result)
 	return
 }

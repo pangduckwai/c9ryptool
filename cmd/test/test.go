@@ -14,11 +14,11 @@ import (
 	"log"
 	"os"
 
-	"sea9.org/go/cryptool/pkg/config"
+	cfgs "sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func read(
-	cfg *config.Config,
+	cfg *cfgs.Config,
 	decode bool,
 ) (
 	dat []byte,
@@ -112,7 +112,7 @@ func main() {
 
 	/*
 		fmt.Println("Test read multiple lines...")
-		cfg := &config.Config{
+		cfg := &cfgs.Config{
 			Buffer:  32768,
 			Verbose: true,
 		}
@@ -125,7 +125,7 @@ func main() {
 
 	/*
 		fmt.Println("Test encrypt with CR public key...")
-		cfg := &config.Config{
+		cfg := &cfgs.Config{
 			Buffer:  32768,
 			Verbose: true,
 			Input:   "cr.pem",
@@ -156,7 +156,7 @@ func main() {
 	*/
 
 	fmt.Println("Test encrypt with public key then decrypt with private key...")
-	cfg := &config.Config{
+	cfg := &cfgs.Config{
 		Buffer:  32768,
 		Verbose: true,
 		Input:   "self.key",

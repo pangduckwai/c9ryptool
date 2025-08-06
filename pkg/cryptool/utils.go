@@ -1,4 +1,4 @@
-package crypt
+package cryptool
 
 import (
 	"bufio"
@@ -7,11 +7,11 @@ import (
 	"io"
 	"os"
 
-	"sea9.org/go/cryptool/pkg/config"
+	cfgs "sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func read(
-	cfg *config.Config,
+	cfg *cfgs.Config,
 	decode bool,
 ) (
 	dat []byte,
@@ -92,7 +92,7 @@ func read(
 }
 
 func write(
-	cfg *config.Config,
+	cfg *cfgs.Config,
 	encode bool,
 	dat []byte,
 ) (err error) {
