@@ -5,6 +5,14 @@ import (
 	"crypto/rsa"
 )
 
+/*
+  Verify:
+	> echo -n "This is top secret" > secret.txt
+	> cryptool encrypt -a RSA-PKCS1v15 -k self.key -i secret.txt -o cipher.txt
+	> basesf decode -i cipher.txt -o cipher-bin.txt
+	> openssl pkeyutl -decrypt -inkey self.key -in cipher-bin.txt -out plain.txt
+*/
+
 // //////////////////// //
 // RSA 2048 PKCS 1 v1.5
 type Rsa2048Pkcs1v15 struct {
