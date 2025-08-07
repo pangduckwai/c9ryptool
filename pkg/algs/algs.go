@@ -41,6 +41,7 @@ var aLGORITHMS = map[string]Algorithm{
 	"RSA-2048-OAEP-SHA256": &asym.Rsa2048OaepSha256{},
 	"RSA-2048-OAEP-SHA512": &asym.Rsa2048OaepSha512{},
 	"RSA-4096-OAEP-SHA512": &asym.Rsa4096OaepSha512{},
+	"RSA-2048-PKCS1v15":    &asym.Rsa2048Pkcs1v15{},
 }
 
 func Default() string {
@@ -132,6 +133,16 @@ func Parse(inp string) (name string) {
 		}
 		if parts[3] == "OAEP" {
 			name = fmt.Sprintf("RSA-%v-%v-%v", l, parts[3], hsh)
+		} else {
+			s3 := ""
+			if parts[3] != "" {
+				s3 = "-"
+			}
+			s4 := ""
+			if parts[4] != "" {
+				s4 = "-"
+			}
+			name = fmt.Sprintf("RSA-%v%v%v%v%v", l, s3, parts[3], s4, parts[4])
 		}
 	}
 	return

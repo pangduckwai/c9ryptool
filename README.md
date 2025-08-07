@@ -43,6 +43,12 @@ A simple encryption tool
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
 
 ## Changelog
+### v0.5.4
+- add `RSA-PKCS1v15` algorithm
+
+### v0.5.3
+- revamp and refactor packages
+
 ### v0.5.2
 - improve the handling of salt for generating keys from password
 

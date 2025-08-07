@@ -40,7 +40,11 @@ func Decrypt(
 		}
 	}
 
-	result, err = alg.Decrypt(input[:len(input)-len(salt)-1])
+	if salt != nil {
+		result, err = alg.Decrypt(input[:len(input)-len(salt)-1])
+	} else {
+		result, err = alg.Decrypt(input)
+	}
 	if err != nil {
 		return
 	}

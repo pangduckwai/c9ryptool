@@ -45,8 +45,10 @@ func Encrypt(
 		return
 	}
 
-	result = append(result, '.')
-	result = append(result, salt...)
+	if salt != nil {
+		result = append(result, '.')
+		result = append(result, salt...)
+	}
 	err = write(cfg, true, result)
 	return
 }

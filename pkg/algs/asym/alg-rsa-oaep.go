@@ -1,93 +1,19 @@
 package asym
 
 import (
-	"bufio"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/sha512"
-	"crypto/x509"
-	"encoding/pem"
-	"fmt"
-	"hash"
-	"os"
 )
 
-func generateRsaKey(lgth int, path string) (
-	key *rsa.PrivateKey,
-	err error,
-) {
-	key, err = rsa.GenerateKey(rand.Reader, lgth)
-	if err != nil {
-		return
-	}
-	buf, err := x509.MarshalPKCS8PrivateKey(key)
-	if err != nil {
-		return
-	}
-	pem := pem.EncodeToMemory(&pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: buf,
-	})
-	kfile, err := os.Create(path)
-	if err != nil {
-		return
-	}
-	wtr := bufio.NewWriter(kfile)
-	defer kfile.Close()
-	wtr.Write(pem)
-	wtr.Flush()
-	return
-}
-
-func readRsaKey(path string) (
-	key *rsa.PrivateKey,
-	pkey *rsa.PublicKey,
-	err error,
-) {
-	var ok bool
-	buf, typ, err := readKey(path)
-	if err != nil {
-		return
-	}
-	if !typ {
-		if key, ok = buf.(*rsa.PrivateKey); ok {
-			pkey = &key.PublicKey
-		} else {
-			err = fmt.Errorf("[RSA] casting to *rsa.PrivateKey failed")
-		}
-	} else {
-		if pkey, ok = buf.(*rsa.PublicKey); !ok {
-			err = fmt.Errorf("[RSA] casting to *rsa.PublicKey failed")
-		}
-	}
-	return
-}
-
-func encryptRsa(
-	key *rsa.PublicKey,
-	input []byte,
-	hsh hash.Hash,
-) (
-	result []byte,
-	err error,
-) {
-	result, err = rsa.EncryptOAEP(hsh, rand.Reader, key, input, nil)
-	return
-}
-
-func decryptRsa(
-	key *rsa.PrivateKey,
-	input []byte,
-	hsh crypto.Hash,
-) (
-	result []byte,
-	err error,
-) {
-	result, err = key.Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: hsh})
-	return
-}
+/*
+  Verify:
+	> cryptool encrypt -k self.key -i go.mod -o cipher.txt
+	> basesf decode -i cipher.txt -o cipher-bin.txt
+	> openssl pkeyutl -decrypt -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -inkey self.key -in cipher-bin.txt -out plain.txt
+*/
 
 // //////////////////// //
 // RSA 2048 OAEP SHA256
@@ -131,11 +57,11 @@ func (a *Rsa2048OaepSha256) PopulateKey(typ int, str string) (err error) {
 }
 
 func (a *Rsa2048OaepSha256) Encrypt(input []byte) ([]byte, error) {
-	return encryptRsa(a.PublicKey, input, sha256.New())
+	return rsa.EncryptOAEP(sha256.New(), rand.Reader, a.PublicKey, input, nil)
 }
 
 func (a *Rsa2048OaepSha256) Decrypt(input []byte) ([]byte, error) {
-	return decryptRsa(a.PrivateKey, input, crypto.SHA256)
+	return a.PrivateKey.Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA256})
 }
 
 // //////////////////// //
@@ -180,11 +106,11 @@ func (a *Rsa2048OaepSha512) PopulateKey(typ int, str string) (err error) {
 }
 
 func (a *Rsa2048OaepSha512) Encrypt(input []byte) ([]byte, error) {
-	return encryptRsa(a.PublicKey, input, sha512.New())
+	return rsa.EncryptOAEP(sha512.New(), rand.Reader, a.PublicKey, input, nil)
 }
 
 func (a *Rsa2048OaepSha512) Decrypt(input []byte) ([]byte, error) {
-	return decryptRsa(a.PrivateKey, input, crypto.SHA512)
+	return a.PrivateKey.Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA512})
 }
 
 // //////////////////// //
@@ -223,9 +149,9 @@ func (a *Rsa4096OaepSha512) PopulateKey(typ int, str string) (err error) {
 }
 
 func (a *Rsa4096OaepSha512) Encrypt(input []byte) ([]byte, error) {
-	return encryptRsa(&a.PublicKey, input, sha512.New())
+	return rsa.EncryptOAEP(sha512.New(), rand.Reader, &a.PublicKey, input, nil)
 }
 
 func (a *Rsa4096OaepSha512) Decrypt(input []byte) ([]byte, error) {
-	return decryptRsa((*rsa.PrivateKey)(a), input, crypto.SHA512)
+	return ((*rsa.PrivateKey)(a)).Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA512})
 }

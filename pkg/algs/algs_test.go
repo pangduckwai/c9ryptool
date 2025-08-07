@@ -32,4 +32,6 @@ func TestParse(t *testing.T) {
 	display(9, "abc3de-def")
 	display(10, "A128CBC")
 	display(11, "RSA-OAEP-256")
+	display(12, "RSA-2048-PKCS1v15")
+	display(13, "RSA-PKCS1v15")
 }

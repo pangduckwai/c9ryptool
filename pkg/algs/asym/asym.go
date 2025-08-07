@@ -1,6 +1,9 @@
 package asym
 
 import (
+	"bufio"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -51,5 +54,56 @@ func readKey(path string) (
 		err = fmt.Errorf("[ASYM]%v\n]", buf.String())
 	}
 
+	return
+}
+
+func generateRsaKey(lgth int, path string) (
+	key *rsa.PrivateKey,
+	err error,
+) {
+	key, err = rsa.GenerateKey(rand.Reader, lgth)
+	if err != nil {
+		return
+	}
+	buf, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return
+	}
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: buf,
+	})
+	kfile, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	wtr := bufio.NewWriter(kfile)
+	defer kfile.Close()
+	wtr.Write(pem)
+	wtr.Flush()
+	return
+}
+
+func readRsaKey(path string) (
+	key *rsa.PrivateKey,
+	pkey *rsa.PublicKey,
+	err error,
+) {
+	var ok bool
+	buf, typ, err := readKey(path)
+	if err != nil {
+		return
+	}
+	if !typ {
+		if key, ok = buf.(*rsa.PrivateKey); ok {
+			pkey = &key.PublicKey
+		} else {
+			err = fmt.Errorf("[RSA] casting to *rsa.PrivateKey failed")
+		}
+	} else {
+		if pkey, ok = buf.(*rsa.PublicKey); !ok {
+			err = fmt.Errorf("[RSA] casting to *rsa.PublicKey failed")
+		}
+	}
 	return
 }
