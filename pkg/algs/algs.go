@@ -37,6 +37,7 @@ var aLGORITHMS = map[string]Algorithm{
 	"AES-128-GCM":          &sym.AesGcm128{},
 	"AES-192-GCM":          &sym.AesGcm192{},
 	"AES-256-GCM":          &sym.AesGcm256{},
+	"AES-256-CBC":          &sym.AesCbc256{},
 	"ChaCha20-Poly1305":    &sym.ChaCha20Poly1305{},
 	"RSA-2048-OAEP-SHA256": &asym.Rsa2048OaepSha256{},
 	"RSA-2048-OAEP-SHA512": &asym.Rsa2048OaepSha512{},
