@@ -10,9 +10,9 @@ func Decrypt(
 	cfg *cfgs.Config,
 	alg algs.Algorithm,
 ) (err error) {
-	var input, result []byte
+	var key, input, result []byte
 
-	input, err = read(cfg, true)
+	input, err = read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
 	if err != nil {
 		return
 	}
@@ -29,12 +29,17 @@ func Decrypt(
 			return
 		}
 	} else if cfg.Genkey {
-		err = alg.PopulateKey(0, cfg.Key)
+		// err = alg.PopulateKey(nil)
+		// if err != nil {
+		// 	return
+		// }
+		// TODO Not supported!!!!!!!!!!!!!
+	} else {
+		key, err = read(cfg.Key, cfg.Buffer, true, cfg.Verbose)
 		if err != nil {
 			return
 		}
-	} else {
-		err = alg.PopulateKey(1, cfg.Key)
+		err = alg.PopulateKey(key)
 		if err != nil {
 			return
 		}
@@ -49,6 +54,6 @@ func Decrypt(
 		return
 	}
 
-	err = write(cfg, false, result)
+	err = write(cfg.Output, false, result)
 	return
 }

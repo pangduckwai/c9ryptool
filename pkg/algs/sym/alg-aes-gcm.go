@@ -82,8 +82,12 @@ func (a *AesGcm128) KeyLength() int {
 	return 128 / 8
 }
 
-func (a *AesGcm128) PopulateKey(typ int, path string) (err error) {
-	*a, err = PopulateKey(typ, a.KeyLength(), path)
+func (a *AesGcm128) Key() []byte {
+	return *a
+}
+
+func (a *AesGcm128) PopulateKey(key []byte) (err error) {
+	*a, err = PopulateKey(key, a.KeyLength())
 	return
 }
 
@@ -111,8 +115,12 @@ func (a *AesGcm192) KeyLength() int {
 	return 192 / 8
 }
 
-func (a *AesGcm192) PopulateKey(typ int, path string) (err error) {
-	*a, err = PopulateKey(typ, a.KeyLength(), path)
+func (a *AesGcm192) Key() []byte {
+	return *a
+}
+
+func (a *AesGcm192) PopulateKey(key []byte) (err error) {
+	*a, err = PopulateKey(key, a.KeyLength())
 	return
 }
 
@@ -140,8 +148,12 @@ func (a *AesGcm256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesGcm256) PopulateKey(typ int, path string) (err error) {
-	*a, err = PopulateKey(typ, a.KeyLength(), path)
+func (a *AesGcm256) Key() []byte {
+	return *a
+}
+
+func (a *AesGcm256) PopulateKey(key []byte) (err error) {
+	*a, err = PopulateKey(key, a.KeyLength())
 	return
 }
 

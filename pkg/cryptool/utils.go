@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func read(
-	cfg *cfgs.Config,
-	decode bool,
+	path string,
+	buffer int,
+	decode, verbose bool,
 ) (
 	dat []byte,
 	err error,
 ) {
 	inp := os.Stdin
-	if cfg.Input != "" {
-		inp, err = os.Open(cfg.Input)
+	if path != "" {
+		inp, err = os.Open(path)
 		if err != nil {
 			err = fmt.Errorf("[READ] %v", err)
 			return
@@ -27,19 +26,19 @@ func read(
 		defer inp.Close()
 	}
 
-	rdr := bufio.NewReaderSize(inp, cfg.Buffer)
-	if rdr.Size() != cfg.Buffer {
-		if cfg.Verbose {
-			fmt.Printf("Read buffer size %v mismatching with the specified size %v, changing buffer size...\n", rdr.Size(), cfg.Buffer)
+	rdr := bufio.NewReaderSize(inp, buffer)
+	if rdr.Size() != buffer {
+		if verbose {
+			fmt.Printf("Read buffer size %v mismatching with the specified size %v, changing buffer size...\n", rdr.Size(), buffer)
 		}
-		cfg.Buffer = rdr.Size()
-		rdr = bufio.NewReaderSize(inp, cfg.Buffer)
+		buffer = rdr.Size()
+		rdr = bufio.NewReaderSize(inp, buffer)
 	}
 
 	cnt, off := 0, 0
 	var err1 error
-	buf := make([]byte, 0, cfg.Buffer)
-	dat = make([]byte, 0, cfg.Buffer*2)
+	buf := make([]byte, 0, buffer)
+	dat = make([]byte, 0, buffer*2)
 	for idx := 0; ; idx++ {
 		// As described in the doc, handle read data first if n > 0 before handling error,
 		// it is because the returned error could have been EOF
@@ -47,7 +46,7 @@ func read(
 			cnt, err = rdr.Read(buf[:cap(buf)])
 		}
 
-		if cnt > 0 && cfg.Input == "" {
+		if cnt > 0 && path == "" {
 			// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
 			if buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
 				if cnt == 2 && buf[:cnt][1] == 10 { // ASCII code 10 is line feed LF ('\n')
@@ -93,14 +92,14 @@ func read(
 }
 
 func write(
-	cfg *cfgs.Config,
+	path string,
 	encode bool,
 	dat []byte,
 ) (err error) {
 	var out *os.File
 	var wtr *bufio.Writer
-	if cfg.Output != "" {
-		out, err = os.Create(cfg.Output)
+	if path != "" {
+		out, err = os.Create(path)
 		if err != nil {
 			err = fmt.Errorf("[WRITE] %v", err)
 			return

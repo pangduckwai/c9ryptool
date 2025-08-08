@@ -70,8 +70,12 @@ func (a *ChaCha20Poly1305) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *ChaCha20Poly1305) PopulateKey(typ int, path string) (err error) {
-	*a, err = PopulateKey(typ, a.KeyLength(), path)
+func (a *ChaCha20Poly1305) Key() []byte {
+	return *a
+}
+
+func (a *ChaCha20Poly1305) PopulateKey(key []byte) (err error) {
+	*a, err = PopulateKey(key, a.KeyLength())
 	return
 }
 

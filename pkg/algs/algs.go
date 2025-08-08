@@ -20,11 +20,11 @@ type Algorithm interface {
 	// KeyLength may be in bytes or bits, depends on algs.
 	KeyLength() int
 
-	// PopulateKey 1st parameter is flag:
-	//  - 0 - generate key, 2nd parameter is the file path to write the new key;
-	//  - 1 - read key, 2nd parameter is the file path to read the key from;
-	//  - 2 - save 2nd parameter as key
-	PopulateKey(int, string) error
+	// Key get key
+	Key() []byte
+
+	// PopulateKey populate key for the algorithm to use. If input byte slice is empty, a new key is generated.
+	PopulateKey([]byte) error
 
 	// Encrypt encrypt the given parameter, returns the encrypted result.
 	Encrypt([]byte) ([]byte, error)
@@ -85,7 +85,6 @@ func Validate(algr string, typ int) (err error) {
 }
 
 // Parse return details of the given encryption algorithm
-// TODO NOTE!!!! add CBC etc.
 func Parse(inp string) (name string) {
 	parts := algrPattern.FindStringSubmatch(inp)
 	if len(parts) < 5 {

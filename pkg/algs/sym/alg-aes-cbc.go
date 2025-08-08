@@ -114,8 +114,12 @@ func (a *AesCbc256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesCbc256) PopulateKey(typ int, path string) (err error) {
-	*a, err = PopulateKey(typ, a.KeyLength(), path)
+func (a *AesCbc256) Key() []byte {
+	return *a
+}
+
+func (a *AesCbc256) PopulateKey(key []byte) (err error) {
+	*a, err = PopulateKey(key, a.KeyLength())
 	return
 }
 

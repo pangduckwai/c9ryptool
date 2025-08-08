@@ -10,9 +10,9 @@ func Encrypt(
 	cfg *cfgs.Config,
 	alg algs.Algorithm,
 ) (err error) {
-	var input, result []byte
+	var key, input, result []byte
 
-	input, err = read(cfg, false)
+	input, err = read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
 	if err != nil {
 		return
 	}
@@ -29,12 +29,20 @@ func Encrypt(
 			return
 		}
 	} else if cfg.Genkey {
-		err = alg.PopulateKey(0, cfg.Key)
+		err = alg.PopulateKey(nil)
+		if err != nil {
+			return
+		}
+		err = write(cfg.Key, true, alg.Key())
 		if err != nil {
 			return
 		}
 	} else {
-		err = alg.PopulateKey(1, cfg.Key)
+		key, err = read(cfg.Key, cfg.Buffer, true, cfg.Verbose)
+		if err != nil {
+			return
+		}
+		err = alg.PopulateKey(key)
 		if err != nil {
 			return
 		}
@@ -49,6 +57,6 @@ func Encrypt(
 		result = append(result, '.')
 		result = append(result, salt...)
 	}
-	err = write(cfg, true, result)
+	err = write(cfg.Output, true, result)
 	return
 }

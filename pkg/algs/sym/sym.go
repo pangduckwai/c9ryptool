@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"os"
 
@@ -23,7 +22,7 @@ func PopulateKeyFromPassword(
 	prompt string,
 	input []byte,
 	keyLen, saltLen int,
-	populate func(int, string) error,
+	populate func([]byte) error,
 ) (
 	salt []byte,
 	err error,
@@ -65,8 +64,20 @@ func PopulateKeyFromPassword(
 		err = fmt.Errorf("[PWD] %v", err)
 		return
 	}
-	err = populate(2, string(key))
+	err = populate(key)
 
+	return
+}
+
+func PopulateKey(ki []byte, lgth int) (
+	ko []byte,
+	err error,
+) {
+	if ki == nil {
+		ko, err = GenerateKey(lgth)
+	} else {
+		ko = ki
+	}
 	return
 }
 
@@ -83,57 +94,42 @@ func Generate(lgth int) (result []byte, err error) {
 
 // GenerateKey generate a random symmetric key of 'keyLen' bytes long, and store the key
 // as base64 encoded text in the file of the given path.
-func GenerateKey(path string, keyLen int) (
+func GenerateKey(keyLen int) (
 	key []byte,
 	err error,
 ) {
 	key, err = Generate(keyLen)
 	if err != nil {
 		err = fmt.Errorf("[GENKEY]%v", err)
-		return
+		// return
 	}
-	kfile, err := os.Create(path)
-	if err != nil {
-		err = fmt.Errorf("[GENKEY] %v", err)
-		return
-	}
-	wtr := bufio.NewWriter(kfile)
-	defer kfile.Close()
-	fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(key))
-	wtr.Flush()
+	// kfile, err := os.Create(path)
+	// if err != nil {
+	// 	err = fmt.Errorf("[GENKEY] %v", err)
+	// 	return
+	// }
+	// wtr := bufio.NewWriter(kfile)
+	// defer kfile.Close()
+	// fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(key))
+	// wtr.Flush()
 	return
 }
 
-// ReadKey read key
-func ReadKey(
-	path string,
-) (
-	key []byte,
-	err error,
-) {
-	kecd, err := os.ReadFile(path)
-	if err != nil {
-		err = fmt.Errorf("[READKEY] %v", err)
-		return
-	}
-	key, err = base64.StdEncoding.DecodeString(string(kecd))
-	if err != nil {
-		err = fmt.Errorf("[READKEY] %v", err)
-	}
-	return
-}
-
-func PopulateKey(typ, lgth int, str string) (
-	key []byte,
-	err error,
-) {
-	switch typ {
-	case 0: // generate key
-		key, err = GenerateKey(str, lgth)
-	case 1: // read key
-		key, err = ReadKey(str)
-	case 2: // from password
-		key = []byte(str)
-	}
-	return
-}
+// // ReadKey read key
+// func ReadKey(
+// 	path string,
+// ) (
+// 	key []byte,
+// 	err error,
+// ) {
+// 	kecd, err := os.ReadFile(path)
+// 	if err != nil {
+// 		err = fmt.Errorf("[READKEY] %v", err)
+// 		return
+// 	}
+// 	key, err = base64.StdEncoding.DecodeString(string(kecd))
+// 	if err != nil {
+// 		err = fmt.Errorf("[READKEY] %v", err)
+// 	}
+// 	return
+// }
