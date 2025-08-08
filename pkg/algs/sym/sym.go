@@ -69,18 +69,6 @@ func PopulateKeyFromPassword(
 	return
 }
 
-func PopulateKey(ki []byte, lgth int) (
-	ko []byte,
-	err error,
-) {
-	if ki == nil {
-		ko, err = GenerateKey(lgth)
-	} else {
-		ko = ki
-	}
-	return
-}
-
 // Generate generate 'lgth' bytes of random value.
 func Generate(lgth int) (result []byte, err error) {
 	result = make([]byte, lgth)
@@ -101,35 +89,6 @@ func GenerateKey(keyLen int) (
 	key, err = Generate(keyLen)
 	if err != nil {
 		err = fmt.Errorf("[GENKEY]%v", err)
-		// return
 	}
-	// kfile, err := os.Create(path)
-	// if err != nil {
-	// 	err = fmt.Errorf("[GENKEY] %v", err)
-	// 	return
-	// }
-	// wtr := bufio.NewWriter(kfile)
-	// defer kfile.Close()
-	// fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(key))
-	// wtr.Flush()
 	return
 }
-
-// // ReadKey read key
-// func ReadKey(
-// 	path string,
-// ) (
-// 	key []byte,
-// 	err error,
-// ) {
-// 	kecd, err := os.ReadFile(path)
-// 	if err != nil {
-// 		err = fmt.Errorf("[READKEY] %v", err)
-// 		return
-// 	}
-// 	key, err = base64.StdEncoding.DecodeString(string(kecd))
-// 	if err != nil {
-// 		err = fmt.Errorf("[READKEY] %v", err)
-// 	}
-// 	return
-// }

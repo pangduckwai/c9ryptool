@@ -75,7 +75,11 @@ func (a *ChaCha20Poly1305) Key() []byte {
 }
 
 func (a *ChaCha20Poly1305) PopulateKey(key []byte) (err error) {
-	*a, err = PopulateKey(key, a.KeyLength())
+	if key == nil {
+		*a, err = GenerateKey(a.KeyLength())
+	} else {
+		*a = key
+	}
 	return
 }
 

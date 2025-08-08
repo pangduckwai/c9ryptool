@@ -10,14 +10,13 @@ func Decrypt(
 	cfg *cfgs.Config,
 	alg algs.Algorithm,
 ) (err error) {
-	var key, input, result []byte
+	var key, input, result, salt []byte
 
 	input, err = read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
 	if err != nil {
 		return
 	}
 
-	var salt []byte
 	if cfg.Passwd {
 		salt, err = sym.PopulateKeyFromPassword(
 			cfgs.Desc(),
@@ -29,13 +28,9 @@ func Decrypt(
 			return
 		}
 	} else if cfg.Genkey {
-		// err = alg.PopulateKey(nil)
-		// if err != nil {
-		// 	return
-		// }
-		// TODO Not supported!!!!!!!!!!!!!
+		// not allowed
 	} else {
-		key, err = read(cfg.Key, cfg.Buffer, true, cfg.Verbose)
+		key, err = read(cfg.Key, cfg.Buffer, alg.Type(), cfg.Verbose)
 		if err != nil {
 			return
 		}

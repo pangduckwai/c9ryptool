@@ -1,28 +1,21 @@
 package asym
 
 import (
-	"bufio"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"os"
 	"strings"
 )
 
-func readKey(path string) (
+func parseKey(k []byte) (
 	key any,
 	typ bool, // false - private key; true - public key
 	err error,
 ) {
-	red, err := os.ReadFile(path)
-	if err != nil {
-		return
-	}
-
 	errs := make([]error, 0)
-	pem, _ := pem.Decode(red)
+	pem, _ := pem.Decode(k)
 	key, err = x509.ParsePKCS8PrivateKey(pem.Bytes)
 	if err != nil {
 		errs = append(errs, err)
@@ -57,52 +50,34 @@ func readKey(path string) (
 	return
 }
 
-func generateRsaKey(lgth int, path string) (
-	key *rsa.PrivateKey,
-	err error,
-) {
-	key, err = rsa.GenerateKey(rand.Reader, lgth)
-	if err != nil {
-		return
-	}
-	buf, err := x509.MarshalPKCS8PrivateKey(key)
-	if err != nil {
-		return
-	}
-	pem := pem.EncodeToMemory(&pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: buf,
-	})
-	kfile, err := os.Create(path)
-	if err != nil {
-		return
-	}
-	wtr := bufio.NewWriter(kfile)
-	defer kfile.Close()
-	wtr.Write(pem)
-	wtr.Flush()
-	return
-}
-
-func readRsaKey(path string) (
+func getRsaKey(k []byte, lgth int) (
 	key *rsa.PrivateKey,
 	pkey *rsa.PublicKey,
 	err error,
 ) {
-	var ok bool
-	buf, typ, err := readKey(path)
-	if err != nil {
-		return
-	}
-	if !typ {
-		if key, ok = buf.(*rsa.PrivateKey); ok {
-			pkey = &key.PublicKey
-		} else {
-			err = fmt.Errorf("[RSA] casting to *rsa.PrivateKey failed")
+	if k == nil {
+		key, err = rsa.GenerateKey(rand.Reader, lgth)
+		if err != nil {
+			return
 		}
+		pkey = &key.PublicKey
 	} else {
-		if pkey, ok = buf.(*rsa.PublicKey); !ok {
-			err = fmt.Errorf("[RSA] casting to *rsa.PublicKey failed")
+		var ok, typ bool
+		var b any
+		b, typ, err = parseKey(k)
+		if err != nil {
+			return
+		}
+		if !typ {
+			if key, ok = b.(*rsa.PrivateKey); ok {
+				pkey = &key.PublicKey
+			} else {
+				err = fmt.Errorf("[RSA] casting to *rsa.PrivateKey failed")
+			}
+		} else {
+			if pkey, ok = b.(*rsa.PublicKey); !ok {
+				err = fmt.Errorf("[RSA] casting to *rsa.PublicKey failed")
+			}
 		}
 	}
 	return

@@ -10,31 +10,6 @@ import (
 	"sea9.org/go/cryptool/pkg/cryptool"
 )
 
-func run(cfg *cfgs.Config) (err error) {
-	err = cfgs.Validate(cfg)
-	if err != nil {
-		return
-	}
-
-	algr := algs.Get(algs.Parse(cfg.Algr))
-	if algr == nil {
-		err = fmt.Errorf(" unsupported algorithm '%v'", cfg.Algr)
-		return
-	}
-
-	switch cfg.Command {
-	case 0:
-		err = cryptool.Encrypt(cfg, algr)
-	case 1:
-		err = cryptool.Decrypt(cfg, algr)
-	}
-
-	if cfg.Verbose {
-		fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), algr.Name())
-	}
-	return
-}
-
 func main() {
 	cfg, err := cfgs.Parse(os.Args)
 	if err != nil {
@@ -45,7 +20,26 @@ func main() {
 	case 0:
 		fallthrough
 	case 1:
-		err = run(cfg)
+		err = cfgs.Validate(cfg)
+		if err != nil {
+			log.Fatalf("[MAIN]%v", err)
+		}
+
+		algr := algs.Get(algs.Parse(cfg.Algr))
+		if algr == nil {
+			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
+		}
+
+		switch cfg.Command {
+		case 0:
+			err = cryptool.Encrypt(cfg, algr)
+		case 1:
+			err = cryptool.Decrypt(cfg, algr)
+		}
+
+		if cfg.Verbose {
+			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), algr.Name())
+		}
 	case 2:
 		fmt.Printf("%v\n%v\n", cfgs.Desc(), cfgs.Help())
 	case 3:

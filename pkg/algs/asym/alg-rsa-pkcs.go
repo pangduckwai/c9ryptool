@@ -3,6 +3,8 @@ package asym
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 )
 
 /*
@@ -32,25 +34,20 @@ func (a *Rsa2048Pkcs1v15) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048Pkcs1v15) PopulateKey(typ int, str string) (err error) {
-	var key *rsa.PrivateKey
-	var pkey *rsa.PublicKey
-	switch typ {
-	case 0: // generate key
-		key, err = generateRsaKey(a.KeyLength(), str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = &key.PublicKey
-	case 1: // read key
-		key, pkey, err = readRsaKey(str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = pkey
+func (a *Rsa2048Pkcs1v15) Key() []byte {
+	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
+	if err != nil {
+		panic(err)
 	}
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: buf,
+	})
+	return pem
+}
+
+func (a *Rsa2048Pkcs1v15) PopulateKey(key []byte) (err error) {
+	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return
 }
 

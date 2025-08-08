@@ -23,6 +23,7 @@ func Validate(cfg *Config) (err error) {
 		if _, err = os.Stat(cfg.Input); errors.Is(err, os.ErrNotExist) {
 			errs = append(errs, fmt.Errorf("input file '%v' does not exist", cfg.Input))
 		} else if err != nil {
+			err = fmt.Errorf("[VLDT] %v", err)
 			return
 		}
 	}
@@ -31,6 +32,7 @@ func Validate(cfg *Config) (err error) {
 		if _, err = os.Stat(cfg.Output); err == nil {
 			errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Output))
 		} else if !errors.Is(err, os.ErrNotExist) {
+			err = fmt.Errorf("[VLDT] %v", err)
 			return
 		}
 	}
@@ -50,6 +52,7 @@ func Validate(cfg *Config) (err error) {
 				errs = append(errs, fmt.Errorf("key file '%v' does not exist", cfg.Key))
 			}
 		} else if err != nil {
+			err = fmt.Errorf("[VLDT] %v", err)
 			return
 		} else if cfg.Genkey {
 			errs = append(errs, fmt.Errorf("key file '%v' already exists", cfg.Key))

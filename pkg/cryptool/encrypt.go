@@ -10,14 +10,13 @@ func Encrypt(
 	cfg *cfgs.Config,
 	alg algs.Algorithm,
 ) (err error) {
-	var key, input, result []byte
+	var key, input, result, salt []byte
 
 	input, err = read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
 	if err != nil {
 		return
 	}
 
-	var salt []byte
 	if cfg.Passwd {
 		salt, err = sym.PopulateKeyFromPassword(
 			cfgs.Desc(),
@@ -33,12 +32,12 @@ func Encrypt(
 		if err != nil {
 			return
 		}
-		err = write(cfg.Key, true, alg.Key())
+		err = write(cfg.Key, alg.Type(), alg.Key())
 		if err != nil {
 			return
 		}
 	} else {
-		key, err = read(cfg.Key, cfg.Buffer, true, cfg.Verbose)
+		key, err = read(cfg.Key, cfg.Buffer, alg.Type(), cfg.Verbose)
 		if err != nil {
 			return
 		}

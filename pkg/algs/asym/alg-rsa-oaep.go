@@ -6,6 +6,8 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/sha512"
+	"crypto/x509"
+	"encoding/pem"
 )
 
 /*
@@ -35,25 +37,20 @@ func (a *Rsa2048OaepSha256) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha256) PopulateKey(typ int, str string) (err error) {
-	var key *rsa.PrivateKey
-	var pkey *rsa.PublicKey
-	switch typ {
-	case 0: // generate key
-		key, err = generateRsaKey(a.KeyLength(), str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = &key.PublicKey
-	case 1: // read key
-		key, pkey, err = readRsaKey(str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = pkey
+func (a *Rsa2048OaepSha256) Key() []byte {
+	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
+	if err != nil {
+		panic(err)
 	}
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: buf,
+	})
+	return pem
+}
+
+func (a *Rsa2048OaepSha256) PopulateKey(key []byte) (err error) {
+	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return
 }
 
@@ -84,25 +81,16 @@ func (a *Rsa2048OaepSha512) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha512) PopulateKey(typ int, str string) (err error) {
-	var key *rsa.PrivateKey
-	var pkey *rsa.PublicKey
-	switch typ {
-	case 0: // generate key
-		key, err = generateRsaKey(a.KeyLength(), str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = &key.PublicKey
-	case 1: // read key
-		key, pkey, err = readRsaKey(str)
-		if err != nil {
-			return
-		}
-		a.PrivateKey = key
-		a.PublicKey = pkey
+func (a *Rsa2048OaepSha512) Key() []byte {
+	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
+	if err != nil {
+		panic(err)
 	}
+	return buf
+}
+
+func (a *Rsa2048OaepSha512) PopulateKey(key []byte) (err error) {
+	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return
 }
 
@@ -130,22 +118,17 @@ func (a *Rsa4096OaepSha512) KeyLength() int {
 	return 4096
 }
 
-func (a *Rsa4096OaepSha512) PopulateKey(typ int, str string) (err error) {
-	var k *rsa.PrivateKey
-	switch typ {
-	case 0: // generate key
-		k, err = generateRsaKey(a.KeyLength(), str)
-		if err != nil {
-			return
-		}
-		a = (*Rsa4096OaepSha512)(k)
-	case 1: // read key
-		k, _, err = readRsaKey(str)
-		if err != nil {
-			return
-		}
-		a = (*Rsa4096OaepSha512)(k)
+func (a *Rsa4096OaepSha512) Key() []byte {
+	buf, err := x509.MarshalPKCS8PrivateKey(a)
+	if err != nil {
+		panic(err)
 	}
+	return buf
+}
+
+func (a *Rsa4096OaepSha512) PopulateKey(key []byte) (err error) {
+	k, _, err := getRsaKey(key, a.KeyLength())
+	a = (*Rsa4096OaepSha512)(k)
 	return
 }
 
