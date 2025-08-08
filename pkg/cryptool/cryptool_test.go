@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
-	cfgs "sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func TestRandom(t *testing.T) {

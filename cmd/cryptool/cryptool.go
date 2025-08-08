@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"sea9.org/go/cryptool/pkg/algs"
-	cfgs "sea9.org/go/cryptool/pkg/cfgs"
-	cryptool "sea9.org/go/cryptool/pkg/cryptool"
+	"sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/cryptool"
 )
 
 func run(cfg *cfgs.Config) (err error) {

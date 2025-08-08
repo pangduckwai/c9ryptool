@@ -3,7 +3,7 @@ package cryptool
 import (
 	"sea9.org/go/cryptool/pkg/algs"
 	"sea9.org/go/cryptool/pkg/algs/sym"
-	cfgs "sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func Encrypt(

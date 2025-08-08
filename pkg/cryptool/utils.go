@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	cfgs "sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/cfgs"
 )
 
 func read(
@@ -21,6 +21,7 @@ func read(
 	if cfg.Input != "" {
 		inp, err = os.Open(cfg.Input)
 		if err != nil {
+			err = fmt.Errorf("[READ] %v", err)
 			return
 		}
 		defer inp.Close()
@@ -70,7 +71,7 @@ func read(
 				break // Done
 			} else {
 				dat = nil
-				err = err1
+				err = fmt.Errorf("[READ] %v", err1)
 				return
 			}
 		}
@@ -78,7 +79,7 @@ func read(
 		if decode {
 			decoded, errr := base64.StdEncoding.DecodeString(string(buf[:cnt]))
 			if errr != nil {
-				err = errr
+				err = fmt.Errorf("[READ] %v", errr)
 				return
 			}
 			dat = append(dat[:len(dat)-off], decoded...)
@@ -101,6 +102,7 @@ func write(
 	if cfg.Output != "" {
 		out, err = os.Create(cfg.Output)
 		if err != nil {
+			err = fmt.Errorf("[WRITE] %v", err)
 			return
 		}
 		wtr = bufio.NewWriter(out)

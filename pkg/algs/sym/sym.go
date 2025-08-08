@@ -46,6 +46,7 @@ func PopulateKeyFromPassword(
 		salt = make([]byte, saltLen)
 		_, err = rand.Read(salt)
 		if err != nil {
+			err = fmt.Errorf("[PWD] %v", err)
 			return
 		}
 	}
@@ -56,10 +57,12 @@ func PopulateKeyFromPassword(
 	fmt.Print("Enter password: ")
 	str, err = rdr.ReadString('\n')
 	if err != nil {
+		err = fmt.Errorf("[PWD] %v", err)
 		return
 	}
 	key, err := scrypt.Key([]byte(str[:len(str)-1]), salt, N, R, P, keyLen)
 	if err != nil {
+		err = fmt.Errorf("[PWD] %v", err)
 		return
 	}
 	err = populate(2, string(key))
@@ -73,6 +76,7 @@ func Generate(lgth int) (result []byte, err error) {
 	_, err = rand.Read(result)
 	if err != nil {
 		result = nil
+		err = fmt.Errorf("[GEN] %v", err)
 	}
 	return
 }
@@ -85,10 +89,12 @@ func GenerateKey(path string, keyLen int) (
 ) {
 	key, err = Generate(keyLen)
 	if err != nil {
+		err = fmt.Errorf("[GENKEY]%v", err)
 		return
 	}
 	kfile, err := os.Create(path)
 	if err != nil {
+		err = fmt.Errorf("[GENKEY] %v", err)
 		return
 	}
 	wtr := bufio.NewWriter(kfile)
@@ -107,9 +113,13 @@ func ReadKey(
 ) {
 	kecd, err := os.ReadFile(path)
 	if err != nil {
+		err = fmt.Errorf("[READKEY] %v", err)
 		return
 	}
 	key, err = base64.StdEncoding.DecodeString(string(kecd))
+	if err != nil {
+		err = fmt.Errorf("[READKEY] %v", err)
+	}
 	return
 }
 
