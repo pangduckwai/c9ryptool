@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	algs "sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypt"
 	"sea9.org/go/cryptool/pkg/encrypt/sym"
 )
 
@@ -123,7 +123,7 @@ func Help() string {
 		"         generated key is used\n\n"+
 		" NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"         when inputting interactively from stdin",
-		algs.Default(),
+		encrypt.Default(),
 		sym.SALTLEN,
 		bUFFER/1024,
 	)
@@ -136,7 +136,7 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		// Algr:    algs.Default(),
+		// Algr:    encrypt.Default(),
 		Buffer:  bUFFER,
 		Passwd:  false,
 		SaltLen: sym.SALTLEN,

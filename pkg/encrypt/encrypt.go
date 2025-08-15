@@ -14,10 +14,10 @@ type Algorithm interface {
 	// Name algorithm name.
 	Name() string
 
-	// Type type of algs. 'true' is symmetric, false is asymmetric
+	// Type type of encryption algorithms. 'true' is symmetric, false is asymmetric
 	Type() bool
 
-	// KeyLength may be in bytes or bits, depends on algs.
+	// KeyLength may be in bytes or bits, depends on the algorithm.
 	KeyLength() int
 
 	// Key get key

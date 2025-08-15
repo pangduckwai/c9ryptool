@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	algs "sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypt"
 )
 
 // Validate validate parameters.
@@ -76,7 +76,7 @@ func Validate(cfg *Config) (err error) {
 			typ = 1
 		}
 
-		if err = algs.Validate(cfg.Algr, typ); err != nil {
+		if err = encrypt.Validate(cfg.Algr, typ); err != nil {
 			errs = append(errs, err)
 		}
 

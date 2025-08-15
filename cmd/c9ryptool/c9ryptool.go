@@ -7,13 +7,13 @@ import (
 
 	"sea9.org/go/cryptool/pkg/cfgs"
 	"sea9.org/go/cryptool/pkg/cryptool"
-	algs "sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypt"
 )
 
 func listCy() {
 	fmt.Println(cfgs.Desc())
-	for i, n := range algs.List() {
-		a := algs.Get(n)
+	for i, n := range encrypt.List() {
+		a := encrypt.Get(n)
 		if a.Type() {
 			fmt.Printf(" %2v sym  %v\n", i+1, n)
 		} else {
@@ -47,7 +47,7 @@ func main() {
 			return
 		}
 
-		algr := algs.Get(algs.Parse(cfg.Algr))
+		algr := encrypt.Get(encrypt.Parse(cfg.Algr))
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
