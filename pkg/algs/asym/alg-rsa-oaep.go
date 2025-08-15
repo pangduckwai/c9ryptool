@@ -54,12 +54,12 @@ func (a *Rsa2048OaepSha256) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Rsa2048OaepSha256) Encrypt(input []byte) ([]byte, error) {
-	return rsa.EncryptOAEP(sha256.New(), rand.Reader, a.PublicKey, input, nil)
+func (a *Rsa2048OaepSha256) Encrypt(input ...[]byte) ([]byte, error) {
+	return rsa.EncryptOAEP(sha256.New(), rand.Reader, a.PublicKey, input[0], nil)
 }
 
-func (a *Rsa2048OaepSha256) Decrypt(input []byte) ([]byte, error) {
-	return a.PrivateKey.Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA256})
+func (a *Rsa2048OaepSha256) Decrypt(input ...[]byte) ([]byte, error) {
+	return a.PrivateKey.Decrypt(rand.Reader, input[0], &rsa.OAEPOptions{Hash: crypto.SHA256})
 }
 
 // //////////////////// //
@@ -94,12 +94,12 @@ func (a *Rsa2048OaepSha512) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Rsa2048OaepSha512) Encrypt(input []byte) ([]byte, error) {
-	return rsa.EncryptOAEP(sha512.New(), rand.Reader, a.PublicKey, input, nil)
+func (a *Rsa2048OaepSha512) Encrypt(input ...[]byte) ([]byte, error) {
+	return rsa.EncryptOAEP(sha512.New(), rand.Reader, a.PublicKey, input[0], nil)
 }
 
-func (a *Rsa2048OaepSha512) Decrypt(input []byte) ([]byte, error) {
-	return a.PrivateKey.Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA512})
+func (a *Rsa2048OaepSha512) Decrypt(input ...[]byte) ([]byte, error) {
+	return a.PrivateKey.Decrypt(rand.Reader, input[0], &rsa.OAEPOptions{Hash: crypto.SHA512})
 }
 
 // //////////////////// //
@@ -132,10 +132,10 @@ func (a *Rsa4096OaepSha512) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Rsa4096OaepSha512) Encrypt(input []byte) ([]byte, error) {
-	return rsa.EncryptOAEP(sha512.New(), rand.Reader, &a.PublicKey, input, nil)
+func (a *Rsa4096OaepSha512) Encrypt(input ...[]byte) ([]byte, error) {
+	return rsa.EncryptOAEP(sha512.New(), rand.Reader, &a.PublicKey, input[0], nil)
 }
 
-func (a *Rsa4096OaepSha512) Decrypt(input []byte) ([]byte, error) {
-	return ((*rsa.PrivateKey)(a)).Decrypt(rand.Reader, input, &rsa.OAEPOptions{Hash: crypto.SHA512})
+func (a *Rsa4096OaepSha512) Decrypt(input ...[]byte) ([]byte, error) {
+	return ((*rsa.PrivateKey)(a)).Decrypt(rand.Reader, input[0], &rsa.OAEPOptions{Hash: crypto.SHA512})
 }

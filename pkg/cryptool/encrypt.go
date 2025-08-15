@@ -37,12 +37,12 @@ func Encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		err = write(cfg.Key, alg.Type(), alg.Key())
+		err = write(cfg.Key, false, alg.Key())
 		if err != nil {
 			return
 		}
 	} else {
-		key, err = read(cfg.Key, cfg.Buffer, alg.Type(), cfg.Verbose)
+		key, err = read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
@@ -54,7 +54,7 @@ func Encrypt(
 		}
 	}
 
-	result, err = alg.Encrypt(input)
+	result, err = alg.Encrypt(input, cfg.Iv)
 	if err != nil {
 		err = fmt.Errorf("[ECY]%v", err)
 		return

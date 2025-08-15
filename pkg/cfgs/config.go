@@ -2,6 +2,7 @@ package cfgs
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -27,7 +28,7 @@ type Config struct {
 }
 
 func Version() string {
-	return "v0.6.0a b2025081512"
+	return "v0.6.0 b2025081516"
 }
 
 func Desc() string {
@@ -40,7 +41,7 @@ func Usage() string {
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-k FILE | --key=FILE}\n" +
-		"   {--iv=IV | --iv-enc=IV-ENC}\n" +
+		"   {--iv=IV | --iv-b64=IV-B64 | --iv-hex=IV-HEX}\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {--salt=LEN}\n" +
@@ -61,18 +62,27 @@ func Help() string {
 		"       encryption algorithm to use, default: '%v'\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
+		"        1. for encryption, the input plaintext is not decoded\n"+
+		"        2. for decryption, the input ciphertext is base64 decoded\n"+
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
+		"        1. for encryption, the output ciphertext is base64 encoded\n"+
+		"        2. for decryption, the output plaintext is not encoded\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       path of the file containing the encryption key\n"+
+		"        - key files are not decoded when read, nor encoded when written\n"+
 		"    --iv=IV\n"+
-		"       initialization vector in hex encoded string, if omitted:\n"+
-		"        1. encryption - auto-generate and concat at the begining the cipher text\n"+
-		"        2. decryption - read from the begining of the cipher text\n"+
-		"    --iv-enc=IV-ENC\n"+
-		"       initialization vector in base64 encoded string\n"+
-		"        1. encryption - auto-generate and concat at the begining the cipher text before base64 encoding\n"+
-		"        2. decryption - read from the begining of the cipher text after base64 decoding\n"+
+		"       initialization vector as string, if omitted:\n"+
+		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
+		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
+		"    --iv-b64=IV-B64\n"+
+		"       initialization vector as base64 encoded string, if omitted:\n"+
+		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
+		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
+		"    --iv-hex=IV-HEX\n"+
+		"       initialization vector as hex encoded string, if omitted:\n"+
+		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
+		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
@@ -107,16 +117,16 @@ func Parse(args []string) (cfg *Config, err error) {
 		Verbose: false,
 	}
 
-	switch args[1][0:1] {
-	case "e":
+	switch {
+	case strings.HasPrefix(args[1], "e"):
 		cfg.Command = 0
-	case "d":
+	case strings.HasPrefix(args[1], "d"):
 		cfg.Command = 1
-	case "a":
+	case strings.HasPrefix(args[1], "a"):
 		cfg.Command = 7
-	case "h":
+	case strings.HasPrefix(args[1], "h"):
 		cfg.Command = 8
-	case "v":
+	case strings.HasPrefix(args[1], "v"):
 		cfg.Command = 9
 	default:
 		err = fmt.Errorf("[CONF] Invalid command '%v'", args[1])
@@ -216,12 +226,22 @@ func Parse(args []string) (cfg *Config, err error) {
 			} else {
 				cfg.Iv = []byte(args[i][5:])
 			}
-		case strings.HasPrefix(args[i], "--iv-enc="):
+		case strings.HasPrefix(args[i], "--iv-b64="):
 			if len(args[i]) <= 9 {
 				err = fmt.Errorf("[CONF] Missing IV value")
 				return
 			} else {
 				cfg.Iv, err = base64.StdEncoding.DecodeString(args[i][9:])
+				if err != nil {
+					err = fmt.Errorf("[CONF] %v", err)
+				}
+			}
+		case strings.HasPrefix(args[i], "--iv-hex="):
+			if len(args[i]) <= 9 {
+				err = fmt.Errorf("[CONF] Missing IV value")
+				return
+			} else {
+				cfg.Iv, err = hex.DecodeString(args[i][9:])
 				if err != nil {
 					err = fmt.Errorf("[CONF] %v", err)
 				}

@@ -26,11 +26,11 @@ type Algorithm interface {
 	// PopulateKey populate key for the algorithm to use. If input byte slice is empty, a new key is generated.
 	PopulateKey([]byte) error
 
-	// Encrypt encrypt the given parameter, returns the encrypted result.
-	Encrypt([]byte) ([]byte, error)
+	// Encrypt encrypt the given parameters (plain-text and IV respectively), returns the encrypted result.
+	Encrypt(...[]byte) ([]byte, error)
 
-	// Decrypt decrypt the given parameter, returns the decrypted result.
-	Decrypt([]byte) ([]byte, error)
+	// Decrypt decrypt the given parameters (plain-text and IV respectively), returns the decrypted result.
+	Decrypt(...[]byte) ([]byte, error)
 }
 
 var aLGORITHMS = map[string]Algorithm{

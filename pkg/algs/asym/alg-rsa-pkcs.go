@@ -51,10 +51,10 @@ func (a *Rsa2048Pkcs1v15) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Rsa2048Pkcs1v15) Encrypt(input []byte) ([]byte, error) {
-	return rsa.EncryptPKCS1v15(rand.Reader, a.PublicKey, input)
+func (a *Rsa2048Pkcs1v15) Encrypt(input ...[]byte) ([]byte, error) {
+	return rsa.EncryptPKCS1v15(rand.Reader, a.PublicKey, input[0])
 }
 
-func (a *Rsa2048Pkcs1v15) Decrypt(input []byte) ([]byte, error) {
-	return rsa.DecryptPKCS1v15(rand.Reader, a.PrivateKey, input)
+func (a *Rsa2048Pkcs1v15) Decrypt(input ...[]byte) ([]byte, error) {
+	return rsa.DecryptPKCS1v15(rand.Reader, a.PrivateKey, input[0])
 }

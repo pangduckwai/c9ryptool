@@ -1,6 +1,7 @@
 package sym
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 func encryptAesGcm(
 	key []byte,
 	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -28,9 +30,11 @@ func encryptAesGcm(
 		return
 	}
 
-	iv, err := Generate(gcm.NonceSize())
-	if err != nil {
-		return
+	if iv == nil {
+		iv, err = Generate(gcm.NonceSize())
+		if err != nil {
+			return
+		}
 	}
 
 	result = gcm.Seal(iv, iv, input, nil)
@@ -40,6 +44,7 @@ func encryptAesGcm(
 func decryptAesGcm(
 	key []byte,
 	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -59,8 +64,16 @@ func decryptAesGcm(
 		return
 	}
 
-	iv := input[:gcm.NonceSize()]
-	txt := input[gcm.NonceSize():]
+	var txt []byte
+	if iv == nil {
+		iv, txt = input[:gcm.NonceSize()], input[gcm.NonceSize():]
+	} else {
+		if bytes.Index(input, iv) == 0 {
+			txt = input[len(iv):]
+		} else {
+			txt = input
+		}
+	}
 
 	result, err = gcm.Open(nil, iv, txt, nil)
 	return
@@ -88,19 +101,27 @@ func (a *AesGcm128) Key() []byte {
 
 func (a *AesGcm128) PopulateKey(key []byte) (err error) {
 	if key == nil {
-		*a, err = GenerateKey(a.KeyLength())
+		*a, err = Generate(a.KeyLength())
 	} else {
 		*a = key
 	}
 	return
 }
 
-func (a *AesGcm128) Encrypt(input []byte) ([]byte, error) {
-	return encryptAesGcm(*a, input)
+func (a *AesGcm128) Encrypt(input ...[]byte) ([]byte, error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return encryptAesGcm(*a, input[0], iv)
 }
 
-func (a *AesGcm128) Decrypt(input []byte) (result []byte, err error) {
-	return decryptAesGcm(*a, input)
+func (a *AesGcm128) Decrypt(input ...[]byte) (result []byte, err error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return decryptAesGcm(*a, input[0], iv)
 }
 
 // /////////// //
@@ -125,19 +146,27 @@ func (a *AesGcm192) Key() []byte {
 
 func (a *AesGcm192) PopulateKey(key []byte) (err error) {
 	if key == nil {
-		*a, err = GenerateKey(a.KeyLength())
+		*a, err = Generate(a.KeyLength())
 	} else {
 		*a = key
 	}
 	return
 }
 
-func (a *AesGcm192) Encrypt(input []byte) ([]byte, error) {
-	return encryptAesGcm(*a, input)
+func (a *AesGcm192) Encrypt(input ...[]byte) ([]byte, error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return encryptAesGcm(*a, input[0], iv)
 }
 
-func (a *AesGcm192) Decrypt(input []byte) (result []byte, err error) {
-	return decryptAesGcm(*a, input)
+func (a *AesGcm192) Decrypt(input ...[]byte) (result []byte, err error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return decryptAesGcm(*a, input[0], iv)
 }
 
 // /////////// //
@@ -162,17 +191,25 @@ func (a *AesGcm256) Key() []byte {
 
 func (a *AesGcm256) PopulateKey(key []byte) (err error) {
 	if key == nil {
-		*a, err = GenerateKey(a.KeyLength())
+		*a, err = Generate(a.KeyLength())
 	} else {
 		*a = key
 	}
 	return
 }
 
-func (a *AesGcm256) Encrypt(input []byte) ([]byte, error) {
-	return encryptAesGcm(*a, input)
+func (a *AesGcm256) Encrypt(input ...[]byte) ([]byte, error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return encryptAesGcm(*a, input[0], iv)
 }
 
-func (a *AesGcm256) Decrypt(input []byte) (result []byte, err error) {
-	return decryptAesGcm(*a, input)
+func (a *AesGcm256) Decrypt(input ...[]byte) (result []byte, err error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return decryptAesGcm(*a, input[0], iv)
 }

@@ -1,6 +1,7 @@
 package sym
 
 import (
+	"bytes"
 	"fmt"
 
 	"golang.org/x/crypto/chacha20poly1305"
@@ -9,6 +10,7 @@ import (
 func encryptChacha20Poly1305(
 	key []byte,
 	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -23,9 +25,11 @@ func encryptChacha20Poly1305(
 		return
 	}
 
-	iv, err := Generate(aead.NonceSize())
-	if err != nil {
-		return
+	if iv == nil {
+		iv, err = Generate(aead.NonceSize())
+		if err != nil {
+			return
+		}
 	}
 
 	result = aead.Seal(iv, iv, input, nil)
@@ -35,6 +39,7 @@ func encryptChacha20Poly1305(
 func decryptChacha20Poly1305(
 	key []byte,
 	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -49,7 +54,17 @@ func decryptChacha20Poly1305(
 		return
 	}
 
-	iv, txt := input[:aead.NonceSize()], input[aead.NonceSize():]
+	var txt []byte
+	if iv == nil {
+		iv, txt = input[:aead.NonceSize()], input[aead.NonceSize():]
+	} else {
+		if bytes.Index(input, iv) == 0 {
+			txt = input[len(iv):]
+		} else {
+			txt = input
+		}
+	}
+
 	result, err = aead.Open(nil, iv, txt, nil)
 	return
 }
@@ -76,17 +91,25 @@ func (a *ChaCha20Poly1305) Key() []byte {
 
 func (a *ChaCha20Poly1305) PopulateKey(key []byte) (err error) {
 	if key == nil {
-		*a, err = GenerateKey(a.KeyLength())
+		*a, err = Generate(a.KeyLength())
 	} else {
 		*a = key
 	}
 	return
 }
 
-func (a *ChaCha20Poly1305) Encrypt(input []byte) ([]byte, error) {
-	return encryptChacha20Poly1305(*a, input)
+func (a *ChaCha20Poly1305) Encrypt(input ...[]byte) ([]byte, error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return encryptChacha20Poly1305(*a, input[0], iv)
 }
 
-func (a *ChaCha20Poly1305) Decrypt(input []byte) (result []byte, err error) {
-	return decryptChacha20Poly1305(*a, input)
+func (a *ChaCha20Poly1305) Decrypt(input ...[]byte) (result []byte, err error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return decryptChacha20Poly1305(*a, input[0], iv)
 }

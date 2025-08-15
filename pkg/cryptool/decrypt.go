@@ -34,7 +34,7 @@ func Decrypt(
 	} else if cfg.Genkey {
 		// not allowed
 	} else {
-		key, err = read(cfg.Key, cfg.Buffer, alg.Type(), cfg.Verbose)
+		key, err = read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
@@ -47,9 +47,9 @@ func Decrypt(
 	}
 
 	if salt != nil {
-		result, err = alg.Decrypt(input[:len(input)-len(salt)-1])
+		result, err = alg.Decrypt(input[:len(input)-len(salt)-1], cfg.Iv)
 	} else {
-		result, err = alg.Decrypt(input)
+		result, err = alg.Decrypt(input, cfg.Iv)
 	}
 	if err != nil {
 		err = fmt.Errorf("[DCY]%v", err)

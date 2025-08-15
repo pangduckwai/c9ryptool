@@ -1,6 +1,7 @@
 package sym
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 func encryptAesCbc(
 	key []byte,
 	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -28,11 +30,13 @@ func encryptAesCbc(
 		return
 	}
 
-	// iv, err := Generate(aes.BlockSize)
-	// if err != nil {
-	// 	return
-	// }
-	iv := []byte("ed029dfc4939dedb")
+	if iv == nil {
+		fmt.Printf("TEMP!!! GEN\n")
+		iv, err = Generate(aes.BlockSize)
+		if err != nil {
+			return
+		}
+	}
 
 	cbc := cipher.NewCBCEncrypter(block, iv)
 
@@ -40,14 +44,14 @@ func encryptAesCbc(
 	result = append(result, iv...)
 	cbc.CryptBlocks(result[aes.BlockSize:], input)
 
-	// TODO HERE!!! ciphertexts must be authenticated to be secure
-	fmt.Printf("TEMP!!! %v\nIV:\n%s\n\nCIPHER:\n%s\n", padSize, iv, result[aes.BlockSize:])
+	fmt.Printf("TEMP!!! %v\nIV:\n%s\n\nCIPHER:\n%s\n", padSize, iv, result[aes.BlockSize:]) // TODO HERE!!! ciphertexts must be authenticated to be secure
 	return
 }
 
 func decryptAesCbc(
 	key []byte,
-	txt []byte,
+	input []byte,
+	iv []byte,
 ) (
 	result []byte,
 	err error,
@@ -68,12 +72,19 @@ func decryptAesCbc(
 		return
 	}
 
-	// iv := input[:aes.BlockSize]
-	iv := []byte("ed029dfc4939dedb")
-	// txt := input[aes.BlockSize:]
-
-	//ed029dfc4939dedbz7chD4VCurG2fbKb7z1ChhNn98+q3GlmU1CydO2CcpfFK/katC5vBZ+yReR4W+/myfyGT4/oioBw3RT1b9gITZpe8JSCerA0cKC3B6npQe1QADYjm1Uu8BDefgu7G4zQjSg7SkLDUqIi/GK1aOITD9X1jCPNC/iOEVqew5sdI1nohWaZ1JcOi3llEMqD1pixpMZCe3pLD0F50PW5cZXxKw==
-	//{"id":"036ec720-46ab-4bdd-bc19-a55544db9e6c","type":"Diagnostic","status":"Pinged","updateTime":{"t":1754622429,"humanT":"2025-08-08 11:07:09"}}
+	var txt []byte
+	if iv == nil {
+		iv = input[:aes.BlockSize]
+		txt = input[aes.BlockSize:]
+	} else {
+		if bytes.Index(input, iv) == 0 {
+			fmt.Printf("TEMP!!! YES\n")
+			txt = input[len(iv):]
+		} else {
+			fmt.Printf("TEMP!!! NOOOO\n")
+			txt = input[:]
+		}
+	}
 	fmt.Printf("TEMP!!! Block size: %v\n", aes.BlockSize)
 	fmt.Printf("TEMP!!! IV  (%3v): '%s'\n", len(iv), iv)
 	fmt.Printf("TEMP!!! In  (%3v): '%s'\n", len(txt), txt)
@@ -120,17 +131,25 @@ func (a *AesCbc256) Key() []byte {
 
 func (a *AesCbc256) PopulateKey(key []byte) (err error) {
 	if key == nil {
-		*a, err = GenerateKey(a.KeyLength())
+		*a, err = Generate(a.KeyLength())
 	} else {
 		*a = key
 	}
 	return
 }
 
-func (a *AesCbc256) Encrypt(input []byte) ([]byte, error) {
-	return encryptAesCbc(*a, input)
+func (a *AesCbc256) Encrypt(input ...[]byte) ([]byte, error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return encryptAesCbc(*a, input[0], iv)
 }
 
-func (a *AesCbc256) Decrypt(input []byte) (result []byte, err error) {
-	return decryptAesCbc(*a, input)
+func (a *AesCbc256) Decrypt(input ...[]byte) (result []byte, err error) {
+	var iv []byte
+	if len(input) > 1 {
+		iv = input[1]
+	}
+	return decryptAesCbc(*a, input[0], iv)
 }
