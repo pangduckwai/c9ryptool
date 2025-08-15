@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"sea9.org/go/cryptool/pkg/encrypt"
@@ -95,4 +96,48 @@ func Validate(cfg *Config) (err error) {
 		err = fmt.Errorf("[VLDT]%v\n]", buf.String())
 	}
 	return
+}
+
+func cmdMatch(inp string) (int, string, error) {
+	fltr := make([]int, 0)
+	li := len(inp)
+
+	for i, cmd := range COMMANDS {
+		lc := len(cmd)
+		if li == lc {
+			if inp == cmd {
+				fltr = append(fltr, i)
+			}
+		} else if li < lc {
+			if strings.Contains(cmd, inp) {
+				fltr = append(fltr, i)
+			}
+		}
+	}
+
+	lf := len(fltr)
+	if lf == 1 {
+		return fltr[0], COMMANDS[fltr[0]], nil
+	} else if lf > 1 {
+		return -3, "", fmt.Errorf("'%v' ambiguously matched to '%v' and '%v'", inp, COMMANDS[fltr[0]], COMMANDS[fltr[1]])
+	} else {
+		var pstr string
+		for _, r := range inp {
+			pstr = fmt.Sprintf("%v.*%c", pstr, r)
+		}
+		var pttn = regexp.MustCompile(fmt.Sprintf("%v.*", pstr))
+
+		for i, cmd := range COMMANDS {
+			if pttn.MatchString(cmd) {
+				fltr = append(fltr, i)
+			}
+		}
+		lf = len(fltr)
+		if lf == 1 {
+			return fltr[0], COMMANDS[fltr[0]], nil
+		} else if lf > 1 {
+			return -2, "", fmt.Errorf("'%v' ambiguously matched to '%v' and '%v'", inp, COMMANDS[fltr[0]], COMMANDS[fltr[1]])
+		}
+		return -1, "", nil
+	}
 }

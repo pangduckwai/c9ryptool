@@ -82,19 +82,3 @@ func TestRead(t *testing.T) {
 	}
 	fmt.Printf("TestRead():\n%v\n", string(buff))
 }
-
-const MASK_LIST = 128
-const MASK_FLAG = 127
-
-func TestBitwise(t *testing.T) {
-	var a0 uint8 = 0
-	var a1 uint8 = 1
-	var a2 uint8 = 2
-	var a3 uint8 = 3
-	a0 |= MASK_LIST
-	a2 |= MASK_LIST
-	fmt.Printf("TestBitwise() 0: %3v - %v %v\n", a0, a0&MASK_FLAG, a0&MASK_LIST > 0)
-	fmt.Printf("TestBitwise() 1: %3v - %v %v\n", a1, a1&MASK_FLAG, a1&MASK_LIST > 0)
-	fmt.Printf("TestBitwise() 2: %3v - %v %v\n", a2, a2&MASK_FLAG, a2&MASK_LIST > 0)
-	fmt.Printf("TestBitwise() 3: %3v - %v %v\n", a3, a3&MASK_FLAG, a3&MASK_LIST > 0)
-}

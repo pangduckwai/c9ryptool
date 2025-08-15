@@ -75,9 +75,9 @@ func main() {
 			return
 		}
 
-	case 8:
+	case 5:
 		fmt.Printf("%v\n%v\n", cfgs.Desc(), cfgs.Help())
-	case 9:
+	case 6:
 		fmt.Println(cfgs.Desc())
 	default:
 		err = fmt.Errorf(" unknown command '%v'", cfg.Command())

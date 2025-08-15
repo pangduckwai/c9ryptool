@@ -129,6 +129,16 @@ func Help() string {
 	)
 }
 
+var COMMANDS = []string{
+	"encrypt",
+	"decrypt",
+	"encode",
+	"decode",
+	"hash",
+	"help",
+	"version",
+}
+
 func Parse(args []string) (cfg *Config, err error) {
 	if len(args) < 2 {
 		err = fmt.Errorf("[CONF] Command missing")
@@ -136,29 +146,31 @@ func Parse(args []string) (cfg *Config, err error) {
 	}
 
 	cfg = &Config{
-		// Algr:    encrypt.Default(),
 		Buffer:  bUFFER,
 		Passwd:  false,
 		SaltLen: sym.SALTLEN,
 		Verbose: false,
 	}
 
-	switch {
-	case strings.HasPrefix(args[1], "encr"):
-		cfg.cmd = 0
-	case strings.HasPrefix(args[1], "decr"):
-		cfg.cmd = 1
-	case strings.HasPrefix(args[1], "enco"):
-		cfg.cmd = 2
-	case strings.HasPrefix(args[1], "deco"):
-		cfg.cmd = 3
-	case strings.HasPrefix(args[1], "h"):
-		cfg.cmd = 8
-	case strings.HasPrefix(args[1], "v"):
-		cfg.cmd = 9
-	default:
+	idx, _, err := cmdMatch(args[1])
+	if err != nil {
+		err = fmt.Errorf("[CONF] %v", err)
+		return
+	} else if idx < 0 {
 		err = fmt.Errorf("[CONF] Invalid command '%v'", args[1])
 		return
+	}
+	cfg.cmd = uint8(idx)
+
+	switch cfg.cmd {
+	case 0:
+		fallthrough
+	case 1:
+		cfg.Algr = encrypt.Default()
+	case 2:
+		fallthrough
+	case 3:
+		cfg.Algr = "TEMP" // TODO TEMP!!!!!!!!
 	}
 
 	var val int
