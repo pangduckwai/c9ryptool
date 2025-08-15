@@ -72,7 +72,7 @@ func Help() string {
 		"       path of the file containing the encryption key\n"+
 		"        - key files are not decoded when read, nor encoded when written\n"+
 		"    --iv=IV\n"+
-		"       initialization vector as string, if omitted:\n"+
+		"       initialization vector as 'base256 enocded' string, if omitted:\n"+
 		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
 		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
 		"    --iv-b64=IV-B64\n"+

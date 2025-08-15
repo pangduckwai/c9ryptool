@@ -18,13 +18,16 @@ A simple encryption tool
 | 1<sup>st</sup> form | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | `ALGR` is the name of the encryption algorithm to use |
-| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
-| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
-| `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key |
-| `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
-| - | `--salt=LEN` | `LEN` is the length of salt to use for generating keys from password |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin<br/>1. for encryption, the input plaintext is not decoded<br/>2. for decryption, the input ciphertext is base64 decoded |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout<br/>1. for encryption, the output ciphertext is base64 encoded<br/>2. for decryption, the output plaintext is not encoded |
+| `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key<br/>- key files are not decoded when read, nor encoded when written |
+| - | `--iv=IV` | `IV` is the initialization vector _in base256 encoding_, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
+| - | `--iv-b64=IV` | `IV` is the initialization vector in base64 encoding, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
+| - | `--iv-hex=IV` | `IV` is the initialization vector in hex endocing, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
 | `-g` | `--generate` | generate a new encrytpion key |
 | `-p` | `--password` | indicate a password is input interactively |
+| - | `--salt=LEN` | `LEN` is the length of salt to use for generating keys from password |
+| `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## console input
