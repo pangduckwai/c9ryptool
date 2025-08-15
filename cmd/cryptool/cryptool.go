@@ -40,11 +40,7 @@ func main() {
 		if cfg.Verbose {
 			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), algr.Name())
 		}
-	case 2:
-		fmt.Printf("%v\n%v\n", cfgs.Desc(), cfgs.Help())
-	case 3:
-		fmt.Println(cfgs.Desc())
-	case 4:
+	case 7:
 		fmt.Println(cfgs.Desc())
 		for i, n := range algs.List() {
 			a := algs.Get(n)
@@ -54,6 +50,10 @@ func main() {
 				fmt.Printf(" %2v asym %v\n", i+1, n)
 			}
 		}
+	case 8:
+		fmt.Printf("%v\n%v\n", cfgs.Desc(), cfgs.Help())
+	case 9:
+		fmt.Println(cfgs.Desc())
 	default:
 		err = fmt.Errorf(" unknown command '%v'", cfg.Command)
 	}

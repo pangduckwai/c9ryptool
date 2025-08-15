@@ -86,7 +86,6 @@ func read(
 			dat = append(dat[:len(dat)-off], buf[:cnt]...)
 		}
 		err1 = err
-		// fmt.Printf("TEMP!!! cnt:%3v off:%3v '%v'\n", cnt, off, string(buf[:cnt]))
 	}
 	return
 }

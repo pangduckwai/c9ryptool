@@ -1,6 +1,8 @@
 package cryptool
 
 import (
+	"fmt"
+
 	"sea9.org/go/cryptool/pkg/algs"
 	"sea9.org/go/cryptool/pkg/algs/sym"
 	"sea9.org/go/cryptool/pkg/cfgs"
@@ -14,6 +16,7 @@ func Encrypt(
 
 	input, err = read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
 	if err != nil {
+		err = fmt.Errorf("[ECY][INP]%v", err)
 		return
 	}
 
@@ -25,11 +28,13 @@ func Encrypt(
 			alg.PopulateKey,
 		)
 		if err != nil {
+			err = fmt.Errorf("[ECY][PWD]%v", err)
 			return
 		}
 	} else if cfg.Genkey {
 		err = alg.PopulateKey(nil)
 		if err != nil {
+			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
 		err = write(cfg.Key, alg.Type(), alg.Key())
@@ -39,16 +44,19 @@ func Encrypt(
 	} else {
 		key, err = read(cfg.Key, cfg.Buffer, alg.Type(), cfg.Verbose)
 		if err != nil {
+			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
 		}
 		err = alg.PopulateKey(key)
 		if err != nil {
+			err = fmt.Errorf("[ECY][POP]%v", err)
 			return
 		}
 	}
 
 	result, err = alg.Encrypt(input)
 	if err != nil {
+		err = fmt.Errorf("[ECY]%v", err)
 		return
 	}
 
@@ -57,5 +65,8 @@ func Encrypt(
 		result = append(result, salt...)
 	}
 	err = write(cfg.Output, true, result)
+	if err != nil {
+		err = fmt.Errorf("[ECY][OUT]%v", err)
+	}
 	return
 }

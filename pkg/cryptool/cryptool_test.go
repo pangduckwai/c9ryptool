@@ -19,14 +19,14 @@ func TestRandom(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TestRandom() %v", err)
 	}
-	enc := base64.StdEncoding.EncodeToString(key)
-	dec, err := base64.StdEncoding.DecodeString(enc)
+	ecd := base64.StdEncoding.EncodeToString(key)
+	dcd, err := base64.StdEncoding.DecodeString(ecd)
 	if err != nil {
 		t.Fatalf("TestRandom() %v", err)
 	}
-	fmt.Printf("TestRandom() %3v - %v\n", x, enc)
+	fmt.Printf("TestRandom() %3v - %v\n", x, ecd)
 	fmt.Printf("TestRandom() %3v - %v\n", x, key)
-	fmt.Printf("TestRandom() %3v - %v\n", x, dec)
+	fmt.Printf("TestRandom() %3v - %v\n", x, dcd)
 }
 
 func TestScrypt(t *testing.T) {
