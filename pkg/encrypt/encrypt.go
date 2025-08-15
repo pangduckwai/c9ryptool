@@ -1,4 +1,4 @@
-package algs
+package encrypt
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strconv"
 
-	"sea9.org/go/cryptool/pkg/algs/asym"
-	"sea9.org/go/cryptool/pkg/algs/sym"
+	"sea9.org/go/cryptool/pkg/encrypt/asym"
+	"sea9.org/go/cryptool/pkg/encrypt/sym"
 )
 
 type Algorithm interface {

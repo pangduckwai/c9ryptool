@@ -1,4 +1,4 @@
-package algs
+package encrypt
 
 import (
 	"fmt"

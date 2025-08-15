@@ -3,14 +3,14 @@ package cryptool
 import (
 	"fmt"
 
-	"sea9.org/go/cryptool/pkg/algs"
-	"sea9.org/go/cryptool/pkg/algs/sym"
 	"sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypt/sym"
 )
 
 func Encrypt(
 	cfg *cfgs.Config,
-	alg algs.Algorithm,
+	alg encrypt.Algorithm,
 ) (err error) {
 	var key, input, result, salt []byte
 
