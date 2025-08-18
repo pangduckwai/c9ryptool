@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
 )
 
@@ -84,7 +85,9 @@ func Validate(cfg *Config) (err error) {
 	case 2:
 		fallthrough
 	case 3:
-		// TODO
+		if err = encodes.Validate(cfg.Algr); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	if len(errs) > 0 {

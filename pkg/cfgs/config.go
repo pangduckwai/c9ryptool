@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
 	"sea9.org/go/cryptool/pkg/encrypts/sym"
 )
@@ -39,7 +40,7 @@ func (cfg *Config) Command() uint8 {
 }
 
 func Version() string {
-	return "v0.6.1 b2025081815"
+	return "v0.7.0 b2025081819"
 }
 
 func Desc() string {
@@ -170,7 +171,7 @@ func Parse(args []string) (cfg *Config, err error) {
 	case 2:
 		fallthrough
 	case 3:
-		cfg.Algr = "TEMP" // TODO TEMP!!!!!!!!
+		cfg.Algr = encodes.Default()
 	}
 
 	var val int

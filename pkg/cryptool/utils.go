@@ -12,7 +12,7 @@ func BufferedRead(
 	rdr *bufio.Reader,
 	size int,
 	isStd bool,
-	action func([]byte),
+	action func(int, []byte),
 ) (
 	err error,
 ) {
@@ -33,7 +33,7 @@ func BufferedRead(
 		}
 
 		if cnt > 0 {
-			action(buf[:cnt])
+			action(cnt, buf[:cnt])
 		}
 	}
 
@@ -71,12 +71,12 @@ func Read(
 	}
 
 	dat = make([]byte, 0, buffer*2)
-	err = BufferedRead(rdr, buffer, path == "", func(buf []byte) {
+	err = BufferedRead(rdr, buffer, path == "", func(cnt int, buf []byte) {
 		if decode {
 			decoded, errr := base64.StdEncoding.DecodeString(string(buf))
 			if errr != nil {
 				err = fmt.Errorf("[READ] %v", errr)
-				panic(err)
+				return
 			}
 			dat = append(dat, decoded...)
 		} else {

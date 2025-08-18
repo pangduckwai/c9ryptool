@@ -70,9 +70,9 @@ var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{
 func Validate(algr string, typ int) (err error) {
 	real := Parse(algr)
 	if real == "" {
-		err = fmt.Errorf("[ALGR] invalid encryption algorithm name pattern '%v'", algr)
+		err = fmt.Errorf("[ENCR] invalid encryption algorithm name pattern '%v'", algr)
 	} else if alg, okay := aLGORITHMS[real]; !okay {
-		err = fmt.Errorf("[ALGR] unsupported encryption algorithm '%v'", real)
+		err = fmt.Errorf("[ENCR] unsupported encryption algorithm '%v'", real)
 	} else if (typ < 0 && alg.Type()) || (typ > 0 && !alg.Type()) {
 		art := "a"
 		pfx := ""
@@ -80,7 +80,7 @@ func Validate(algr string, typ int) (err error) {
 			art = "an"
 			pfx = "a"
 		}
-		err = fmt.Errorf("[ALGR] %v is not %v %vsymmetric algorithm as expected", alg.Name(), art, pfx)
+		err = fmt.Errorf("[ENCR] %v is not %v %vsymmetric algorithm as expected", alg.Name(), art, pfx)
 	}
 	return
 }

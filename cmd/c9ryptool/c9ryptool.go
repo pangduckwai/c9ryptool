@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
 )
 
@@ -41,13 +42,11 @@ func main() {
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
-
 		if cfg.Command() == 0 {
 			err = encrypt(cfg, algr)
 		} else {
 			err = decrypt(cfg, algr)
 		}
-
 		if cfg.Verbose {
 			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), algr.Name())
 		}
@@ -62,8 +61,23 @@ func main() {
 
 		if cfg.IsList() {
 			fmt.Println(cfgs.Desc())
-			fmt.Println("TEMP!!! HAHAHA list encoding schemes!") // TODO HERE!!!
+			for i, n := range encodes.List() {
+				fmt.Printf(" %2v - %v\n", i+1, n)
+			}
 			return
+		}
+
+		encd := encodes.Get(cfg.Algr)
+		if encd == nil {
+			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Algr)
+		}
+		if cfg.Command() == 2 {
+			err = encode(cfg, encd)
+		} else {
+			err = decode(cfg, encd)
+		}
+		if cfg.Verbose {
+			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), encd.Name())
 		}
 
 	case 5:
