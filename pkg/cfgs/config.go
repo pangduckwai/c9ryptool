@@ -39,7 +39,7 @@ func (cfg *Config) Command() uint8 {
 }
 
 func Version() string {
-	return "v0.6.0 b2025081516"
+	return "v0.6.1 b2025081815"
 }
 
 func Desc() string {

@@ -8,6 +8,41 @@ import (
 	"os"
 )
 
+func BufferedRead(
+	rdr *bufio.Reader,
+	size int,
+	isStd bool,
+	action func([]byte),
+) (
+	err error,
+) {
+	buf := make([]byte, 0, size)
+	cnt := 0
+	// var err0 error
+
+	for err == nil {
+		// As described in the doc, handle read data first if n > 0 before handling error,
+		// it is because the returned error could have been EOF
+		cnt, err = rdr.Read(buf[:cap(buf)])
+
+		// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
+		// An entire line with a signle period ('.') means the end of input.
+		if cnt > 0 && isStd && buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
+			cnt = 0
+			err = io.EOF
+		}
+
+		if cnt > 0 {
+			action(buf[:cnt])
+		}
+	}
+
+	if err == io.EOF {
+		err = nil
+	}
+	return
+}
+
 func Read(
 	path string,
 	buffer int,
@@ -35,58 +70,19 @@ func Read(
 		rdr = bufio.NewReaderSize(inp, buffer)
 	}
 
-	cnt, off := 0, 0
-	var err1 error
-	buf := make([]byte, 0, buffer)
 	dat = make([]byte, 0, buffer*2)
-	for idx := 0; ; idx++ {
-		// As described in the doc, handle read data first if n > 0 before handling error,
-		// it is because the returned error could have been EOF
-		if err1 == nil { // When loop for the last time, skip read
-			cnt, err = rdr.Read(buf[:cap(buf)])
-		}
-
-		if cnt > 0 && path == "" {
-			// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
-			if buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
-				if cnt == 2 && buf[:cnt][1] == 10 { // ASCII code 10 is line feed LF ('\n')
-					cnt = 0
-					off = 1
-					err = io.EOF
-				} else if cnt == 3 && buf[:cnt][1] == 13 && buf[:cnt][2] == 10 { // ASCII code 13 is carriage return CR
-					cnt = 0
-					off = 2
-					err = io.EOF
-				}
-			}
-			if off > len(dat) {
-				off = len(dat)
-			}
-		}
-
-		if err1 != nil {
-			if err1 == io.EOF {
-				err = nil
-				break // Done
-			} else {
-				dat = nil
-				err = fmt.Errorf("[READ] %v", err1)
-				return
-			}
-		}
-
+	err = BufferedRead(rdr, buffer, path == "", func(buf []byte) {
 		if decode {
-			decoded, errr := base64.StdEncoding.DecodeString(string(buf[:cnt]))
+			decoded, errr := base64.StdEncoding.DecodeString(string(buf))
 			if errr != nil {
 				err = fmt.Errorf("[READ] %v", errr)
-				return
+				panic(err)
 			}
-			dat = append(dat[:len(dat)-off], decoded...)
+			dat = append(dat, decoded...)
 		} else {
-			dat = append(dat[:len(dat)-off], buf[:cnt]...)
+			dat = append(dat, buf...)
 		}
-		err1 = err
-	}
+	})
 	return
 }
 
