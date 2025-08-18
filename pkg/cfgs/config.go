@@ -181,7 +181,7 @@ func Parse(args []string) (cfg *Config, err error) {
 			cfg.Verbose = true
 		case args[i] == "-l" || args[i] == "--list":
 			cfg.cmd |= MASK_LIST
-			break
+			i = len(args)
 		case args[i] == "-b":
 			i++
 			if i >= len(args) {

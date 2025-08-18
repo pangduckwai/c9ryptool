@@ -20,7 +20,7 @@ type Encoding interface {
 
 var eNCODINGS = map[string]Encoding{
 	"direct": nil,
-	"base64": &Base64{N: "base64 encoding"},
+	"base64": Base64(0),
 	"hex":    nil,
 }
 

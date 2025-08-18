@@ -4,24 +4,24 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"sea9.org/go/cryptool/pkg/cryptool"
 )
 
 // ////// //
 // Base64
-type Base64 struct {
-	N string
+type Base64 int
+
+func (n Base64) Name() string {
+	return "base64 encoding"
 }
 
-func (n *Base64) Name() string {
-	return n.N
-}
-
-func (n *Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
+	var buf strings.Builder
 
 	encode := func(inp []byte, flush bool) {
 		encoded := base64.StdEncoding.EncodeToString(inp)
@@ -31,11 +31,14 @@ func (n *Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 				wtr.Flush()
 			}
 		} else {
-			fmt.Print(encoded)
+			buf.WriteString(encoded)
+			if flush {
+				fmt.Print(buf.String())
+			}
 		}
 	}
 
-	err = cryptool.BufferedRead(rdr, size, false, func(cnt int, buf []byte) {
+	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 
@@ -60,10 +63,11 @@ func (n *Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
-func (n *Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
+	buf := make([]byte, 0)
 
 	decode := func(inp []byte, flush bool) error {
 		decoded, err := base64.StdEncoding.DecodeString(string(inp))
@@ -79,12 +83,15 @@ func (n *Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 				wtr.Flush()
 			}
 		} else {
-			fmt.Printf("%s", decoded) // Show string (%s) or hex encoding (%x) ?
+			buf = append(buf, decoded...)
+			if flush {
+				fmt.Printf("%s", buf) // Show string (%s) or hex encoding (%x) ?
+			}
 		}
 		return nil
 	}
 
-	err = cryptool.BufferedRead(rdr, size, false, func(cnt int, buf []byte) {
+	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 

@@ -11,14 +11,12 @@ import (
 func BufferedRead(
 	rdr *bufio.Reader,
 	size int,
-	isStd bool,
 	action func(int, []byte),
 ) (
 	err error,
 ) {
 	buf := make([]byte, 0, size)
 	cnt := 0
-	// var err0 error
 
 	for err == nil {
 		// As described in the doc, handle read data first if n > 0 before handling error,
@@ -27,9 +25,14 @@ func BufferedRead(
 
 		// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
 		// An entire line with a signle period ('.') means the end of input.
-		if cnt > 0 && isStd && buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
-			cnt = 0
-			err = io.EOF
+		if (cnt == 2 && buf[:cnt][1] == 10) || (cnt == 3 && buf[:cnt][1] == 13 && buf[:cnt][2] == 10) {
+			// ASCII code 10: line feed (LF)
+			// ASCII code 13: carriage return (CR)
+			// ASCII code 46: period ('.')
+			if buf[:cnt][0] == 46 {
+				cnt = 0
+				err = io.EOF
+			}
 		}
 
 		if cnt > 0 {
@@ -71,7 +74,7 @@ func Read(
 	}
 
 	dat = make([]byte, 0, buffer*2)
-	err = BufferedRead(rdr, buffer, path == "", func(cnt int, buf []byte) {
+	err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) {
 		if decode {
 			decoded, errr := base64.StdEncoding.DecodeString(string(buf))
 			if errr != nil {
