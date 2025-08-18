@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func read(
+func Read(
 	path string,
 	buffer int,
 	decode, verbose bool,
@@ -90,7 +90,7 @@ func read(
 	return
 }
 
-func write(
+func Write(
 	path string,
 	encode bool,
 	dat []byte,

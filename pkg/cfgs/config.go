@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/encrypt"
-	"sea9.org/go/cryptool/pkg/encrypt/sym"
+	"sea9.org/go/cryptool/pkg/encrypts"
+	"sea9.org/go/cryptool/pkg/encrypts/sym"
 )
 
 const bUFFER = 1048576 // 1024x1024
@@ -43,7 +43,7 @@ func Version() string {
 }
 
 func Desc() string {
-	return fmt.Sprintf("C9rypTool (version %v)", Version())
+	return fmt.Sprintf("c9rypTool (version %v)", Version())
 }
 
 func Usage() string {
@@ -123,7 +123,7 @@ func Help() string {
 		"         generated key is used\n\n"+
 		" NOTE 2: type a period (.) then press <enter> in a new line to finish\n"+
 		"         when inputting interactively from stdin",
-		encrypt.Default(),
+		encrypts.Default(),
 		sym.SALTLEN,
 		bUFFER/1024,
 	)
@@ -166,7 +166,7 @@ func Parse(args []string) (cfg *Config, err error) {
 	case 0:
 		fallthrough
 	case 1:
-		cfg.Algr = encrypt.Default()
+		cfg.Algr = encrypts.Default()
 	case 2:
 		fallthrough
 	case 3:

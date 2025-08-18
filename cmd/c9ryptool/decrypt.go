@@ -1,20 +1,21 @@
-package cryptool
+package main
 
 import (
 	"fmt"
 
 	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/encrypt"
-	"sea9.org/go/cryptool/pkg/encrypt/sym"
+	"sea9.org/go/cryptool/pkg/cryptool"
+	"sea9.org/go/cryptool/pkg/encrypts"
+	"sea9.org/go/cryptool/pkg/encrypts/sym"
 )
 
-func Decrypt(
+func decrypt(
 	cfg *cfgs.Config,
-	alg encrypt.Algorithm,
+	alg encrypts.Algorithm,
 ) (err error) {
 	var key, input, result, salt []byte
 
-	input, err = read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
+	input, err = cryptool.Read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[DCY][INP]%v", err)
 		return
@@ -34,7 +35,7 @@ func Decrypt(
 	} else if cfg.Genkey {
 		// not allowed
 	} else {
-		key, err = read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+		key, err = cryptool.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
@@ -56,7 +57,7 @@ func Decrypt(
 		return
 	}
 
-	err = write(cfg.Output, false, result)
+	err = cryptool.Write(cfg.Output, false, result)
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)
 	}

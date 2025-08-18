@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypts"
 )
 
 // Validate validate parameters.
@@ -77,7 +77,7 @@ func Validate(cfg *Config) (err error) {
 			typ = 1
 		}
 
-		if err = encrypt.Validate(cfg.Algr, typ); err != nil {
+		if err = encrypts.Validate(cfg.Algr, typ); err != nil {
 			errs = append(errs, err)
 		}
 

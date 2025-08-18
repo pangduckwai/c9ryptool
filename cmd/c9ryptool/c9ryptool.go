@@ -6,26 +6,8 @@ import (
 	"os"
 
 	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/cryptool"
-	"sea9.org/go/cryptool/pkg/encrypt"
+	"sea9.org/go/cryptool/pkg/encrypts"
 )
-
-func listCy() {
-	fmt.Println(cfgs.Desc())
-	for i, n := range encrypt.List() {
-		a := encrypt.Get(n)
-		if a.Type() {
-			fmt.Printf(" %2v sym  %v\n", i+1, n)
-		} else {
-			fmt.Printf(" %2v asym %v\n", i+1, n)
-		}
-	}
-}
-
-func listCd() {
-	fmt.Println(cfgs.Desc())
-	fmt.Println("TEMP!!! HAHAHA list encoding schemes!")
-}
 
 func main() {
 	cfg, err := cfgs.Parse(os.Args)
@@ -43,19 +25,27 @@ func main() {
 		}
 
 		if cfg.IsList() {
-			listCy()
+			fmt.Println(cfgs.Desc())
+			for i, n := range encrypts.List() {
+				a := encrypts.Get(n)
+				if a.Type() {
+					fmt.Printf(" %2v sym  %v\n", i+1, n)
+				} else {
+					fmt.Printf(" %2v asym %v\n", i+1, n)
+				}
+			}
 			return
 		}
 
-		algr := encrypt.Get(encrypt.Parse(cfg.Algr))
+		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
 
 		if cfg.Command() == 0 {
-			err = cryptool.Encrypt(cfg, algr)
+			err = encrypt(cfg, algr)
 		} else {
-			err = cryptool.Decrypt(cfg, algr)
+			err = decrypt(cfg, algr)
 		}
 
 		if cfg.Verbose {
@@ -71,7 +61,8 @@ func main() {
 		}
 
 		if cfg.IsList() {
-			listCd()
+			fmt.Println(cfgs.Desc())
+			fmt.Println("TEMP!!! HAHAHA list encoding schemes!") // TODO HERE!!!
 			return
 		}
 

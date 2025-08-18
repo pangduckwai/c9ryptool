@@ -1,4 +1,4 @@
-package encrypt
+package encrypts
 
 import (
 	"fmt"
@@ -6,10 +6,11 @@ import (
 	"sort"
 	"strconv"
 
-	"sea9.org/go/cryptool/pkg/encrypt/asym"
-	"sea9.org/go/cryptool/pkg/encrypt/sym"
+	"sea9.org/go/cryptool/pkg/encrypts/asym"
+	"sea9.org/go/cryptool/pkg/encrypts/sym"
 )
 
+// Algorithm encryption algorithms
 type Algorithm interface {
 	// Name algorithm name.
 	Name() string
