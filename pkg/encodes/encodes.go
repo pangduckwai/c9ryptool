@@ -19,9 +19,9 @@ type Encoding interface {
 }
 
 var eNCODINGS = map[string]Encoding{
-	"direct": nil,
+	//"direct": nil,
 	"base64": Base64(0),
-	"hex":    nil,
+	"hex":    Hex(0),
 }
 
 func Default() string {

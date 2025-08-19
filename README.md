@@ -1,14 +1,15 @@
 # c9ryptool
-A simple encryption tool
+A simple cryptographic tool
 
 ## Usage
-
-`> ./c9ryptool [command] {options}`
+``` bash
+> ./c9ryptool [command] {options}
+```
 
 ### 1. Miscellaneous
 | command | description |
 | --- | --- |
-| `version` | display current version of `cryptool` |
+| `version` | display current version of `c9ryptool` |
 | `help` | display the help message |
 
 ---
@@ -22,8 +23,8 @@ A simple encryption tool
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | `ALGR` is the name of the encryption algorithm to use |
-| `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key<br/>- key files are not decoded when read, nor encoded when written |
-| - | `--iv=IV` | `IV` is the initialization vector _in base256 encoding_, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
+| `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key<br/>* key files are not decoded when read, nor encoded when written |
+| - | `--iv=IV` | `IV` is the initialization vector (_in base256 encoding_), if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
 | - | `--iv-b64=IV` | `IV` is the initialization vector in base64 encoding, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
 | - | `--iv-hex=IV` | `IV` is the initialization vector in hex endocing, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
 | `-g` | `--generate` | generate a new encrytpion key |
@@ -73,6 +74,9 @@ A simple encryption tool
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## Changelog
+### v0.7.2
+- add `hex` encoding
+
 ### v0.7.1
 - add `base64` encoding
 
