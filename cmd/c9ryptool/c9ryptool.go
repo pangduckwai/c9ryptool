@@ -10,10 +10,18 @@ import (
 	"sea9.org/go/cryptool/pkg/encrypts"
 )
 
+func version() string {
+	return "v0.7.1 2025081911"
+}
+
+func desc() string {
+	return fmt.Sprintf("c9rypTool (version %v)", version())
+}
+
 func main() {
 	cfg, err := cfgs.Parse(os.Args)
 	if err != nil {
-		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, cfgs.Desc(), cfgs.Usage())
+		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, desc(), cfgs.Usage())
 	}
 
 	switch cfg.Command() {
@@ -26,7 +34,7 @@ func main() {
 		}
 
 		if cfg.IsList() {
-			fmt.Println(cfgs.Desc())
+			fmt.Println(desc())
 			for i, n := range encrypts.List() {
 				a := encrypts.Get(n)
 				if a.Type() {
@@ -48,7 +56,7 @@ func main() {
 			err = decrypt(cfg, algr)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), algr.Name())
+			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
 		}
 
 	case 2:
@@ -60,7 +68,7 @@ func main() {
 		}
 
 		if cfg.IsList() {
-			fmt.Println(cfgs.Desc())
+			fmt.Println(desc())
 			for i, n := range encodes.List() {
 				fmt.Printf(" %2v - %v\n", i+1, n)
 			}
@@ -77,13 +85,13 @@ func main() {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", cfgs.Desc(), encd.Name())
+			fmt.Printf("%v finished using '%v'\n", desc(), encd.Name())
 		}
 
 	case 5:
-		fmt.Printf("%v\n%v\n", cfgs.Desc(), cfgs.Help())
+		fmt.Printf("%v\n%v\n", desc(), cfgs.Help())
 	case 6:
-		fmt.Println(cfgs.Desc())
+		fmt.Println(desc())
 	default:
 		err = fmt.Errorf(" unknown command '%v'", cfg.Command())
 	}

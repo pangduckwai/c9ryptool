@@ -39,14 +39,6 @@ func (cfg *Config) Command() uint8 {
 	return cfg.cmd & MASK_FLAG
 }
 
-func Version() string {
-	return "v0.7.1 2025081911"
-}
-
-func Desc() string {
-	return fmt.Sprintf("c9rypTool (version %v)", Version())
-}
-
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +

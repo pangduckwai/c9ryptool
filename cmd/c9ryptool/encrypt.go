@@ -23,7 +23,7 @@ func encrypt(
 
 	if cfg.Passwd {
 		salt, err = sym.PopulateKeyFromPassword(
-			cfgs.Desc(),
+			desc(),
 			nil,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,
@@ -85,7 +85,7 @@ func decrypt(
 
 	if cfg.Passwd {
 		salt, err = sym.PopulateKeyFromPassword(
-			cfgs.Desc(),
+			desc(),
 			input,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,
