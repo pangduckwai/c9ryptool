@@ -2,9 +2,9 @@ package sym
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"os"
 
 	"golang.org/x/crypto/scrypt"
@@ -28,24 +28,12 @@ func PopulateKeyFromPassword(
 	err error,
 ) {
 	if input != nil {
-		idx := bytes.LastIndex(input, []byte("."))
-		if idx < 0 || idx > len(input)-2 {
-			err = fmt.Errorf("[PWD] salt missing: %v", idx)
-			return
-		}
-
-		sln := len(input) - saltLen
-		if idx == sln-1 {
-			salt = input[sln:]
-		} else {
-			err = fmt.Errorf("[PWD] salt with length %v, expecting %v", sln-1, saltLen)
-			return
-		}
+		salt = input[len(input)-saltLen:]
 	} else {
 		salt = make([]byte, saltLen)
 		_, err = rand.Read(salt)
 		if err != nil {
-			err = fmt.Errorf("[PWD] %v", err)
+			err = fmt.Errorf("[PASS] %v", err)
 			return
 		}
 	}
@@ -56,12 +44,16 @@ func PopulateKeyFromPassword(
 	fmt.Print("Enter password: ")
 	str, err = rdr.ReadString('\n')
 	if err != nil {
-		err = fmt.Errorf("[PWD] %v", err)
+		if err == io.EOF {
+			err = fmt.Errorf("[PASS] stdin already ended, cannot read password")
+		} else {
+			err = fmt.Errorf("[PASS] %v", err)
+		}
 		return
 	}
 	key, err := scrypt.Key([]byte(str[:len(str)-1]), salt, N, R, P, keyLen)
 	if err != nil {
-		err = fmt.Errorf("[PWD] %v", err)
+		err = fmt.Errorf("[PASS] %v", err)
 		return
 	}
 	err = populate(key)

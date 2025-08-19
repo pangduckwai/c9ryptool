@@ -62,7 +62,6 @@ func encrypt(
 	}
 
 	if salt != nil {
-		result = append(result, '.')
 		result = append(result, salt...)
 	}
 	err = cryptool.Write(cfg.Output, true, result)
@@ -111,7 +110,7 @@ func decrypt(
 	}
 
 	if salt != nil {
-		result, err = alg.Decrypt(input[:len(input)-len(salt)-1], cfg.Iv)
+		result, err = alg.Decrypt(input[:len(input)-len(salt)], cfg.Iv)
 	} else {
 		result, err = alg.Decrypt(input, cfg.Iv)
 	}

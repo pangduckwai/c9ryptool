@@ -21,18 +21,22 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
+	isStdout := wtr == nil
 	var buf strings.Builder
 
-	encode := func(inp []byte, flush bool) {
-		encoded := base64.StdEncoding.EncodeToString(inp)
-		if wtr != nil {
-			fmt.Fprint(wtr, encoded)
-			if flush {
-				wtr.Flush()
+	encode := func(inp []byte, left, flush bool) {
+		if left {
+			encoded := base64.StdEncoding.EncodeToString(inp)
+			if !isStdout {
+				fmt.Fprint(wtr, encoded)
+			} else {
+				buf.WriteString(encoded)
 			}
-		} else {
-			buf.WriteString(encoded)
-			if flush {
+		}
+		if flush {
+			if !isStdout {
+				wtr.Flush()
+			} else {
 				fmt.Print(buf.String())
 			}
 		}
@@ -43,7 +47,7 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 3 // num of characters to encode each time is multiple of 3
-		encode(dat[:lgh], false)
+		encode(dat[:lgh], true, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -57,9 +61,7 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	if lgh > 0 {
-		encode(dat, true)
-	}
+	encode(dat, lgh > 0, true)
 	return
 }
 
@@ -67,25 +69,29 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
+	isStdout := wtr == nil
 	buf := make([]byte, 0)
 
-	decode := func(inp []byte, flush bool) error {
-		decoded, err := base64.StdEncoding.DecodeString(string(inp))
-		if err != nil {
-			return err
-		}
-		if wtr != nil {
-			_, err = wtr.Write(decoded)
+	decode := func(inp []byte, left, flush bool) error {
+		if left {
+			decoded, err := base64.StdEncoding.DecodeString(string(inp))
 			if err != nil {
 				return err
 			}
-			if flush {
-				wtr.Flush()
+			if !isStdout {
+				_, err = wtr.Write(decoded)
+				if err != nil {
+					return err
+				}
+			} else {
+				buf = append(buf, decoded...)
 			}
-		} else {
-			buf = append(buf, decoded...)
-			if flush {
-				fmt.Printf("%s", buf) // Show string (%s) or hex encoding (%x) ?
+		}
+		if flush {
+			if !isStdout {
+				wtr.Flush()
+			} else {
+				fmt.Printf("%s\n", buf) // Show string (%s) or hex encoding (%x) ?
 			}
 		}
 		return nil
@@ -96,7 +102,7 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 4 // num of characters to decode each time is multiple of 4
-		err = decode(dat[:lgh], false)
+		err = decode(dat[:lgh], true, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -110,8 +116,6 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	if lgh > 0 {
-		err = decode(dat, true)
-	}
+	err = decode(dat, lgh > 0, true)
 	return
 }
