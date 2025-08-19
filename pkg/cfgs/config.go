@@ -60,13 +60,13 @@ func Usage() string {
 
 func Help() string {
 	return fmt.Sprintf("Usage: c9ryptool [commands] {options}\n"+
-		" * commands\n"+
-		" . version    - display current version of 'cryptool'\n"+
-		" . help       - display this message\n\n"+
-		" * commands\n"+
+		" # misc.\n"+
+		" . version - display current version of 'cryptool'\n"+
+		" . help    - display this message\n\n"+
+		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
-		"    * options:\n"+
+		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
 		"    -k FILE, --key=FILE\n"+
@@ -90,14 +90,13 @@ func Help() string {
 		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    --salt=LEN\n"+
 		"       length of salt to use for generating keys from password, default: %v\n\n"+
-		" * commands\n"+
+		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
-		"    * options:\n"+
+		"   * options:\n"+
 		"    -n ENC, --encoding=ENC\n"+
 		"       encoding scheme to use, default: 'base64'\n\n"+
-		" * all commands\n"+
-		"    * options:\n"+
+		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
 		"        1. for encryption, the input plaintext is not decoded\n"+

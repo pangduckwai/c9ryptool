@@ -42,6 +42,10 @@ func Validate(cfg *Config) (err error) {
 	case 0:
 		fallthrough
 	case 1:
+		if cfg.IsList() {
+			break
+		}
+
 		if cfg.Passwd && cfg.Genkey {
 			err = fmt.Errorf("[VLDT] incompatable options '-g' and '-p'") // > cryptool e|d -p -g -i README.md
 			return
@@ -85,6 +89,10 @@ func Validate(cfg *Config) (err error) {
 	case 2:
 		fallthrough
 	case 3:
+		if cfg.IsList() {
+			break
+		}
+
 		if err = encodes.Validate(cfg.Algr); err != nil {
 			errs = append(errs, err)
 		}

@@ -1,25 +1,28 @@
-# cryptool
+# c9ryptool
 A simple encryption tool
 
 ## Usage
 
-`> ./cryptool [command] {options}`
+`> ./c9ryptool [command] {options}`
 
-### commands
+### Misc. commands
+| full name | description |
+| --- | --- |
+| `version` | display current version of `cryptool` |
+| `help` | display the help message |
+
+---
+
+### Encryption commands
 | full name | description |
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
-| `algorithms` | list names of the supported algorithms |
-| `version` | display current version of `cryptool` |
-| `help` | display the help message |
 
-### options
+#### options
 | 1<sup>st</sup> form | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | `ALGR` is the name of the encryption algorithm to use |
-| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin<br/>1. for encryption, the input plaintext is not decoded<br/>2. for decryption, the input ciphertext is base64 decoded |
-| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout<br/>1. for encryption, the output ciphertext is base64 encoded<br/>2. for decryption, the output plaintext is not encoded |
 | `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption key<br/>- key files are not decoded when read, nor encoded when written |
 | - | `--iv=IV` | `IV` is the initialization vector _in base256 encoding_, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
 | - | `--iv-b64=IV` | `IV` is the initialization vector in base64 encoding, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
@@ -27,6 +30,28 @@ A simple encryption tool
 | `-g` | `--generate` | generate a new encrytpion key |
 | `-p` | `--password` | indicate a password is input interactively |
 | - | `--salt=LEN` | `LEN` is the length of salt to use for generating keys from password |
+
+---
+
+### Encoding commands
+| full name | description |
+| --- | --- |
+| `encode` | convert the given input into the specified encoding |
+| `decode` | convert the given input back from the specified encoding |
+
+#### options
+| 1<sup>st</sup> form | 2<sup>nd</sup> form | description |
+| --- | --- | --- |
+| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
+
+---
+
+### Common options
+| 1<sup>st</sup> form | 2<sup>nd</sup> form | description |
+| --- | --- | --- |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin<br/>1. for encryption, the input plaintext is not decoded<br/>2. for decryption, the input ciphertext is base64 decoded |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout<br/>1. for encryption, the output ciphertext is base64 encoded<br/>2. for decryption, the output plaintext is not encoded |
+| `-l` | `--list` | list the supported algorithms or encoding schemes |
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
@@ -46,6 +71,9 @@ A simple encryption tool
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
 
 ## Changelog
+### v0.7.1
+- add `base64` encoding
+
 ### v0.5.4
 - add `RSA-PKCS1v15` algorithm
 
