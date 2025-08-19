@@ -54,6 +54,7 @@ func Usage() string {
 		"  all commands\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
+		"   {-l | --list}\n" +
 		"   {-b SIZE | --buffer=SIZE}\n" +
 		"   {-v | --verbose}"
 }
