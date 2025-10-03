@@ -74,6 +74,9 @@ A simple cryptographic tool
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## Changelog
+### v0.7.3
+- add `base64url` encoding
+
 ### v0.7.2
 - add `hex` encoding
 
