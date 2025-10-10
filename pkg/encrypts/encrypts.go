@@ -53,10 +53,14 @@ func Default() string {
 	return "ChaCha20-Poly1305" //"AES-256-GCM"
 }
 
-func List() (list []string) {
+// List list available algorithm names.
+// typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
+func List(typ int) (list []string) {
 	list = make([]string, 0)
 	for k := range aLGORITHMS {
-		list = append(list, k)
+		if typ == 0 || (typ < 0 && !aLGORITHMS[k].Type()) || (typ > 0 && aLGORITHMS[k].Type()) {
+			list = append(list, k)
+		}
 	}
 	sort.Strings(list)
 	return

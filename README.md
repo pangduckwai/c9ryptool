@@ -19,6 +19,7 @@ A simple cryptographic tool
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
+| `pubkey` | export public key from the read private key |
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
@@ -68,12 +69,15 @@ A simple cryptographic tool
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin<br/>1. for encryption, the input plaintext is not decoded<br/>2. for decryption, the input ciphertext is base64 decoded |
-| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout<br/>1. for encryption, the output ciphertext is base64 encoded<br/>2. for decryption, the output plaintext is not encoded |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout<br/>1. for encryption, the output ciphertext is base64 encoded<br/>2. for decryption, the output plaintext is not encoded<br/>3. for pubkey export, the output is not encoded |
 | `-l` | `--list` | list the supported algorithms or encoding schemes |
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## Changelog
+### v0.7.4
+- add command to export public key
+
 ### v0.7.3
 - add `base64url` encoding
 

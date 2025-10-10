@@ -107,6 +107,7 @@ func Help() string {
 		"       path of the output file, omitting means output to stdout\n"+
 		"        1. for encryption, the output ciphertext is base64 encoded\n"+
 		"        2. for decryption, the output plaintext is not encoded\n"+
+		"        3. for pubkey export, the output is not encoded\n"+
 		"    -l, --list\n"+
 		"       list the supported algorithms or encoding schemes\n"+
 		"    -b SIZE, --buffer=SIZE\n"+

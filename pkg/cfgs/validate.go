@@ -98,8 +98,12 @@ func Validate(cfg *Config) (err error) {
 		}
 
 	case 5:
-		if cfg.Passwd || cfg.Genkey || cfg.Input != "" {
-			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p' or '-i'")
+		if cfg.IsList() {
+			break
+		}
+
+		if cfg.Passwd || cfg.Genkey || cfg.Input != "" || cfg.Iv != nil {
+			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p', '-i' or '--iv*'")
 			return
 		}
 

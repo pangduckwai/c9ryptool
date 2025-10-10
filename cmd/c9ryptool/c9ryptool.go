@@ -35,7 +35,7 @@ func main() {
 
 		if cfg.IsList() {
 			fmt.Println(desc())
-			for i, n := range encrypts.List() {
+			for i, n := range encrypts.List(0) {
 				a := encrypts.Get(n)
 				if a.Type() {
 					fmt.Printf(" %2v sym  %v\n", i+1, n)
@@ -92,6 +92,14 @@ func main() {
 		err = cfgs.Validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
+		}
+
+		if cfg.IsList() {
+			fmt.Println(desc())
+			for i, n := range encrypts.List(-1) {
+				fmt.Printf(" %2v - %v\n", i+1, n)
+			}
+			return
 		}
 
 		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
