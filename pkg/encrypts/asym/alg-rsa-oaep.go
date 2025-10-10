@@ -49,6 +49,18 @@ func (a *Rsa2048OaepSha256) Key() []byte {
 	return pem
 }
 
+func (a *Rsa2048OaepSha256) PubKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return pem
+}
+
 func (a *Rsa2048OaepSha256) PopulateKey(key []byte) (err error) {
 	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return
@@ -89,6 +101,18 @@ func (a *Rsa2048OaepSha512) Key() []byte {
 	return buf
 }
 
+func (a *Rsa2048OaepSha512) PubKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return pem
+}
+
 func (a *Rsa2048OaepSha512) PopulateKey(key []byte) (err error) {
 	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return
@@ -124,6 +148,10 @@ func (a *Rsa4096OaepSha512) Key() []byte {
 		panic(err)
 	}
 	return buf
+}
+
+func (a *Rsa4096OaepSha512) PubKey() []byte {
+	return nil
 }
 
 func (a *Rsa4096OaepSha512) PopulateKey(key []byte) (err error) {

@@ -37,6 +37,6 @@ go.work.sum
 # .vscode/
 
 bin/
-*.txt
+test/
 *.key
 *.pem

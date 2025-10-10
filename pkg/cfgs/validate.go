@@ -96,6 +96,21 @@ func Validate(cfg *Config) (err error) {
 		if err = encodes.Validate(cfg.Algr); err != nil {
 			errs = append(errs, err)
 		}
+
+	case 5:
+		if cfg.Passwd || cfg.Genkey || cfg.Input != "" {
+			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p' or '-i'")
+			return
+		}
+
+		if cfg.Key == "" {
+			err = fmt.Errorf("[VLDT] key file missing")
+			return
+		} else {
+			if err = encrypts.Validate(cfg.Algr, -1); err != nil {
+				return
+			}
+		}
 	}
 
 	if len(errs) > 0 {

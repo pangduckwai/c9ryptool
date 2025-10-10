@@ -99,6 +99,10 @@ func (a *AesGcm128) Key() []byte {
 	return *a
 }
 
+func (a *AesGcm128) PubKey() []byte {
+	return nil
+}
+
 func (a *AesGcm128) PopulateKey(key []byte) (err error) {
 	if key == nil {
 		*a, err = Generate(a.KeyLength())
@@ -144,6 +148,10 @@ func (a *AesGcm192) Key() []byte {
 	return *a
 }
 
+func (a *AesGcm192) PubKey() []byte {
+	return nil
+}
+
 func (a *AesGcm192) PopulateKey(key []byte) (err error) {
 	if key == nil {
 		*a, err = Generate(a.KeyLength())
@@ -187,6 +195,10 @@ func (a *AesGcm256) KeyLength() int {
 
 func (a *AesGcm256) Key() []byte {
 	return *a
+}
+
+func (a *AesGcm256) PubKey() []byte {
+	return nil
 }
 
 func (a *AesGcm256) PopulateKey(key []byte) (err error) {

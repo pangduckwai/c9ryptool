@@ -129,6 +129,10 @@ func (a *AesCbc256) Key() []byte {
 	return *a
 }
 
+func (a *AesCbc256) PubKey() []byte {
+	return nil
+}
+
 func (a *AesCbc256) PopulateKey(key []byte) (err error) {
 	if key == nil {
 		*a, err = Generate(a.KeyLength())

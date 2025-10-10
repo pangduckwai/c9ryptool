@@ -1,4 +1,4 @@
-package cryptool
+package utils
 
 import (
 	"crypto/rand"

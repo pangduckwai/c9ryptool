@@ -44,6 +44,9 @@ func encode(
 	}
 
 	err = ecd.Encode(rdr, wtr)
+	if err != nil {
+		err = fmt.Errorf("[ENCODE] %v", err)
+	}
 	return
 }
 
@@ -82,5 +85,8 @@ func decode(
 	}
 
 	err = ecd.Decode(rdr, wtr)
+	if err != nil {
+		err = fmt.Errorf("[DECODE] %v", err)
+	}
 	return
 }

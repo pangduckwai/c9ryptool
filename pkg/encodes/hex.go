@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/cryptool"
+	"sea9.org/go/cryptool/pkg/utils"
 )
 
 // /// //
@@ -22,7 +22,7 @@ func (n Hex) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	var buf strings.Builder
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, inp []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) {
 		encoded := hex.EncodeToString(inp[:cnt])
 		if !isStdout {
 			fmt.Fprint(wtr, encoded)
@@ -47,7 +47,7 @@ func (n Hex) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	buf := make([]byte, 0)
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, inp []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) {
 		var decoded []byte
 		decoded, err = hex.DecodeString(string(inp[:cnt]))
 		if err != nil {

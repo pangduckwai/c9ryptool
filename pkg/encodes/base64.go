@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/cryptool"
+	"sea9.org/go/cryptool/pkg/utils"
 )
 
 // ////// //
@@ -24,8 +24,8 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	var buf strings.Builder
 
-	encode := func(inp []byte, left, flush bool) {
-		if left {
+	encode := func(inp []byte, ln int, flush bool) {
+		if ln > 0 {
 			encoded := base64.StdEncoding.EncodeToString(inp)
 			if !isStdout {
 				fmt.Fprint(wtr, encoded)
@@ -42,12 +42,12 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		}
 	}
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 3 // num of characters to encode each time is multiple of 3
-		encode(dat[:lgh], true, false)
+		encode(dat[:lgh], lgh, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -61,7 +61,7 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	encode(dat, lgh > 0, true)
+	encode(dat, lgh, true)
 	return
 }
 
@@ -72,8 +72,8 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	buf := make([]byte, 0)
 
-	decode := func(inp []byte, left, flush bool) error {
-		if left {
+	decode := func(inp []byte, ln int, flush bool) error {
+		if ln > 0 {
 			decoded, err := base64.StdEncoding.DecodeString(string(inp))
 			if err != nil {
 				return err
@@ -97,12 +97,12 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return nil
 	}
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 4 // num of characters to decode each time is multiple of 4
-		err = decode(dat[:lgh], true, false)
+		err = decode(dat[:lgh], lgh, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -116,7 +116,7 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	err = decode(dat, lgh > 0, true)
+	err = decode(dat, lgh, true)
 	return
 }
 
@@ -135,8 +135,8 @@ func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	var buf strings.Builder
 
-	encode := func(inp []byte, left, flush bool) {
-		if left {
+	encode := func(inp []byte, ln int, flush bool) {
+		if ln > 0 {
 			encoded := base64.URLEncoding.EncodeToString(inp)
 			if !isStdout {
 				fmt.Fprint(wtr, encoded)
@@ -153,12 +153,12 @@ func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		}
 	}
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 3 // num of characters to encode each time is multiple of 3
-		encode(dat[:lgh], true, false)
+		encode(dat[:lgh], lgh, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -172,7 +172,7 @@ func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	encode(dat, lgh > 0, true)
+	encode(dat, lgh, true)
 	return
 }
 
@@ -183,8 +183,17 @@ func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	buf := make([]byte, 0)
 
-	decode := func(inp []byte, left, flush bool) error {
-		if left {
+	decode := func(inp []byte, ln int, flush bool) error {
+		if ln > 0 {
+			switch ln % 4 {
+			case 2:
+				inp = append(inp, '=')
+				fallthrough
+			case 3:
+				inp = append(inp, '=')
+			case 1:
+				return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
+			}
 			decoded, err := base64.URLEncoding.DecodeString(string(inp))
 			if err != nil {
 				return err
@@ -208,12 +217,12 @@ func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return nil
 	}
 
-	err = cryptool.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
 		lgh += cnt
 		dat = append(dat, buf...)
 
 		lgh -= lgh % 4 // num of characters to decode each time is multiple of 4
-		err = decode(dat[:lgh], true, false)
+		err = decode(dat[:lgh], lgh, false)
 
 		if len(dat) > lgh {
 			dat = dat[lgh:]
@@ -227,6 +236,6 @@ func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	err = decode(dat, lgh > 0, true)
+	err = decode(dat, lgh, true)
 	return
 }

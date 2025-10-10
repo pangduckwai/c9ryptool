@@ -46,6 +46,15 @@ func (a *Rsa2048Pkcs1v15) Key() []byte {
 	return pem
 }
 
+func (a *Rsa2048Pkcs1v15) PubKey() []byte {
+	buf := x509.MarshalPKCS1PublicKey(a.PublicKey)
+	pem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return pem
+}
+
 func (a *Rsa2048Pkcs1v15) PopulateKey(key []byte) (err error) {
 	a.PrivateKey, a.PublicKey, err = getRsaKey(key, a.KeyLength())
 	return

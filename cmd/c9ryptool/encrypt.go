@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/cryptool"
 	"sea9.org/go/cryptool/pkg/encrypts"
 	"sea9.org/go/cryptool/pkg/encrypts/sym"
+	"sea9.org/go/cryptool/pkg/utils"
 )
 
 func encrypt(
@@ -15,7 +15,7 @@ func encrypt(
 ) (err error) {
 	var key, input, result, salt []byte
 
-	input, err = cryptool.Read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[ECY][INP]%v", err)
 		return
@@ -38,12 +38,12 @@ func encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		err = cryptool.Write(cfg.Key, false, alg.Key())
+		err = utils.Write(cfg.Key, false, alg.Key())
 		if err != nil {
 			return
 		}
 	} else {
-		key, err = cryptool.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+		key, err = utils.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
@@ -64,7 +64,7 @@ func encrypt(
 	if salt != nil {
 		result = append(result, salt...)
 	}
-	err = cryptool.Write(cfg.Output, true, result)
+	err = utils.Write(cfg.Output, true, result)
 	if err != nil {
 		err = fmt.Errorf("[ECY][OUT]%v", err)
 	}
@@ -77,7 +77,7 @@ func decrypt(
 ) (err error) {
 	var key, input, result, salt []byte
 
-	input, err = cryptool.Read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[DCY][INP]%v", err)
 		return
@@ -97,7 +97,7 @@ func decrypt(
 	} else if cfg.Genkey {
 		// not allowed
 	} else {
-		key, err = cryptool.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+		key, err = utils.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
@@ -119,7 +119,7 @@ func decrypt(
 		return
 	}
 
-	err = cryptool.Write(cfg.Output, false, result)
+	err = utils.Write(cfg.Output, false, result)
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)
 	}

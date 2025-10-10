@@ -42,7 +42,7 @@ func (cfg *Config) Command() uint8 {
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
-		"  [encrypt | decrypt]\n" +
+		"  [encrypt | decrypt | pubkey]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {--iv=IV | --iv-b64=IV-B64 | --iv-hex=IV-HEX}\n" +
@@ -67,6 +67,7 @@ func Help() string {
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
+		" . pubkey  - export pubic key\n"+
 		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
@@ -128,6 +129,7 @@ var COMMANDS = []string{
 	"encode",
 	"decode",
 	"hash",
+	"pubkey",
 	"help",
 	"version",
 }
