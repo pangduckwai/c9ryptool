@@ -20,7 +20,7 @@ A simple cryptographic tool
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
 
-| option | 2<sup>nd</sup> form | encryption | description |
+| option | 2<sup>nd</sup> form | - | description |
 | --- | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | all | `ALGR` is the name of the encryption algorithm to use |
 | `-k FILE` | `--key=FILE` | all | `FILE` is the path of the file containing the encryption (private) key |
