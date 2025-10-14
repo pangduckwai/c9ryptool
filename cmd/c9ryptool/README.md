@@ -24,7 +24,7 @@ A simple cryptographic tool
 | --- | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | all | `ALGR` is the name of the encryption algorithm to use |
 | `-k FILE` | `--key=FILE` | all | `FILE` is the path of the file containing the encryption (private) key |
-| - | `--iv=IV` | sym | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64 decoding |
+| - | `--iv=IV` | sym | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the<br/>ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64<br/>decoding |
 | - | `--tag=TAG` | sym | `TAG` is the path of the file containing the message authentication tag |
 | - | `--aad=AAD` | sym | `AAD` is the path of the file containing the additional authenticated data |
 | `-g` | `--generate` | all | generate a new encrytpion key |
