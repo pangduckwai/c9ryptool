@@ -12,6 +12,7 @@
 cmd/**
 !cmd/**/
 !cmd/**/*.go
+!cmd/**/*.md
 
 # Test binary, built with `go test -c`
 *.test

@@ -70,7 +70,7 @@ func TestReadfile(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	buff, err := Read("../../README.md", 16, false, true)
+	buff, err := Read("../../README.md", 16, true)
 	if err != nil {
 		t.Fatalf("TestRead() %v", err)
 	}

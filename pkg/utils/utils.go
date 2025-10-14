@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -49,7 +48,7 @@ func BufferedRead(
 func Read(
 	path string,
 	buffer int,
-	decode, verbose bool,
+	verbose bool,
 ) (
 	dat []byte,
 	err error,
@@ -75,23 +74,13 @@ func Read(
 
 	dat = make([]byte, 0, buffer*2)
 	err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) {
-		if decode {
-			decoded, errr := base64.StdEncoding.DecodeString(string(buf))
-			if errr != nil {
-				err = fmt.Errorf("[READ] %v", errr)
-				return
-			}
-			dat = append(dat, decoded...)
-		} else {
-			dat = append(dat, buf...)
-		}
+		dat = append(dat, buf...)
 	})
 	return
 }
 
 func Write(
 	path string,
-	encode bool,
 	dat []byte,
 ) (err error) {
 	var out *os.File
@@ -107,17 +96,9 @@ func Write(
 	}
 
 	if wtr == nil {
-		if encode {
-			fmt.Println(base64.StdEncoding.EncodeToString(dat))
-		} else {
-			fmt.Printf("%s", dat)
-		}
+		fmt.Printf("%s", dat)
 	} else {
-		if encode {
-			fmt.Fprint(wtr, base64.StdEncoding.EncodeToString(dat))
-		} else {
-			fmt.Fprintf(wtr, "%s", dat)
-		}
+		fmt.Fprintf(wtr, "%s", dat)
 		wtr.Flush()
 	}
 	return

@@ -20,13 +20,14 @@ type Encoding interface {
 
 var eNCODINGS = map[string]Encoding{
 	//"direct": nil,
-	"base64":    Base64(0),
-	"base64url": Base64Url(0),
-	"hex":       Hex(0),
+	"base64":       Base64(0),
+	"base64url":    Base64Url(0),
+	"rawbase64url": RawBase64Url(0),
+	"hex":          Hex(0),
 }
 
 func Default() string {
-	return "base64url"
+	return "rawbase64url"
 }
 
 func List() (list []string) {

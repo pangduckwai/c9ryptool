@@ -11,6 +11,7 @@ func encryptAesGcm(
 	key []byte,
 	input []byte,
 	iv []byte,
+	aad []byte,
 ) (
 	result []byte,
 	err error,
@@ -37,7 +38,7 @@ func encryptAesGcm(
 		}
 	}
 
-	result = gcm.Seal(iv, iv, input, nil)
+	result = gcm.Seal(iv, iv, input, aad)
 	return
 }
 
@@ -45,6 +46,8 @@ func decryptAesGcm(
 	key []byte,
 	input []byte,
 	iv []byte,
+	tag []byte,
+	aad []byte,
 ) (
 	result []byte,
 	err error,
@@ -71,11 +74,14 @@ func decryptAesGcm(
 		if bytes.Index(input, iv) == 0 {
 			txt = input[len(iv):]
 		} else {
-			txt = input
+			txt = input[:]
 		}
 	}
+	if tag != nil {
+		txt = append(txt, tag...)
+	}
 
-	result, err = gcm.Open(nil, iv, txt, nil)
+	result, err = gcm.Open(nil, iv, txt, aad)
 	return
 }
 
@@ -113,19 +119,30 @@ func (a *AesGcm128) PopulateKey(key []byte) (err error) {
 }
 
 func (a *AesGcm128) Encrypt(input ...[]byte) ([]byte, error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, aad []byte
+	switch len(input) {
+	case 3:
+		aad = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return encryptAesGcm(*a, input[0], iv)
+	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
 func (a *AesGcm128) Decrypt(input ...[]byte) (result []byte, err error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, tag, aad []byte
+	switch len(input) {
+	case 4:
+		aad = input[3]
+		fallthrough
+	case 3:
+		tag = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return decryptAesGcm(*a, input[0], iv)
+	return decryptAesGcm(*a, input[0], iv, tag, aad)
 }
 
 // /////////// //
@@ -162,19 +179,30 @@ func (a *AesGcm192) PopulateKey(key []byte) (err error) {
 }
 
 func (a *AesGcm192) Encrypt(input ...[]byte) ([]byte, error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, aad []byte
+	switch len(input) {
+	case 3:
+		aad = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return encryptAesGcm(*a, input[0], iv)
+	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
 func (a *AesGcm192) Decrypt(input ...[]byte) (result []byte, err error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, tag, aad []byte
+	switch len(input) {
+	case 4:
+		aad = input[3]
+		fallthrough
+	case 3:
+		tag = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return decryptAesGcm(*a, input[0], iv)
+	return decryptAesGcm(*a, input[0], iv, tag, aad)
 }
 
 // /////////// //
@@ -211,17 +239,28 @@ func (a *AesGcm256) PopulateKey(key []byte) (err error) {
 }
 
 func (a *AesGcm256) Encrypt(input ...[]byte) ([]byte, error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, aad []byte
+	switch len(input) {
+	case 3:
+		aad = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return encryptAesGcm(*a, input[0], iv)
+	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
 func (a *AesGcm256) Decrypt(input ...[]byte) (result []byte, err error) {
-	var iv []byte
-	if len(input) > 1 {
+	var iv, tag, aad []byte
+	switch len(input) {
+	case 4:
+		aad = input[3]
+		fallthrough
+	case 3:
+		tag = input[2]
+		fallthrough
+	case 2:
 		iv = input[1]
 	}
-	return decryptAesGcm(*a, input[0], iv)
+	return decryptAesGcm(*a, input[0], iv, tag, aad)
 }

@@ -40,6 +40,12 @@ func Validate(cfg *Config) (err error) {
 
 	switch cfg.Command() {
 	case 0:
+		if cfg.IsList() {
+			break
+		}
+		if cfg.Tag != "" {
+			err = fmt.Errorf("[VLDT] unsupported option '--tag'")
+		}
 		fallthrough
 	case 1:
 		if cfg.IsList() {
@@ -75,7 +81,7 @@ func Validate(cfg *Config) (err error) {
 		}
 
 		var typ int
-		if cfg.Passwd || cfg.Iv != nil {
+		if cfg.Passwd || cfg.Iv != "" || cfg.Tag != "" || cfg.Aad != "" {
 			// must be symmetric algorithm if:
 			// 1. encryption key is generated from a passphrase
 			// 2. IV is given
@@ -102,8 +108,8 @@ func Validate(cfg *Config) (err error) {
 			break
 		}
 
-		if cfg.Passwd || cfg.Genkey || cfg.Input != "" || cfg.Iv != nil {
-			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p', '-i' or '--iv*'")
+		if cfg.Passwd || cfg.Genkey || cfg.Input != "" || cfg.Iv != "" || cfg.Tag != "" || cfg.Aad != "" {
+			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p', '-i', '--iv', '--tag' or '--aad'")
 			return
 		}
 

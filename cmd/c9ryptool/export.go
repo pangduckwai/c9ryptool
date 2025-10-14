@@ -14,7 +14,7 @@ func export(
 ) (err error) {
 	var key []byte
 
-	key, err = utils.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+	key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[ECY][KEY]%v", err)
 		return
@@ -25,6 +25,6 @@ func export(
 		return
 	}
 
-	err = utils.Write(cfg.Output, false, alg.PubKey())
+	err = utils.Write(cfg.Output, alg.PubKey())
 	return
 }

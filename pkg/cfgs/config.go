@@ -1,8 +1,6 @@
 package cfgs
 
 import (
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -23,7 +21,9 @@ type Config struct {
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
 	Key     string // secret key file path
-	Iv      []byte // initialization vector, nil - auto-gen
+	Iv      string // initialization vector file path, nil - auto-gen
+	Tag     string // message authentication tag file path
+	Aad     string // additional authenticated data
 	Genkey  bool   // generate key enabled
 	Passwd  bool   // interactively input password
 	SaltLen int    // length of salt to use for generating keys from password
@@ -45,7 +45,9 @@ func Usage() string {
 		"  [encrypt | decrypt | pubkey]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
-		"   {--iv=IV | --iv-b64=IV-B64 | --iv-hex=IV-HEX}\n" +
+		"   {--iv=IV }\n" +
+		"   {--tag=TAG }\n" +
+		"   {--aad=AAD }\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {--salt=LEN}\n\n" +
@@ -73,19 +75,23 @@ func Help() string {
 		"       encryption algorithm to use, default: '%v'\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       path of the file containing the encryption key\n"+
-		"        - key files are not decoded when read, nor encoded when written\n"+
+		// "        - key files are not decoded when read, nor encoded when written\n"+
 		"    --iv=IV\n"+
-		"       initialization vector as 'base256 enocded' string, if omitted:\n"+
+		"       path of the file containing the initialization vector, if omitted:\n"+
 		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
 		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
-		"    --iv-b64=IV-B64\n"+
-		"       initialization vector as base64 encoded string, if omitted:\n"+
-		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
-		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
-		"    --iv-hex=IV-HEX\n"+
-		"       initialization vector as hex encoded string, if omitted:\n"+
-		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
-		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
+		// "    --iv-b64=IV-B64\n"+
+		// "       initialization vector as base64 encoded string, if omitted:\n"+
+		// "        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
+		// "        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
+		// "    --iv-hex=IV-HEX\n"+
+		// "       initialization vector as hex encoded string, if omitted:\n"+
+		// "        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
+		// "        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
+		"    --tag=TAG\n"+
+		"       path of the file containing the message authentication tag\n"+
+		"    --aad=AAD\n"+
+		"       path of the file containing the additional authenticated data\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
@@ -101,13 +107,13 @@ func Help() string {
 		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
-		"        1. for encryption, the input plaintext is not decoded\n"+
-		"        2. for decryption, the input ciphertext is base64 decoded\n"+
+		// "        1. for encryption, the input plaintext is not decoded\n"+
+		// "        2. for decryption, the input ciphertext is base64 decoded\n"+
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
-		"        1. for encryption, the output ciphertext is base64 encoded\n"+
-		"        2. for decryption, the output plaintext is not encoded\n"+
-		"        3. for pubkey export, the output is not encoded\n"+
+		// "        1. for encryption, the output ciphertext is base64 encoded\n"+
+		// "        2. for decryption, the output plaintext is not encoded\n"+
+		// "        3. for pubkey export, the output is not encoded\n"+
 		"    -l, --list\n"+
 		"       list the supported algorithms or encoding schemes\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
@@ -233,27 +239,41 @@ func Parse(args []string) (cfg *Config, err error) {
 				err = fmt.Errorf("[CONF] Missing IV value")
 				return
 			} else {
-				cfg.Iv = []byte(args[i][5:])
+				cfg.Iv = args[i][5:]
 			}
-		case strings.HasPrefix(args[i], "--iv-b64="):
-			if len(args[i]) <= 9 {
-				err = fmt.Errorf("[CONF] Missing IV value")
+		// case strings.HasPrefix(args[i], "--iv-b64="):
+		// 	if len(args[i]) <= 9 {
+		// 		err = fmt.Errorf("[CONF] Missing IV value")
+		// 		return
+		// 	} else {
+		// 		cfg.Iv, err = base64.StdEncoding.DecodeString(args[i][9:])
+		// 		if err != nil {
+		// 			err = fmt.Errorf("[CONF] %v", err)
+		// 		}
+		// 	}
+		// case strings.HasPrefix(args[i], "--iv-hex="):
+		// 	if len(args[i]) <= 9 {
+		// 		err = fmt.Errorf("[CONF] Missing IV value")
+		// 		return
+		// 	} else {
+		// 		cfg.Iv, err = hex.DecodeString(args[i][9:])
+		// 		if err != nil {
+		// 			err = fmt.Errorf("[CONF] %v", err)
+		// 		}
+		// 	}
+		case strings.HasPrefix(args[i], "--tag="):
+			if len(args[i]) <= 6 {
+				err = fmt.Errorf("[CONF] Missing TAG value")
 				return
 			} else {
-				cfg.Iv, err = base64.StdEncoding.DecodeString(args[i][9:])
-				if err != nil {
-					err = fmt.Errorf("[CONF] %v", err)
-				}
+				cfg.Tag = args[i][6:]
 			}
-		case strings.HasPrefix(args[i], "--iv-hex="):
-			if len(args[i]) <= 9 {
-				err = fmt.Errorf("[CONF] Missing IV value")
+		case strings.HasPrefix(args[i], "--aad="):
+			if len(args[i]) <= 6 {
+				err = fmt.Errorf("[CONF] Missing AAD value")
 				return
 			} else {
-				cfg.Iv, err = hex.DecodeString(args[i][9:])
-				if err != nil {
-					err = fmt.Errorf("[CONF] %v", err)
-				}
+				cfg.Aad = args[i][6:]
 			}
 		case strings.HasPrefix(args[i], "--salt="):
 			if len(args[i]) <= 7 {

@@ -13,9 +13,9 @@ func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
 ) (err error) {
-	var key, input, result, salt []byte
+	var key, input, result, salt, iv, aad []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, false, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[ECY][INP]%v", err)
 		return
@@ -38,12 +38,12 @@ func encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		err = utils.Write(cfg.Key, false, alg.Key())
+		err = utils.Write(cfg.Key, alg.Key())
 		if err != nil {
 			return
 		}
 	} else {
-		key, err = utils.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
@@ -55,7 +55,23 @@ func encrypt(
 		}
 	}
 
-	result, err = alg.Encrypt(input, cfg.Iv)
+	if cfg.Iv != "" {
+		iv, err = utils.Read(cfg.Iv, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[ECY][IV]%v", err)
+			return
+		}
+	}
+
+	if cfg.Aad != "" {
+		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[ECY][AAD]%v", err)
+			return
+		}
+	}
+
+	result, err = alg.Encrypt(input, iv, aad)
 	if err != nil {
 		err = fmt.Errorf("[ECY]%v", err)
 		return
@@ -64,7 +80,7 @@ func encrypt(
 	if salt != nil {
 		result = append(result, salt...)
 	}
-	err = utils.Write(cfg.Output, true, result)
+	err = utils.Write(cfg.Output, result)
 	if err != nil {
 		err = fmt.Errorf("[ECY][OUT]%v", err)
 	}
@@ -75,9 +91,9 @@ func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
 ) (err error) {
-	var key, input, result, salt []byte
+	var key, input, result, salt, iv, tag, aad []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, true, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
 		err = fmt.Errorf("[DCY][INP]%v", err)
 		return
@@ -97,7 +113,7 @@ func decrypt(
 	} else if cfg.Genkey {
 		// not allowed
 	} else {
-		key, err = utils.Read(cfg.Key, cfg.Buffer, false, cfg.Verbose)
+		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
 		if err != nil {
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
@@ -109,17 +125,41 @@ func decrypt(
 		}
 	}
 
+	if cfg.Iv != "" {
+		iv, err = utils.Read(cfg.Iv, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[ECY][IV]%v", err)
+			return
+		}
+	}
+
+	if cfg.Tag != "" {
+		tag, err = utils.Read(cfg.Tag, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[ECY][TAG]%v", err)
+			return
+		}
+	}
+
+	if cfg.Aad != "" {
+		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[ECY][AAD]%v", err)
+			return
+		}
+	}
+
 	if salt != nil {
-		result, err = alg.Decrypt(input[:len(input)-len(salt)], cfg.Iv)
+		result, err = alg.Decrypt(input[:len(input)-len(salt)], iv, tag, aad)
 	} else {
-		result, err = alg.Decrypt(input, cfg.Iv)
+		result, err = alg.Decrypt(input, iv, tag, aad)
 	}
 	if err != nil {
 		err = fmt.Errorf("[DCY]%v", err)
 		return
 	}
 
-	err = utils.Write(cfg.Output, false, result)
+	err = utils.Write(cfg.Output, result)
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)
 	}
