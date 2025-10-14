@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,8 +21,7 @@ func usage() string {
 
 // parse Parse command line arguments.
 // returns:
-//
-//	lgth: +ve - length of file out0, -ve - length of file out1
+// - lgth: +ve - length of file out0, -ve - length of file out1
 func parse(args []string) (
 	in, out0, out1 string,
 	lgth int,
@@ -105,12 +105,60 @@ func parse(args []string) (
 			return
 		}
 	}
+	return
+}
+
+func validate(
+	in, out0, out1 string,
+	lgth int,
+) (err error) {
+	if in != "" {
+		if _, err = os.Stat(in); errors.Is(err, os.ErrNotExist) {
+			err = fmt.Errorf("[VLDT] input file '%v' does not exist", in)
+			return
+		} else if err != nil {
+			err = fmt.Errorf("[VLDT] %v", err)
+			return
+		}
+	}
+
+	if out0 != "" {
+		if _, err = os.Stat(out0); err == nil {
+			err = fmt.Errorf("[VLDT] output file '%v' already exists", out0)
+			return
+		} else if !errors.Is(err, os.ErrNotExist) {
+			err = fmt.Errorf("[VLDT] %v", err)
+			return
+		} else {
+			err = nil
+		}
+	}
+
+	if out1 != "" {
+		if _, err = os.Stat(out1); err == nil {
+			err = fmt.Errorf("[VLDT] output file '%v' already exists", out1)
+			return
+		} else if !errors.Is(err, os.ErrNotExist) {
+			err = fmt.Errorf("[VLDT] %v", err)
+			return
+		} else {
+			err = nil
+		}
+	}
+
+	if lgth == 0 {
+		err = fmt.Errorf("[VLDT] length cannot be zero")
+	}
 
 	return
 }
 
 func main() {
 	in, out0, out1, lgth, err := parse(os.Args)
+	if err != nil {
+		log.Fatalf("[SPLIT]%v", err)
+	}
+	err = validate(in, out0, out1, lgth)
 	if err != nil {
 		log.Fatalf("[SPLIT]%v", err)
 	}
@@ -136,6 +184,4 @@ func main() {
 	}
 
 	fmt.Printf("[SPLIT] finished splitting %v (%v)\n", in, lgth)
-	fmt.Printf("TEMP: '%v' -> '%v', '%v'\n", in, out0, out1)
-	fmt.Printf("TEMP:\nindex: %v\n%v\nOUT0:\n%v\nOUT1:\n%v\n", lgth, input, input[:lgth], input[lgth:])
 }

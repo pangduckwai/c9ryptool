@@ -102,25 +102,6 @@ func Validate(cfg *Config) (err error) {
 		if err = encodes.Validate(cfg.Algr); err != nil {
 			errs = append(errs, err)
 		}
-
-	case 5:
-		if cfg.IsList() {
-			break
-		}
-
-		if cfg.Passwd || cfg.Genkey || cfg.Input != "" || cfg.Iv != "" || cfg.Tag != "" || cfg.Aad != "" {
-			err = fmt.Errorf("[VLDT] unsupported options '-g', '-p', '-i', '--iv', '--tag' or '--aad'")
-			return
-		}
-
-		if cfg.Key == "" {
-			err = fmt.Errorf("[VLDT] key file missing")
-			return
-		} else {
-			if err = encrypts.Validate(cfg.Algr, -1); err != nil {
-				return
-			}
-		}
 	}
 
 	if len(errs) > 0 {

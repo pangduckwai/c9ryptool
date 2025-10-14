@@ -9,9 +9,12 @@ import (
 	"strings"
 )
 
-func parseKey(k []byte) (
+// ParseKey parse the given input into a key in one of the PEM formats.
+// returns:
+// - typ: false - private key; true - public key
+func ParseKey(k []byte) (
 	key any,
-	typ bool, // false - private key; true - public key
+	typ bool,
 	err error,
 ) {
 	errs := make([]error, 0)
@@ -64,7 +67,7 @@ func getRsaKey(k []byte, lgth int) (
 	} else {
 		var ok, typ bool
 		var b any
-		b, typ, err = parseKey(k)
+		b, typ, err = ParseKey(k)
 		if err != nil {
 			return
 		}

@@ -42,7 +42,7 @@ func (cfg *Config) Command() uint8 {
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
-		"  [encrypt | decrypt | pubkey]\n" +
+		"  [encrypt | decrypt]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {--iv=IV }\n" +
@@ -69,25 +69,15 @@ func Help() string {
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
-		" . pubkey  - export pubic key\n"+
 		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       path of the file containing the encryption key\n"+
-		// "        - key files are not decoded when read, nor encoded when written\n"+
 		"    --iv=IV\n"+
 		"       path of the file containing the initialization vector, if omitted:\n"+
 		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
 		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
-		// "    --iv-b64=IV-B64\n"+
-		// "       initialization vector as base64 encoded string, if omitted:\n"+
-		// "        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
-		// "        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
-		// "    --iv-hex=IV-HEX\n"+
-		// "       initialization vector as hex encoded string, if omitted:\n"+
-		// "        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
-		// "        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
 		"    --tag=TAG\n"+
 		"       path of the file containing the message authentication tag\n"+
 		"    --aad=AAD\n"+
@@ -107,13 +97,8 @@ func Help() string {
 		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
-		// "        1. for encryption, the input plaintext is not decoded\n"+
-		// "        2. for decryption, the input ciphertext is base64 decoded\n"+
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
-		// "        1. for encryption, the output ciphertext is base64 encoded\n"+
-		// "        2. for decryption, the output plaintext is not encoded\n"+
-		// "        3. for pubkey export, the output is not encoded\n"+
 		"    -l, --list\n"+
 		"       list the supported algorithms or encoding schemes\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
@@ -241,26 +226,6 @@ func Parse(args []string) (cfg *Config, err error) {
 			} else {
 				cfg.Iv = args[i][5:]
 			}
-		// case strings.HasPrefix(args[i], "--iv-b64="):
-		// 	if len(args[i]) <= 9 {
-		// 		err = fmt.Errorf("[CONF] Missing IV value")
-		// 		return
-		// 	} else {
-		// 		cfg.Iv, err = base64.StdEncoding.DecodeString(args[i][9:])
-		// 		if err != nil {
-		// 			err = fmt.Errorf("[CONF] %v", err)
-		// 		}
-		// 	}
-		// case strings.HasPrefix(args[i], "--iv-hex="):
-		// 	if len(args[i]) <= 9 {
-		// 		err = fmt.Errorf("[CONF] Missing IV value")
-		// 		return
-		// 	} else {
-		// 		cfg.Iv, err = hex.DecodeString(args[i][9:])
-		// 		if err != nil {
-		// 			err = fmt.Errorf("[CONF] %v", err)
-		// 		}
-		// 	}
 		case strings.HasPrefix(args[i], "--tag="):
 			if len(args[i]) <= 6 {
 				err = fmt.Errorf("[CONF] Missing TAG value")

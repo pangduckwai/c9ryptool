@@ -19,7 +19,6 @@ A simple cryptographic tool
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
-| `pubkey` | export public key from the read private key |
 
 | option | 2<sup>nd</sup> form | encryption | description |
 | --- | --- | --- | --- |
@@ -80,6 +79,10 @@ A simple cryptographic tool
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
 
 ## Changelog
+### v0.8.0
+- add an entry point to split files
+- move export public key to a separate entry point
+
 ### v0.7.5
 - remove all auto encoding during encryption/decryption
 - change input of `IV` to read from file

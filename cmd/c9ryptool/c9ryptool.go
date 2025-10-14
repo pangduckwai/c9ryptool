@@ -11,7 +11,7 @@ import (
 )
 
 func version() string {
-	return "v0.7.5 2025101413"
+	return "v0.8.0 2025101417"
 }
 
 func desc() string {
@@ -86,29 +86,6 @@ func main() {
 		}
 		if cfg.Verbose {
 			fmt.Printf("%v finished using '%v'\n", desc(), encd.Name())
-		}
-
-	case 5:
-		err = cfgs.Validate(cfg)
-		if err != nil {
-			log.Fatalf("[MAIN]%v", err)
-		}
-
-		if cfg.IsList() {
-			fmt.Println(desc())
-			for i, n := range encrypts.List(-1) {
-				fmt.Printf(" %2v - %v\n", i+1, n)
-			}
-			return
-		}
-
-		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
-		if algr == nil {
-			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
-		}
-		err = export(cfg, algr)
-		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
 		}
 
 	case 6:

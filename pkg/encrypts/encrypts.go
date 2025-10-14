@@ -24,9 +24,6 @@ type Algorithm interface {
 	// Key get key
 	Key() []byte
 
-	// PubKey get public key
-	PubKey() []byte
-
 	// PopulateKey populate key for the algorithm to use. If input byte slice is empty, a new key is generated.
 	PopulateKey([]byte) error
 
