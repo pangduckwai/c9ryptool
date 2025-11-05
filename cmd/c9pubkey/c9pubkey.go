@@ -15,7 +15,7 @@ import (
 )
 
 func usage() string {
-	return "Usage:\n pubkey\n" +
+	return "Usage:\n c9pubkey\n" +
 		"   [-k FILE | --key=FILE]\n" +
 		"   {-o FILE | --out=FILE}\n"
 }
