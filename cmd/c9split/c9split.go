@@ -12,7 +12,7 @@ import (
 )
 
 func usage() string {
-	return "Usage:\n split\n" +
+	return "Usage:\n c9split\n" +
 		"   [-i FILE | --in=FILE]\n" +
 		"   {-o FILE | --out0=FILE}\n" +
 		"   {-p FILE | --out1=FILE}\n" +
