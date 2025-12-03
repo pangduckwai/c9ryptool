@@ -128,7 +128,7 @@ func decrypt(
 	if cfg.Iv != "" {
 		iv, err = utils.Read(cfg.Iv, cfg.Buffer, cfg.Verbose)
 		if err != nil {
-			err = fmt.Errorf("[ECY][IV]%v", err)
+			err = fmt.Errorf("[DCY][IV]%v", err)
 			return
 		}
 	}
@@ -136,7 +136,7 @@ func decrypt(
 	if cfg.Tag != "" {
 		tag, err = utils.Read(cfg.Tag, cfg.Buffer, cfg.Verbose)
 		if err != nil {
-			err = fmt.Errorf("[ECY][TAG]%v", err)
+			err = fmt.Errorf("[DCY][TAG]%v", err)
 			return
 		}
 	}
@@ -144,7 +144,7 @@ func decrypt(
 	if cfg.Aad != "" {
 		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
 		if err != nil {
-			err = fmt.Errorf("[ECY][AAD]%v", err)
+			err = fmt.Errorf("[DCY][AAD]%v", err)
 			return
 		}
 	}

@@ -123,11 +123,11 @@ func main() {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
 		if cfg.Command() == cfgs.CMD_YAMLENC {
-			// err = yamlEncrypt(cfg, algr, encd)
-			err = fmt.Errorf(" YAML Encrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
+			err = yamlEncrypt(cfg, algr) //, encd)
+			// err = fmt.Errorf(" YAML Encrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
 		} else {
-			// err = yamlDecrypt(cfg, algr, encd)
-			err = fmt.Errorf(" YAML Decrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
+			err = yamlDecrypt(cfg, algr) //, encd)
+			// err = fmt.Errorf(" YAML Decrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
 		}
 		if cfg.Verbose {
 			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
