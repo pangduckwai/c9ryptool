@@ -93,6 +93,42 @@ func main() {
 			fmt.Printf("%v finished using '%v'\n", desc(), encd.Name())
 		}
 
+	case cfgs.CMD_YAMLENC:
+		fallthrough
+	case cfgs.CMD_YAMLDEC:
+		err = cfgs.Validate(cfg)
+		if err != nil {
+			log.Fatalf("[MAIN]%v", err)
+		}
+
+		if cfg.IsList() {
+			fmt.Println(desc())
+			for i, n := range encrypts.List(0) {
+				a := encrypts.Get(n)
+				if a.Type() {
+					fmt.Printf(" %2v sym  %v\n", i+1, n)
+				} else {
+					fmt.Printf(" %2v asym %v\n", i+1, n)
+				}
+			}
+			return
+		}
+
+		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
+		if algr == nil {
+			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
+		}
+		if cfg.Command() == cfgs.CMD_YAMLENC {
+			// err = encrypt(cfg, algr)
+			err = fmt.Errorf(" YAML Encrypt WIP '%v'", cfg.Command())
+		} else {
+			// err = decrypt(cfg, algr)
+			err = fmt.Errorf(" YAML Decrypt WIP '%v'", cfg.Command())
+		}
+		if cfg.Verbose {
+			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
+		}
+
 	default:
 		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())
 	}

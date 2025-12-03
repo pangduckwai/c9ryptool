@@ -40,6 +40,8 @@ func Validate(cfg *Config) (err error) {
 
 	switch cfg.Command() {
 	case CMD_ENCRYPT:
+		fallthrough
+	case CMD_YAMLENC:
 		if cfg.IsList() {
 			break
 		}
@@ -48,6 +50,8 @@ func Validate(cfg *Config) (err error) {
 		}
 		fallthrough
 	case CMD_DECRYPT:
+		fallthrough
+	case CMD_YAMLDEC:
 		if cfg.IsList() {
 			break
 		}

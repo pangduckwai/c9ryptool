@@ -43,12 +43,14 @@ func TestMatchs(t *testing.T) {
 		"encode", "enco", "nco", "ncd", "nd", "no", // #19
 		"decode", "deco", "eco", "dco", "dd", "do", // #25
 		"hash", "hsh", "ash", "hs", "hh", // #31
+		"yamlenc", "yan", "yn", // #36
+		"yamldec", "yad", "yd", // #39
 		"enc", "dec", "ery", "ecd", // fail
-		"nc", "ec", "ed", "dc", "de", // fail
-		"h", // fail
+		"nc", "ec", "ed", "dc", "de", "ya", // fail
+		"h", "l", "y", // fail
 	}
 
-	h := 36
+	h := 42
 	e := -1
 	f := 0
 	for i, input := range inputs {

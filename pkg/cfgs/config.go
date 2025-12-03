@@ -121,6 +121,8 @@ const CMD_ENCRYPT = 2
 const CMD_DECRYPT = 3
 const CMD_ENCODE = 4
 const CMD_DECODE = 5
+const CMD_YAMLENC = 7
+const CMD_YAMLDEC = 8
 
 var COMMANDS = []string{
 	"help",
@@ -130,6 +132,8 @@ var COMMANDS = []string{
 	"encode",
 	"decode",
 	"hash",
+	"yamlenc",
+	"yamldec",
 }
 
 func Parse(args []string) (cfg *Config, err error) {
@@ -159,6 +163,10 @@ func Parse(args []string) (cfg *Config, err error) {
 	case CMD_ENCRYPT:
 		fallthrough
 	case CMD_DECRYPT:
+		fallthrough
+	case CMD_YAMLENC:
+		fallthrough
+	case CMD_YAMLDEC:
 		cfg.Algr = encrypts.Default()
 	case CMD_ENCODE:
 		fallthrough
