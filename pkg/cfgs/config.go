@@ -17,7 +17,8 @@ const MASK_FLAG = 127
 
 type Config struct {
 	cmd     uint8  // 0 - encrypt; 1 - decrypt
-	Algr    string // algorithms / encoding schemes
+	Algr    string // encryption algorithms
+	Encd    string // encoding schemes
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
 	Key     string // secret key file path
@@ -93,7 +94,7 @@ func Help() string {
 		" . decode - convert the given input back from the specified encoding\n"+
 		"   * options:\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       encoding scheme to use, default: 'base64'\n\n"+
+		"       encoding scheme to use, default: '%v'\n\n"+
 		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
@@ -111,6 +112,7 @@ func Help() string {
 		"         when inputting interactively from stdin",
 		encrypts.Default(),
 		sym.SALTLEN,
+		encodes.Default(),
 		bUFFER/1024,
 	)
 }
@@ -160,18 +162,19 @@ func Parse(args []string) (cfg *Config, err error) {
 	cfg.cmd = uint8(idx)
 
 	switch cfg.cmd {
-	case CMD_ENCRYPT:
-		fallthrough
-	case CMD_DECRYPT:
-		fallthrough
 	case CMD_YAMLENC:
 		fallthrough
 	case CMD_YAMLDEC:
+		cfg.Encd = encodes.Default()
+		fallthrough
+	case CMD_ENCRYPT:
+		fallthrough
+	case CMD_DECRYPT:
 		cfg.Algr = encrypts.Default()
 	case CMD_ENCODE:
 		fallthrough
 	case CMD_DECODE:
-		cfg.Algr = encodes.Default()
+		cfg.Encd = encodes.Default()
 	}
 
 	var val int
@@ -274,14 +277,14 @@ func Parse(args []string) (cfg *Config, err error) {
 				err = fmt.Errorf("[CONF] Missing encoding argument")
 				return
 			} else {
-				cfg.Algr = args[i]
+				cfg.Encd = args[i]
 			}
 		case strings.HasPrefix(args[i], "--encoding="):
 			if len(args[i]) <= 11 {
 				err = fmt.Errorf("[CONF] Missing encoding")
 				return
 			} else {
-				cfg.Algr = args[i][11:]
+				cfg.Encd = args[i][11:]
 			}
 		case args[i] == "-i":
 			i++

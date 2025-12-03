@@ -80,9 +80,9 @@ func main() {
 			return
 		}
 
-		encd := encodes.Get(cfg.Algr)
+		encd := encodes.Get(cfg.Encd)
 		if encd == nil {
-			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Algr)
+			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
 		if cfg.Command() == cfgs.CMD_ENCODE {
 			err = encode(cfg, encd)
@@ -118,12 +118,16 @@ func main() {
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
+		encd := encodes.Get(cfg.Encd)
+		if encd == nil {
+			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
+		}
 		if cfg.Command() == cfgs.CMD_YAMLENC {
-			// err = encrypt(cfg, algr)
-			err = fmt.Errorf(" YAML Encrypt WIP '%v'", cfg.Command())
+			// err = yamlEncrypt(cfg, algr, encd)
+			err = fmt.Errorf(" YAML Encrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
 		} else {
-			// err = decrypt(cfg, algr)
-			err = fmt.Errorf(" YAML Decrypt WIP '%v'", cfg.Command())
+			// err = yamlDecrypt(cfg, algr, encd)
+			err = fmt.Errorf(" YAML Decrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
 		}
 		if cfg.Verbose {
 			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())

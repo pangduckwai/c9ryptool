@@ -103,7 +103,7 @@ func Validate(cfg *Config) (err error) {
 			break
 		}
 
-		if err = encodes.Validate(cfg.Algr); err != nil {
+		if err = encodes.Validate(cfg.Encd); err != nil {
 			errs = append(errs, err)
 		}
 	}

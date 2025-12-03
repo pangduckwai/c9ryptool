@@ -245,7 +245,7 @@ func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 type RawBase64Url int
 
 func (n RawBase64Url) Name() string {
-	return "base64 URL encoding"
+	return "raw base64 URL encoding"
 }
 
 func (n RawBase64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
