@@ -36,18 +36,39 @@ func TestMatch(t *testing.T) {
 func TestMatchs(t *testing.T) {
 	fmt.Println()
 	inputs := []string{
-		"encr", "decr", "enco", "deco", "h", "v",
-		"ncr", "ecry", "nco", "eco", "l", "si",
-		"ny", "dy", "nd", "no", "dd", "do", "dco",
-		"nc", "ec", "er", "ed", "dc",
+		"encrypt", "encr", "ncry", "nrp", "ny", // #0
+		"decrypt", "decr", "ecry", "drp", "dy", // #5
+		"encode", "enco", "nco", "ncd", "nd", "no", // #10
+		"decode", "deco", "eco", "dco", "dd", "do", // #16
+		"hash", "hsh", "ash", "hs", "hh", // #22
+		"pubkey", "pub", "key", "pby", // #27
+		"help", "hlp", "elp", "hl", "hp", // #31
+		"version", "v", "si", "er", // #36
+		// "yamlenc", "yan", "yn", // #40
+		// "yamldec", "yad", "yd", // #43
+		"enc", "dec", "ery", "ecd", // fail
+		"nc", "ec", "ed", "dc", "de", //"ya", // fail
+		"h", //"l", "y", // fail
 	}
 
+	h := 40 //46
+	e := -1
+	f := 0
 	for i, input := range inputs {
 		idx, rst, err := cmdMatch(input)
 		if err != nil {
-			fmt.Printf("TestMatchs() %2v - in:%-7v err:%v\n", i, input, err)
+			f++
+			if e < 0 {
+				e = i
+			}
+			fmt.Printf("TestMatchs() %2v - in:%-9v err:%v\n", i, fmt.Sprintf("\"%v\"", input), err)
 		} else {
-			fmt.Printf("TestMatchs() %2v - in:%-7v out:%-7v (%2v)\n", i, input, rst, idx)
+			fmt.Printf("TestMatchs() %2v - in:%-9v out:%-9v (%v)\n", i, fmt.Sprintf("\"%v\"", input), fmt.Sprintf("\"%v\"", rst), idx)
 		}
+	}
+	if e != h {
+		t.Fatalf("Test 1 to %v should be successful, while the rest should fail, found %v failed", h, e)
+	} else if f != len(inputs)-h {
+		t.Fatalf("Expecting %v fails, got %v", len(inputs)-h, f)
 	}
 }

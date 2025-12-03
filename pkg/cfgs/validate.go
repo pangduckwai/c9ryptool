@@ -136,7 +136,11 @@ func cmdMatch(inp string) (int, string, error) {
 	if lf == 1 {
 		return fltr[0], COMMANDS[fltr[0]], nil
 	} else if lf > 1 {
-		return -3, "", fmt.Errorf("'%v' ambiguously matched to '%v' and '%v'", inp, COMMANDS[fltr[0]], COMMANDS[fltr[1]])
+		ms := make([]string, 0)
+		for x := range fltr {
+			ms = append(ms, COMMANDS[fltr[x]])
+		}
+		return -3, "", fmt.Errorf("'%v' ambiguously matched to %v", inp, ms)
 	} else {
 		var pstr string
 		for _, r := range inp {
@@ -153,7 +157,11 @@ func cmdMatch(inp string) (int, string, error) {
 		if lf == 1 {
 			return fltr[0], COMMANDS[fltr[0]], nil
 		} else if lf > 1 {
-			return -2, "", fmt.Errorf("'%v' ambiguously matched to '%v' and '%v'", inp, COMMANDS[fltr[0]], COMMANDS[fltr[1]])
+			ms := make([]string, 0)
+			for x := range fltr {
+				ms = append(ms, COMMANDS[fltr[x]])
+			}
+			return -2, "", fmt.Errorf("\"%v\" ambiguously matched to %v", inp, ms)
 		}
 		return -1, "", nil
 	}
