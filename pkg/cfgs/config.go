@@ -115,15 +115,21 @@ func Help() string {
 	)
 }
 
+const CMD_HELP = 0
+const CMD_VERSION = 1
+const CMD_ENCRYPT = 2
+const CMD_DECRYPT = 3
+const CMD_ENCODE = 4
+const CMD_DECODE = 5
+
 var COMMANDS = []string{
+	"help",
+	"version",
 	"encrypt",
 	"decrypt",
 	"encode",
 	"decode",
 	"hash",
-	"pubkey",
-	"help",
-	"version",
 }
 
 func Parse(args []string) (cfg *Config, err error) {
@@ -150,13 +156,13 @@ func Parse(args []string) (cfg *Config, err error) {
 	cfg.cmd = uint8(idx)
 
 	switch cfg.cmd {
-	case 0:
+	case CMD_ENCRYPT:
 		fallthrough
-	case 1:
+	case CMD_DECRYPT:
 		cfg.Algr = encrypts.Default()
-	case 2:
+	case CMD_ENCODE:
 		fallthrough
-	case 3:
+	case CMD_DECODE:
 		cfg.Algr = encodes.Default()
 	}
 

@@ -39,7 +39,7 @@ func Validate(cfg *Config) (err error) {
 	}
 
 	switch cfg.Command() {
-	case 0:
+	case CMD_ENCRYPT:
 		if cfg.IsList() {
 			break
 		}
@@ -47,7 +47,7 @@ func Validate(cfg *Config) (err error) {
 			err = fmt.Errorf("[VLDT] unsupported option '--tag'")
 		}
 		fallthrough
-	case 1:
+	case CMD_DECRYPT:
 		if cfg.IsList() {
 			break
 		}
@@ -76,7 +76,7 @@ func Validate(cfg *Config) (err error) {
 			errs = append(errs, fmt.Errorf("encryption key filename missing")) // > go run ./cmd/cryptool e|d {-g} -i README.md
 		}
 
-		if cfg.Command() == 1 && cfg.Genkey {
+		if cfg.Command() == CMD_DECRYPT && cfg.Genkey {
 			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > cryptool d -g {-k key.txt} -i README.md
 		}
 
@@ -92,9 +92,9 @@ func Validate(cfg *Config) (err error) {
 			errs = append(errs, err)
 		}
 
-	case 2:
+	case CMD_ENCODE:
 		fallthrough
-	case 3:
+	case CMD_DECODE:
 		if cfg.IsList() {
 			break
 		}

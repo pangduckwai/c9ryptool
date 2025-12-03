@@ -36,22 +36,19 @@ func TestMatch(t *testing.T) {
 func TestMatchs(t *testing.T) {
 	fmt.Println()
 	inputs := []string{
-		"encrypt", "encr", "ncry", "nrp", "ny", // #0
-		"decrypt", "decr", "ecry", "drp", "dy", // #5
-		"encode", "enco", "nco", "ncd", "nd", "no", // #10
-		"decode", "deco", "eco", "dco", "dd", "do", // #16
-		"hash", "hsh", "ash", "hs", "hh", // #22
-		"pubkey", "pub", "key", "pby", // #27
-		"help", "hlp", "elp", "hl", "hp", // #31
-		"version", "v", "si", "er", // #36
-		// "yamlenc", "yan", "yn", // #40
-		// "yamldec", "yad", "yd", // #43
+		"help", "hlp", "elp", "hl", "hp", // #0
+		"version", "v", "si", "er", // #5
+		"encrypt", "encr", "ncry", "nrp", "ny", // #9
+		"decrypt", "decr", "ecry", "drp", "dy", // #14
+		"encode", "enco", "nco", "ncd", "nd", "no", // #19
+		"decode", "deco", "eco", "dco", "dd", "do", // #25
+		"hash", "hsh", "ash", "hs", "hh", // #31
 		"enc", "dec", "ery", "ecd", // fail
-		"nc", "ec", "ed", "dc", "de", //"ya", // fail
-		"h", //"l", "y", // fail
+		"nc", "ec", "ed", "dc", "de", // fail
+		"h", // fail
 	}
 
-	h := 40 //46
+	h := 36
 	e := -1
 	f := 0
 	for i, input := range inputs {

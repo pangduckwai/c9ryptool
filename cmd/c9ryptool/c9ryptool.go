@@ -25,9 +25,14 @@ func main() {
 	}
 
 	switch cfg.Command() {
-	case 0:
+	case cfgs.CMD_HELP:
+		fmt.Printf("%v\n%v\n", desc(), cfgs.Help())
+	case cfgs.CMD_VERSION:
+		fmt.Println(desc())
+
+	case cfgs.CMD_ENCRYPT:
 		fallthrough
-	case 1:
+	case cfgs.CMD_DECRYPT:
 		err = cfgs.Validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
@@ -50,7 +55,7 @@ func main() {
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
-		if cfg.Command() == 0 {
+		if cfg.Command() == cfgs.CMD_ENCRYPT {
 			err = encrypt(cfg, algr)
 		} else {
 			err = decrypt(cfg, algr)
@@ -59,9 +64,9 @@ func main() {
 			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
 		}
 
-	case 2:
+	case cfgs.CMD_ENCODE:
 		fallthrough
-	case 3:
+	case cfgs.CMD_DECODE:
 		err = cfgs.Validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
@@ -79,7 +84,7 @@ func main() {
 		if encd == nil {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Algr)
 		}
-		if cfg.Command() == 2 {
+		if cfg.Command() == cfgs.CMD_ENCODE {
 			err = encode(cfg, encd)
 		} else {
 			err = decode(cfg, encd)
@@ -88,12 +93,8 @@ func main() {
 			fmt.Printf("%v finished using '%v'\n", desc(), encd.Name())
 		}
 
-	case 6:
-		fmt.Printf("%v\n%v\n", desc(), cfgs.Help())
-	case 7:
-		fmt.Println(desc())
 	default:
-		err = fmt.Errorf(" unknown command '%v'", cfg.Command())
+		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())
 	}
 
 	if err != nil {
