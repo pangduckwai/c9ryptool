@@ -128,10 +128,27 @@ func yamlDecrypt(
 		return
 	}
 
+	inp := make(map[string]interface{})
+	err = yaml.Unmarshal(input, inp)
+	if err != nil {
+		err = fmt.Errorf("[YAML][DCY][UNM]%v", err)
+		return
+	}
+
+	if s0, ok := inp["salt"]; ok {
+		if s1, ok := s0.(string); ok {
+			salt, err = base64.RawURLEncoding.DecodeString(s1) // TODO TEMP HERE!!!!!!!!!
+			if err != nil {
+				return
+			}
+		}
+		delete(inp, "salt")
+	}
+
 	if cfg.Passwd {
-		salt, err = sym.PopulateKeyFromPassword(
+		_, err = sym.PopulateKeyFromPassword(
 			desc(),
-			input,
+			salt,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,
 		)
@@ -184,22 +201,11 @@ func yamlDecrypt(
 			return
 		}
 		var dec []byte
-		if salt != nil {
-			dec, err = alg.Decrypt(enc[:len(enc)-len(salt)], iv, tag, aad)
-		} else {
-			dec, err = alg.Decrypt(enc, iv, tag, aad)
-		}
+		dec, err = alg.Decrypt(enc, iv, tag, aad)
 		if err != nil {
 			return
 		}
 		out = string(dec)
-		return
-	}
-
-	inp := make(map[string]interface{})
-	err = yaml.Unmarshal(input, inp)
-	if err != nil {
-		err = fmt.Errorf("[YAML][DCY][UNM]%v", err)
 		return
 	}
 
