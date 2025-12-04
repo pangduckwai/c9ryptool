@@ -80,9 +80,6 @@ func yamlEncrypt(
 		if err != nil {
 			return
 		}
-		if salt != nil {
-			enc = append(enc, salt...)
-		}
 		out = base64.RawURLEncoding.EncodeToString(enc) // TODO TEMP HERE!!!!!!!!!
 		return
 	}
@@ -99,6 +96,10 @@ func yamlEncrypt(
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][NAV]%v", err)
 		return
+	}
+
+	if salt != nil {
+		sec["salt"] = base64.RawURLEncoding.EncodeToString(salt) // TODO TEMP HERE!!!!!!!!!
 	}
 
 	output, err = yaml.Marshal(sec)

@@ -70,6 +70,8 @@ func Help() string {
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
+		" . yamlenc - encrypt values in the given YAML file while keeping the keys unchanged\n"+
+		" . yamldec - decrypt values in the given YAML file while\n"+
 		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
