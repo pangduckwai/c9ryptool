@@ -17,13 +17,17 @@ func (n Hex) Name() string {
 	return "hex encoding"
 }
 
+func (n Hex) EncodeImpl(inp []byte) string {
+	return hex.EncodeToString(inp)
+}
+
 func (n Hex) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	isStdout := wtr == nil
 	var buf strings.Builder
 
 	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) {
-		encoded := hex.EncodeToString(inp[:cnt])
+		encoded := n.EncodeImpl(inp[:cnt])
 		if !isStdout {
 			fmt.Fprint(wtr, encoded)
 		} else {
@@ -42,6 +46,11 @@ func (n Hex) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
+func (n Hex) DecodeImpl(inp string) (out []byte, err error) {
+	out, err = hex.DecodeString(inp)
+	return
+}
+
 func (n Hex) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	isStdout := wtr == nil
@@ -49,7 +58,7 @@ func (n Hex) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) {
 		var decoded []byte
-		decoded, err = hex.DecodeString(string(inp[:cnt]))
+		decoded, err = n.DecodeImpl(string(inp[:cnt]))
 		if err != nil {
 			return
 		}

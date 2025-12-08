@@ -51,7 +51,8 @@ func Usage() string {
 		"   {--aad=AAD }\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
-		"   {--salt=LEN}\n\n" +
+		"   {--salt=LEN}\n" +
+		"   {-n ENC | --encoding=ENC}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-n ENC | --encoding=ENC}\n\n" +
 		"  all commands\n" +
@@ -70,8 +71,8 @@ func Help() string {
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
-		" . yamlenc - encrypt values in the given YAML file while keeping the keys unchanged\n"+
-		" . yamldec - decrypt values in the given YAML file while\n"+
+		" . yamlenc - encrypt values in the given YAML file while preserving the file structure\n"+
+		" . yamldec - decrypt values in the given YAML file\n"+
 		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
@@ -90,7 +91,9 @@ func Help() string {
 		"    -p, --password\n"+
 		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    --salt=LEN\n"+
-		"       length of salt to use for generating keys from password, default: %v\n\n"+
+		"       length of salt to use for generating keys from password, default: %v\n"+
+		"    -n ENC, --encoding=ENC\n"+
+		"       encoding scheme to use, only applies to yaml encryption/decryption, default: '%v'\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
@@ -114,6 +117,7 @@ func Help() string {
 		"         when inputting interactively from stdin",
 		encrypts.Default(),
 		sym.SALTLEN,
+		encodes.Default(),
 		encodes.Default(),
 		bUFFER/1024,
 	)

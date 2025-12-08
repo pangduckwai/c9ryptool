@@ -19,6 +19,8 @@ A simple cryptographic tool
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
+| `yamlenc` | encrypt values in the given YAML file while preserving the file structure |
+| `yamldec` | decrypt values in the given YAML file |
 
 | option | 2<sup>nd</sup> form | - | description |
 | --- | --- | --- | --- |
@@ -30,6 +32,7 @@ A simple cryptographic tool
 | `-g` | `--generate` | all | generate a new encrytpion key |
 | `-p` | `--password` | sym | indicate a password is input interactively |
 | - | `--salt=LEN` | sym | `LEN` is the length of salt to use for generating keys from password |
+| `-n ENC` | `--encoding=ENC` | yaml | `ENC` is the name of the encoding scheme to use, only applies to yaml encryption/decryption |
 
 > ### console input
 > #### 1. password
@@ -79,6 +82,9 @@ A simple cryptographic tool
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
 
 ## Changelog
+### v0.9.0
+- add YAML encryption/decryption
+
 ### v0.8.0
 - add an entry point to split files
 - move export public key to a separate entry point

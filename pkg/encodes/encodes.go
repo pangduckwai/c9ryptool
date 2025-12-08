@@ -11,8 +11,12 @@ type Encoding interface {
 	// Name algorithm name.
 	Name() string
 
+	EncodeImpl([]byte) string
+
 	// Encode encode the given input and returns the encoded result.
 	Encode(*bufio.Reader, *bufio.Writer) error
+
+	DecodeImpl(string) ([]byte, error)
 
 	// Decode decode the given input and returns the decoded result.
 	Decode(*bufio.Reader, *bufio.Writer) error
@@ -43,11 +47,10 @@ func Get(scheme string) Encoding {
 	return eNCODINGS[scheme]
 }
 
-// Validate validate the given algorithm name.
-// typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
+// Validate validate the given scheme name.
 func Validate(scheme string) (err error) {
 	if _, okay := eNCODINGS[scheme]; !okay {
-		err = fmt.Errorf("[ENCD] unsupported encryption algorithm '%v'", scheme)
+		err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", scheme)
 	}
 	return
 }

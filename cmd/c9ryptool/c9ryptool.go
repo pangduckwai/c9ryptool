@@ -11,7 +11,7 @@ import (
 )
 
 func version() string {
-	return "v0.9.0 2025120418"
+	return "v0.9.0 2025120819"
 }
 
 func desc() string {
@@ -61,7 +61,7 @@ func main() {
 			err = decrypt(cfg, algr)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
+			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name())
 		}
 
 	case cfgs.CMD_ENCODE:
@@ -90,7 +90,7 @@ func main() {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", desc(), encd.Name())
+			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], encd.Name())
 		}
 
 	case cfgs.CMD_YAMLENC:
@@ -123,14 +123,12 @@ func main() {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
 		if cfg.Command() == cfgs.CMD_YAMLENC {
-			err = yamlEncrypt(cfg, algr) //, encd)
-			// err = fmt.Errorf(" YAML Encrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
+			err = yamlEncrypt(cfg, algr, encd)
 		} else {
-			err = yamlDecrypt(cfg, algr) //, encd)
-			// err = fmt.Errorf(" YAML Decrypt WIP '%v' '%v' '%v'", cfg.Command(), algr.Name(), encd.Name())
+			err = yamlDecrypt(cfg, algr, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished using '%v'\n", desc(), algr.Name())
+			fmt.Printf("%v finished '%v' using '%v' and '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name(), encd.Name())
 		}
 
 	default:

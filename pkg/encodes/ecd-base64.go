@@ -17,6 +17,10 @@ func (n Base64) Name() string {
 	return "base64 encoding"
 }
 
+func (n Base64) EncodeImpl(inp []byte) string {
+	return base64.StdEncoding.EncodeToString(inp)
+}
+
 func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -26,7 +30,7 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	encode := func(inp []byte, ln int, flush bool) {
 		if ln > 0 {
-			encoded := base64.StdEncoding.EncodeToString(inp)
+			encoded := n.EncodeImpl(inp)
 			if !isStdout {
 				fmt.Fprint(wtr, encoded)
 			} else {
@@ -65,6 +69,11 @@ func (n Base64) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
+func (n Base64) DecodeImpl(inp string) (out []byte, err error) {
+	out, err = base64.StdEncoding.DecodeString(inp)
+	return
+}
+
 func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -74,7 +83,7 @@ func (n Base64) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	decode := func(inp []byte, ln int, flush bool) error {
 		if ln > 0 {
-			decoded, err := base64.StdEncoding.DecodeString(string(inp))
+			decoded, err := n.DecodeImpl(string(inp))
 			if err != nil {
 				return err
 			}
@@ -128,6 +137,10 @@ func (n Base64Url) Name() string {
 	return "base64 URL encoding"
 }
 
+func (n Base64Url) EncodeImpl(inp []byte) string {
+	return base64.URLEncoding.EncodeToString(inp)
+}
+
 func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -137,7 +150,7 @@ func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	encode := func(inp []byte, ln int, flush bool) {
 		if ln > 0 {
-			encoded := base64.URLEncoding.EncodeToString(inp)
+			encoded := n.EncodeImpl(inp)
 			if !isStdout {
 				fmt.Fprint(wtr, encoded)
 			} else {
@@ -176,6 +189,11 @@ func (n Base64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
+func (n Base64Url) DecodeImpl(inp string) (out []byte, err error) {
+	out, err = base64.URLEncoding.DecodeString(inp)
+	return
+}
+
 func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -194,7 +212,7 @@ func (n Base64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 			case 1:
 				return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
 			}
-			decoded, err := base64.URLEncoding.DecodeString(string(inp))
+			decoded, err := n.DecodeImpl(string(inp))
 			if err != nil {
 				return err
 			}
@@ -248,6 +266,10 @@ func (n RawBase64Url) Name() string {
 	return "raw base64 URL encoding"
 }
 
+func (n RawBase64Url) EncodeImpl(inp []byte) string {
+	return base64.RawURLEncoding.EncodeToString(inp)
+}
+
 func (n RawBase64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -257,7 +279,7 @@ func (n RawBase64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	encode := func(inp []byte, ln int, flush bool) {
 		if ln > 0 {
-			encoded := base64.RawURLEncoding.EncodeToString(inp)
+			encoded := n.EncodeImpl(inp)
 			if !isStdout {
 				fmt.Fprint(wtr, encoded)
 			} else {
@@ -296,6 +318,11 @@ func (n RawBase64Url) Encode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
+func (n RawBase64Url) DecodeImpl(inp string) (out []byte, err error) {
+	out, err = base64.RawURLEncoding.DecodeString(inp)
+	return
+}
+
 func (n RawBase64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
@@ -305,7 +332,7 @@ func (n RawBase64Url) Decode(rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	decode := func(inp []byte, ln int, flush bool) error {
 		if ln > 0 {
-			decoded, err := base64.RawURLEncoding.DecodeString(string(inp))
+			decoded, err := n.DecodeImpl(string(inp))
 			if err != nil {
 				return err
 			}
