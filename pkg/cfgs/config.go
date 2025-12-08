@@ -54,6 +54,8 @@ func Usage() string {
 		"   {--salt=LEN}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-n ENC | --encoding=ENC}\n\n" +
+		"  [hashing]\n" +
+		"   {-h ALGR | --hashing=ALGR}\n\n" +
 		"  all commands\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
@@ -97,6 +99,11 @@ func Help() string {
 		"   * options:\n"+
 		"    -n ENC, --encoding=ENC\n"+
 		"       encoding scheme to use, default: '%v'\n\n"+
+		" # hashing\n"+
+		" . hashing - hash input using the specified algorithm\n"+
+		"   * options:\n"+
+		"    -h ALGR, --hashing=ALGR\n"+
+		"       hashing algorithm to use, default: 'v'\n\n"+
 		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
