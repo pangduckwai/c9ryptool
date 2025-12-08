@@ -43,7 +43,7 @@ func (cfg *Config) Command() uint8 {
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
-		"  [encrypt | decrypt]\n" +
+		"  [encrypt | decrypt | yamlenc | yamldec]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {--iv=IV }\n" +
