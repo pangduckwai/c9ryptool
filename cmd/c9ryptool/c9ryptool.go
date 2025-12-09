@@ -8,10 +8,11 @@ import (
 	"sea9.org/go/cryptool/pkg/cfgs"
 	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
+	"sea9.org/go/cryptool/pkg/hashes"
 )
 
 func version() string {
-	return "v0.9.0 2025120819"
+	return "v1.0.0 2025120911"
 }
 
 func desc() string {
@@ -130,6 +131,26 @@ func main() {
 		if cfg.Verbose {
 			fmt.Printf("%v finished '%v' using '%v' and '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name(), encd.Name())
 		}
+
+	case cfgs.CMD_HASHING:
+		err = cfgs.Validate(cfg)
+		if err != nil {
+			log.Fatalf("[MAIN]%v", err)
+		}
+
+		if cfg.IsList() {
+			fmt.Println(desc())
+			for i, n := range hashes.List() {
+				fmt.Printf(" %2v %v\n", i+1, n)
+			}
+			return
+		}
+
+		hshs := hashes.Get(cfg.Hash) // TODO HERE!!! change to use parsing similar to encryption algorithm names
+		if hshs == nil {
+			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Hash)
+		}
+		calcHash(cfg, hshs)
 
 	default:
 		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())

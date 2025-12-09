@@ -2,22 +2,21 @@ package hashes
 
 import (
 	"bufio"
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"hash"
 	"sort"
+
+	"sea9.org/go/cryptool/pkg/utils"
 )
 
-type Hashing interface {
-	// Name algorithm name.
-	Name() string
-
-	// Hash hash the given input and return the result.
-	Hash(*bufio.Reader, *bufio.Writer) error
-}
-
-var hASHINGS = map[string]Hashing{
-	"md5":    nil,
-	"sha1":   nil,
-	"sha256": nil,
+var hASHINGS = map[string]hash.Hash{
+	"md5":    md5.New(),
+	"sha1":   sha1.New(),
+	"sha256": sha256.New(),
 }
 
 func Default() string {
@@ -33,14 +32,35 @@ func List() (list []string) {
 	return
 }
 
-func Get(algr string) Hashing {
+func Get(algr string) hash.Hash {
 	return hASHINGS[algr]
 }
 
-// Validate validate the given algorithm name.
+// Validate validate the given algorithm name. TODO HERE!!! change to use parsing similar to encryption algorithm names
 func Validate(algr string) (err error) {
 	if _, okay := hASHINGS[algr]; !okay {
 		err = fmt.Errorf("[HASH] unsupported hashing algorithm '%v'", algr)
+	}
+	return
+}
+
+func Hash(h hash.Hash, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+	size := rdr.Size()
+	isStdout := wtr == nil
+
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+		_, err = h.Write(buf)
+	})
+	if err != nil {
+		return
+	}
+
+	hsh := hex.EncodeToString(h.Sum(nil))
+	if !isStdout {
+		fmt.Fprint(wtr, hsh)
+		wtr.Flush()
+	} else {
+		fmt.Println(hsh)
 	}
 	return
 }

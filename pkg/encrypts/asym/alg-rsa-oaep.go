@@ -13,7 +13,7 @@ import (
 /*
   Verify:
 	> echo -n "This is top secret" > secret.txt
-	> cryptool encrypt -a RSA-OAEP-256 -k self.key -i secret.txt -o cipher.txt
+	> c9ryptool encrypt -a RSA-OAEP-256 -k self.key -i secret.txt -o cipher.txt
 	> basesf decode -i cipher.txt -o cipher-bin.txt
 	> openssl pkeyutl -decrypt -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -inkey self.key -in cipher-bin.txt -out plain.txt
 */

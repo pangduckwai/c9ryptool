@@ -57,7 +57,7 @@ func Usage() string {
 		"   {-n ENC | --encoding=ENC}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-n ENC | --encoding=ENC}\n\n" +
-		"  [hashing]\n" +
+		"  [hash]\n" +
 		"   {-h ALGR | --hashing=ALGR}\n\n" +
 		"  all commands\n" +
 		"   {-i FILE | --in=FILE}\n" +
@@ -70,7 +70,7 @@ func Usage() string {
 func Help() string {
 	return fmt.Sprintf("Usage: c9ryptool [commands] {options}\n"+
 		" # misc.\n"+
-		" . version - display current version of 'cryptool'\n"+
+		" . version - display current version of 'c9ryptool'\n"+
 		" . help    - display this message\n\n"+
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
@@ -105,10 +105,10 @@ func Help() string {
 		"    -n ENC, --encoding=ENC\n"+
 		"       encoding scheme to use, default: '%v'\n\n"+
 		" # hashing\n"+
-		" . hashing - hash input using the specified algorithm\n"+
+		" . hash - hash input using the specified algorithm\n"+
 		"   * options:\n"+
 		"    -h ALGR, --hashing=ALGR\n"+
-		"       hashing algorithm to use, default: 'v'\n\n"+
+		"       hashing algorithm to use, default: '%v'\n\n"+
 		" # common options:\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
@@ -128,6 +128,7 @@ func Help() string {
 		sym.SALTLEN,
 		encodes.Default(),
 		encodes.Default(),
+		hashes.Default(),
 		bUFFER/1024,
 	)
 }

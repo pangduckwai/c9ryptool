@@ -9,6 +9,7 @@ import (
 
 	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
+	"sea9.org/go/cryptool/pkg/hashes"
 )
 
 // Validate validate parameters.
@@ -102,8 +103,15 @@ func Validate(cfg *Config) (err error) {
 		if cfg.IsList() {
 			break
 		}
-
 		if err = encodes.Validate(cfg.Encd); err != nil {
+			errs = append(errs, err)
+		}
+
+	case CMD_HASHING:
+		if cfg.IsList() {
+			break
+		}
+		if err = hashes.Validate(cfg.Hash); err != nil {
 			errs = append(errs, err)
 		}
 	}

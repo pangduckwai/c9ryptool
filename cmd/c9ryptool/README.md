@@ -67,7 +67,18 @@ A simple cryptographic tool
 
 ---
 
-### 4. Common options
+### 4. Hashing
+| command | description |
+| --- | --- |
+| `hash` | hash input using the specified algorithm |
+
+| option | 2<sup>nd</sup> form | description |
+| --- | --- | --- |
+| `-h ALGR` | `--hashing=ALGR` | `ALGR` is the name of the hashing algorithm to use |
+
+---
+
+### 5. Common options
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
@@ -80,8 +91,12 @@ A simple cryptographic tool
 ### 2025-10-14
 - Work on AES-CBC
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
+- Let user to control encoding of input/output (in file, out file, key file) during encryption
 
 ## Changelog
+### v1.0.0
+- add hashing
+
 ### v0.9.0
 - add YAML encryption/decryption
 
