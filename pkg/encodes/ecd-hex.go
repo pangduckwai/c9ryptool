@@ -12,8 +12,12 @@ func (n Hex) Name() string {
 	return "hex encoding"
 }
 
-func (n Hex) Padding() bool {
-	return false
+func (n Hex) Padding(inp []byte) []byte {
+	return inp
+}
+
+func (n Hex) Multiple() (int, int) {
+	return 1, 1
 }
 
 func (n Hex) Encode(inp []byte) string {

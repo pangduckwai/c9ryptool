@@ -14,8 +14,11 @@ type Encoding interface {
 	// Name algorithm name.
 	Name() string
 
-	// Padding use padding or not
-	Padding() bool
+	// Padding fill the input with the specific padding.
+	Padding([]byte) []byte
+
+	// Multiple return the multiple of number of characters processed in each encoding / decoding invocation.
+	Multiple() (int, int)
 
 	// Encode encode the given input and returns the encoded result.
 	Encode([]byte) string
@@ -64,44 +67,55 @@ func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	var buf strings.Builder
 
-	encode := func(inp []byte, ln int, flush bool) {
+	encode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
 			encoded := n.Encode(inp)
 			if !isStdout {
-				fmt.Fprint(wtr, encoded)
+				_, err = fmt.Fprint(wtr, encoded)
+				if err != nil {
+					return
+				}
 			} else {
 				buf.WriteString(encoded)
 			}
 		}
 		if flush {
 			if !isStdout {
-				wtr.Flush()
+				err = wtr.Flush()
 			} else {
 				fmt.Print(buf.String())
 			}
 		}
+		return
 	}
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
-		lgh += cnt
-		dat = append(dat, buf...)
+	enc, _ := n.Multiple()
+	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
+		if enc > 1 {
+			lgh += cnt
+			dat = append(dat, inp...)
 
-		lgh -= lgh % 3 // num of characters to encode each time is multiple of 3
-		encode(dat[:lgh], lgh, false)
+			lgh -= lgh % enc // num of characters to encode each time is multiple of 3
+			err = encode(dat[:lgh], lgh, false)
 
-		if len(dat) > lgh {
-			dat = dat[lgh:]
-			lgh = len(dat)
+			if len(dat) > lgh {
+				dat = dat[lgh:]
+				lgh = len(dat)
+			} else {
+				dat = dat[:0]
+				lgh = 0
+			}
 		} else {
-			dat = dat[:0]
-			lgh = 0
+			err = encode(inp[:cnt], cnt, false)
 		}
+
+		return err
 	})
 	if err != nil {
 		return
 	}
 
-	encode(dat, lgh, true)
+	err = encode(dat, lgh, true)
 	return
 }
 
@@ -112,28 +126,18 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	isStdout := wtr == nil
 	buf := make([]byte, 0)
 
-	decode := func(inp []byte, ln int, flush bool) error {
+	decode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
-			if n.Padding() {
-				switch ln % 4 {
-				case 2:
-					inp = append(inp, '=')
-					fallthrough
-				case 3:
-					inp = append(inp, '=')
-				case 1:
-					return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
-				}
-			}
-			decoded, err := n.Decode(string(inp))
+			inp = n.Padding(inp)
+			var decoded []byte
+			decoded, err = n.Decode(string(inp))
 			if err != nil {
-				// return err
-				return fmt.Errorf("'%v' : %v", string(inp), err)
+				return
 			}
 			if !isStdout {
 				_, err = wtr.Write(decoded)
 				if err != nil {
-					return err
+					return
 				}
 			} else {
 				buf = append(buf, decoded...)
@@ -141,28 +145,35 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		}
 		if flush {
 			if !isStdout {
-				wtr.Flush()
+				err = wtr.Flush()
 			} else {
-				fmt.Printf("%s\n", buf) // Show string (%s) or hex encoding (%x) ?
+				fmt.Printf("%s", buf) // Show string (%s) or hex encoding (%x) ?
 			}
 		}
-		return nil
+		return
 	}
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
-		lgh += cnt
-		dat = append(dat, buf...)
+	_, dec := n.Multiple()
+	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
+		if dec > 1 {
+			lgh += cnt
+			dat = append(dat, inp...)
 
-		lgh -= lgh % 4 // num of characters to decode each time is multiple of 4
-		err = decode(dat[:lgh], lgh, false)
+			lgh -= lgh % dec // num of characters to decode each time is multiple of 4
+			err = decode(dat[:lgh], lgh, false)
 
-		if len(dat) > lgh {
-			dat = dat[lgh:]
-			lgh = len(dat)
+			if len(dat) > lgh {
+				dat = dat[lgh:]
+				lgh = len(dat)
+			} else {
+				dat = dat[:0]
+				lgh = 0
+			}
 		} else {
-			dat = dat[:0]
-			lgh = 0
+			err = decode(inp[:cnt], cnt, false)
 		}
+
+		return err
 	})
 	if err != nil {
 		return

@@ -10,7 +10,7 @@ import (
 func BufferedRead(
 	rdr *bufio.Reader,
 	size int,
-	action func(int, []byte),
+	action func(int, []byte) error,
 ) (
 	err error,
 ) {
@@ -35,7 +35,10 @@ func BufferedRead(
 		}
 
 		if cnt > 0 {
-			action(cnt, buf[:cnt])
+			err = action(cnt, buf[:cnt])
+			if err != nil {
+				break
+			}
 		}
 	}
 
@@ -73,8 +76,9 @@ func Read(
 	}
 
 	dat = make([]byte, 0, buffer*2)
-	err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) {
+	err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) error {
 		dat = append(dat, buf...)
+		return nil
 	})
 	return
 }

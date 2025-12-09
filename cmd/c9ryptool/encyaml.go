@@ -8,7 +8,6 @@ import (
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
 	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
-	"sea9.org/go/c9ryptool/pkg/nav"
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
@@ -92,7 +91,7 @@ func yamlEncrypt(
 	}
 
 	sec := make(map[string]interface{})
-	err = nav.Nav(inp, sec, encrypt)
+	err = utils.Traverse(inp, sec, encrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][NAV]%v", err)
 		return
@@ -210,7 +209,7 @@ func yamlDecrypt(
 	}
 
 	clr := make(map[string]interface{})
-	err = nav.Nav(inp, clr, decrypt)
+	err = utils.Traverse(inp, clr, decrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][NAV]%v", err)
 		return

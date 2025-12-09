@@ -48,8 +48,9 @@ func Hash(h hash.Hash, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	isStdout := wtr == nil
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
-		_, err = h.Write(buf)
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) error {
+		_, err := h.Write(buf)
+		return err
 	})
 	if err != nil {
 		return

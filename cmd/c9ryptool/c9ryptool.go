@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.0.1 2025120914"
+	return "v1.0.2 2025120918"
 }
 
 func desc() string {

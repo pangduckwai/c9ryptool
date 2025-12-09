@@ -1,13 +1,14 @@
-package nav
+package utils
 
 import "fmt"
 
-func Nav(
+// Traverse traverse a map[string]interface{}
+func Traverse(
 	inp, out map[string]interface{},
 	convert func(string) (string, error),
 ) (err error) {
 	for k, v := range inp {
-		err = _nav(k, v, out, convert)
+		err = _traverse(k, v, out, convert)
 		if err != nil {
 			break
 		}
@@ -15,7 +16,7 @@ func Nav(
 	return
 }
 
-func _nav(
+func _traverse(
 	key string,
 	ifc interface{},
 	out map[string]interface{},
@@ -26,7 +27,7 @@ func _nav(
 		nxt := make([]interface{}, len(typ))
 		out[key] = nxt
 		for i, f := range typ {
-			err = __nav(key, i, f, nxt, convert)
+			err = __traverse(key, i, f, nxt, convert)
 			if err != nil {
 				break
 			}
@@ -34,7 +35,7 @@ func _nav(
 	case map[string]interface{}:
 		nxt := make(map[string]interface{})
 		out[key] = nxt
-		err = Nav(typ, nxt, convert)
+		err = Traverse(typ, nxt, convert)
 	case string:
 		out[key], err = convert(typ)
 		if err != nil {
@@ -46,7 +47,7 @@ func _nav(
 	return
 }
 
-func __nav(
+func __traverse(
 	key string, idx int,
 	ifc interface{},
 	out []interface{},
@@ -57,7 +58,7 @@ func __nav(
 		nxt := make([]interface{}, len(typ))
 		out[idx] = nxt
 		for i, f := range typ {
-			err = __nav(key, i, f, nxt, convert)
+			err = __traverse(key, i, f, nxt, convert)
 			if err != nil {
 				break
 			}
@@ -65,7 +66,7 @@ func __nav(
 	case map[string]interface{}:
 		nxt := make(map[string]interface{})
 		out[idx] = nxt
-		err = Nav(typ, nxt, convert)
+		err = Traverse(typ, nxt, convert)
 	case string:
 		out[idx], err = convert(typ)
 		if err != nil {
