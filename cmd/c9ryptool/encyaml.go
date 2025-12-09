@@ -80,7 +80,7 @@ func yamlEncrypt(
 		if err != nil {
 			return
 		}
-		out = ecd.EncodeImpl(enc)
+		out = ecd.Encode(enc)
 		return
 	}
 
@@ -99,7 +99,7 @@ func yamlEncrypt(
 	}
 
 	if salt != nil {
-		sec["salt"] = ecd.EncodeImpl(salt) // TODO name of "salt"
+		sec["salt"] = ecd.Encode(salt) // TODO name of "salt"
 	}
 
 	output, err = yaml.Marshal(sec)
@@ -137,7 +137,7 @@ func yamlDecrypt(
 
 	if s0, ok := inp["salt"]; ok { // TODO name of "salt"
 		if s1, ok := s0.(string); ok {
-			salt, err = ecd.DecodeImpl(s1)
+			salt, err = ecd.Decode(s1)
 			if err != nil {
 				return
 			}
@@ -196,7 +196,7 @@ func yamlDecrypt(
 	}
 
 	decrypt := func(inp string) (out string, err error) {
-		enc, err := ecd.DecodeImpl(inp)
+		enc, err := ecd.Decode(inp)
 		if err != nil {
 			return
 		}
