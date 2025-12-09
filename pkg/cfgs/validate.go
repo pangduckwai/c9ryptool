@@ -58,7 +58,7 @@ func Validate(cfg *Config) (err error) {
 		}
 
 		if cfg.Passwd && cfg.Genkey {
-			err = fmt.Errorf("[VLDT] incompatable options '-g' and '-p'") // > cryptool e|d -p -g -i README.md
+			err = fmt.Errorf("[VLDT] incompatable options '-g' and '-p'") // > c9ryptool e|d -p -g -i README.md
 			return
 		}
 
@@ -78,11 +78,11 @@ func Validate(cfg *Config) (err error) {
 				errs = append(errs, fmt.Errorf("key file '%v' already exists", cfg.Key))
 			}
 		} else if !cfg.Passwd {
-			errs = append(errs, fmt.Errorf("encryption key filename missing")) // > go run ./cmd/cryptool e|d {-g} -i README.md
+			errs = append(errs, fmt.Errorf("encryption key filename missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
 		}
 
 		if cfg.Command() == CMD_DECRYPT && cfg.Genkey {
-			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > cryptool d -g {-k key.txt} -i README.md
+			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > c9ryptool d -g {-k key.txt} -i README.md
 		}
 
 		var typ int
