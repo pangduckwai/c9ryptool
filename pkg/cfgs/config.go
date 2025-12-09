@@ -8,6 +8,7 @@ import (
 	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
 	"sea9.org/go/cryptool/pkg/encrypts/sym"
+	"sea9.org/go/cryptool/pkg/hashes"
 )
 
 const bUFFER = 1048576 // 1024x1024
@@ -19,6 +20,7 @@ type Config struct {
 	cmd     uint8  // 0 - encrypt; 1 - decrypt
 	Algr    string // encryption algorithms
 	Encd    string // encoding schemes
+	Hash    string // hashing algorithm
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
 	Key     string // secret key file path
@@ -132,6 +134,7 @@ const CMD_ENCRYPT = 2
 const CMD_DECRYPT = 3
 const CMD_ENCODE = 4
 const CMD_DECODE = 5
+const CMD_HASHING = 6
 const CMD_YAMLENC = 7
 const CMD_YAMLDEC = 8
 
@@ -184,6 +187,8 @@ func Parse(args []string) (cfg *Config, err error) {
 		fallthrough
 	case CMD_DECODE:
 		cfg.Encd = encodes.Default()
+	case CMD_HASHING:
+		cfg.Hash = hashes.Default()
 	}
 
 	var val int
@@ -294,6 +299,21 @@ func Parse(args []string) (cfg *Config, err error) {
 				return
 			} else {
 				cfg.Encd = args[i][11:]
+			}
+		case args[i] == "-h":
+			i++
+			if i >= len(args) {
+				err = fmt.Errorf("[CONF] Missing algorithm argument")
+				return
+			} else {
+				cfg.Hash = args[i]
+			}
+		case strings.HasPrefix(args[i], "--hashing="):
+			if len(args[i]) <= 10 {
+				err = fmt.Errorf("[CONF] Missing algorithm")
+				return
+			} else {
+				cfg.Hash = args[i][10:]
 			}
 		case args[i] == "-i":
 			i++

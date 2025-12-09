@@ -1,4 +1,4 @@
-package hashs
+package hashes
 
 import (
 	"bufio"
@@ -40,7 +40,7 @@ func Get(algr string) Hashing {
 // Validate validate the given algorithm name.
 func Validate(algr string) (err error) {
 	if _, okay := hASHINGS[algr]; !okay {
-		err = fmt.Errorf("[ENCD] unsupported hashing algorithm '%v'", algr)
+		err = fmt.Errorf("[HASH] unsupported hashing algorithm '%v'", algr)
 	}
 	return
 }
