@@ -6,13 +6,16 @@ import (
 	"sort"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 // Encoding encoding scheme
 type Encoding interface {
 	// Name algorithm name.
 	Name() string
+
+	// Padding use padding or not
+	Padding() bool
 
 	// Encode encode the given input and returns the encoded result.
 	Encode([]byte) string
@@ -111,18 +114,21 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	decode := func(inp []byte, ln int, flush bool) error {
 		if ln > 0 {
-			switch ln % 4 {
-			case 2:
-				inp = append(inp, '=')
-				fallthrough
-			case 3:
-				inp = append(inp, '=')
-			case 1:
-				return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
+			if n.Padding() {
+				switch ln % 4 {
+				case 2:
+					inp = append(inp, '=')
+					fallthrough
+				case 3:
+					inp = append(inp, '=')
+				case 1:
+					return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
+				}
 			}
 			decoded, err := n.Decode(string(inp))
 			if err != nil {
-				return err
+				// return err
+				return fmt.Errorf("'%v' : %v", string(inp), err)
 			}
 			if !isStdout {
 				_, err = wtr.Write(decoded)

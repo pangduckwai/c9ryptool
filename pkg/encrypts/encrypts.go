@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strconv"
 
-	"sea9.org/go/cryptool/pkg/encrypts/asym"
-	"sea9.org/go/cryptool/pkg/encrypts/sym"
+	"sea9.org/go/c9ryptool/pkg/encrypts/asym"
+	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
 )
 
 // Algorithm encryption algorithms

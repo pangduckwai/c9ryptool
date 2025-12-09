@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/encrypts/asym"
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/encrypts/asym"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func usage() string {

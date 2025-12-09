@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/encodes"
-	"sea9.org/go/cryptool/pkg/encrypts"
-	"sea9.org/go/cryptool/pkg/encrypts/sym"
-	"sea9.org/go/cryptool/pkg/hashes"
+	"sea9.org/go/c9ryptool/pkg/encodes"
+	"sea9.org/go/c9ryptool/pkg/encrypts"
+	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
+	"sea9.org/go/c9ryptool/pkg/hashes"
 )
 
 const bUFFER = 1048576 // 1024x1024

@@ -6,8 +6,8 @@ import (
 	"hash"
 	"os"
 
-	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/hashes"
+	"sea9.org/go/c9ryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/hashes"
 )
 
 func calcHash(

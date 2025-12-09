@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/encodes"
+	"sea9.org/go/c9ryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/encodes"
 )
 
 func encode(

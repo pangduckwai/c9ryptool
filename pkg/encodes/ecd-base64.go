@@ -12,6 +12,10 @@ func (n Base64) Name() string {
 	return "base64 encoding"
 }
 
+func (n Base64) Padding() bool {
+	return true
+}
+
 func (n Base64) Encode(inp []byte) string {
 	return base64.StdEncoding.EncodeToString(inp)
 }
@@ -29,6 +33,10 @@ func (n Base64Url) Name() string {
 	return "base64 URL encoding"
 }
 
+func (n Base64Url) Padding() bool {
+	return true
+}
+
 func (n Base64Url) Encode(inp []byte) string {
 	return base64.URLEncoding.EncodeToString(inp)
 }
@@ -44,6 +52,10 @@ type RawBase64Url int
 
 func (n RawBase64Url) Name() string {
 	return "raw base64 URL encoding"
+}
+
+func (n RawBase64Url) Padding() bool {
+	return false
 }
 
 func (n RawBase64Url) Encode(inp []byte) string {

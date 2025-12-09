@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func usage() string {

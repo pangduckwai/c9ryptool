@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/encrypts"
-	"sea9.org/go/cryptool/pkg/encrypts/sym"
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/encrypts"
+	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func encrypt(

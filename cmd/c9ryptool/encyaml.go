@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"gopkg.in/yaml.v3"
-	"sea9.org/go/cryptool/pkg/cfgs"
-	"sea9.org/go/cryptool/pkg/encodes"
-	"sea9.org/go/cryptool/pkg/encrypts"
-	"sea9.org/go/cryptool/pkg/encrypts/sym"
-	"sea9.org/go/cryptool/pkg/nav"
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/encodes"
+	"sea9.org/go/c9ryptool/pkg/encrypts"
+	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
+	"sea9.org/go/c9ryptool/pkg/nav"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func yamlEncrypt(

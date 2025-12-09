@@ -10,7 +10,7 @@ import (
 	"hash"
 	"sort"
 
-	"sea9.org/go/cryptool/pkg/utils"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 var hASHINGS = map[string]hash.Hash{

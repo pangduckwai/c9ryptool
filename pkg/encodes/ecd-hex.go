@@ -12,6 +12,10 @@ func (n Hex) Name() string {
 	return "hex encoding"
 }
 
+func (n Hex) Padding() bool {
+	return false
+}
+
 func (n Hex) Encode(inp []byte) string {
 	return hex.EncodeToString(inp)
 }

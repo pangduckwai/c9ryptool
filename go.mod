@@ -1,4 +1,4 @@
-module sea9.org/go/cryptool
+module sea9.org/go/c9ryptool
 
 go 1.24
 

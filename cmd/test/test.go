@@ -14,7 +14,7 @@ import (
 	"log"
 	"os"
 
-	"sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/cfgs"
 )
 
 func read(
