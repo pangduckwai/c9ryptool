@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"sort"
+	"strings"
+
+	"sea9.org/go/cryptool/pkg/utils"
 )
 
 // Encoding encoding scheme
@@ -12,10 +15,10 @@ type Encoding interface {
 	Name() string
 
 	// Encode encode the given input and returns the encoded result.
-	Encode(*bufio.Reader, *bufio.Writer) error
+	Encode([]byte) string
 
 	// Decode decode the given input and returns the decoded result.
-	Decode(*bufio.Reader, *bufio.Writer) error
+	Decode(string) ([]byte, error)
 }
 
 var eNCODINGS = map[string]Encoding{
@@ -43,11 +46,122 @@ func Get(scheme string) Encoding {
 	return eNCODINGS[scheme]
 }
 
-// Validate validate the given algorithm name.
-// typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
+// Validate validate the given scheme name.
 func Validate(scheme string) (err error) {
 	if _, okay := eNCODINGS[scheme]; !okay {
-		err = fmt.Errorf("[ENCD] unsupported encryption algorithm '%v'", scheme)
+		err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", scheme)
 	}
+	return
+}
+
+func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+	size := rdr.Size()
+	lgh := 0
+	dat := make([]byte, 0, size*2)
+	isStdout := wtr == nil
+	var buf strings.Builder
+
+	encode := func(inp []byte, ln int, flush bool) {
+		if ln > 0 {
+			encoded := n.Encode(inp)
+			if !isStdout {
+				fmt.Fprint(wtr, encoded)
+			} else {
+				buf.WriteString(encoded)
+			}
+		}
+		if flush {
+			if !isStdout {
+				wtr.Flush()
+			} else {
+				fmt.Print(buf.String())
+			}
+		}
+	}
+
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+		lgh += cnt
+		dat = append(dat, buf...)
+
+		lgh -= lgh % 3 // num of characters to encode each time is multiple of 3
+		encode(dat[:lgh], lgh, false)
+
+		if len(dat) > lgh {
+			dat = dat[lgh:]
+			lgh = len(dat)
+		} else {
+			dat = dat[:0]
+			lgh = 0
+		}
+	})
+	if err != nil {
+		return
+	}
+
+	encode(dat, lgh, true)
+	return
+}
+
+func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+	size := rdr.Size()
+	lgh := 0
+	dat := make([]byte, 0, size*2)
+	isStdout := wtr == nil
+	buf := make([]byte, 0)
+
+	decode := func(inp []byte, ln int, flush bool) error {
+		if ln > 0 {
+			switch ln % 4 {
+			case 2:
+				inp = append(inp, '=')
+				fallthrough
+			case 3:
+				inp = append(inp, '=')
+			case 1:
+				return fmt.Errorf("invalid input \"%s\", %v %% 4 = 1", inp, len(inp))
+			}
+			decoded, err := n.Decode(string(inp))
+			if err != nil {
+				return err
+			}
+			if !isStdout {
+				_, err = wtr.Write(decoded)
+				if err != nil {
+					return err
+				}
+			} else {
+				buf = append(buf, decoded...)
+			}
+		}
+		if flush {
+			if !isStdout {
+				wtr.Flush()
+			} else {
+				fmt.Printf("%s\n", buf) // Show string (%s) or hex encoding (%x) ?
+			}
+		}
+		return nil
+	}
+
+	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) {
+		lgh += cnt
+		dat = append(dat, buf...)
+
+		lgh -= lgh % 4 // num of characters to decode each time is multiple of 4
+		err = decode(dat[:lgh], lgh, false)
+
+		if len(dat) > lgh {
+			dat = dat[lgh:]
+			lgh = len(dat)
+		} else {
+			dat = dat[:0]
+			lgh = 0
+		}
+	})
+	if err != nil {
+		return
+	}
+
+	err = decode(dat, lgh, true)
 	return
 }

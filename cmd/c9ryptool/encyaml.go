@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
 	"sea9.org/go/cryptool/pkg/cfgs"
+	"sea9.org/go/cryptool/pkg/encodes"
 	"sea9.org/go/cryptool/pkg/encrypts"
 	"sea9.org/go/cryptool/pkg/encrypts/sym"
 	"sea9.org/go/cryptool/pkg/nav"
@@ -15,7 +15,7 @@ import (
 func yamlEncrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	// ecd encodes.Encoding,
+	ecd encodes.Encoding,
 ) (err error) {
 	var key, input, output, salt, iv, aad []byte
 
@@ -80,7 +80,7 @@ func yamlEncrypt(
 		if err != nil {
 			return
 		}
-		out = base64.RawURLEncoding.EncodeToString(enc) // TODO TEMP HERE!!!!!!!!!
+		out = ecd.Encode(enc)
 		return
 	}
 
@@ -99,7 +99,7 @@ func yamlEncrypt(
 	}
 
 	if salt != nil {
-		sec["salt"] = base64.RawURLEncoding.EncodeToString(salt) // TODO TEMP HERE!!!!!!!!!
+		sec["salt"] = ecd.Encode(salt) // TODO name of "salt"
 	}
 
 	output, err = yaml.Marshal(sec)
@@ -118,7 +118,7 @@ func yamlEncrypt(
 func yamlDecrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	// ecd encodes.Encoding,
+	ecd encodes.Encoding,
 ) (err error) {
 	var key, input, output, salt, iv, tag, aad []byte
 
@@ -135,9 +135,9 @@ func yamlDecrypt(
 		return
 	}
 
-	if s0, ok := inp["salt"]; ok {
+	if s0, ok := inp["salt"]; ok { // TODO name of "salt"
 		if s1, ok := s0.(string); ok {
-			salt, err = base64.RawURLEncoding.DecodeString(s1) // TODO TEMP HERE!!!!!!!!!
+			salt, err = ecd.Decode(s1)
 			if err != nil {
 				return
 			}
@@ -196,7 +196,7 @@ func yamlDecrypt(
 	}
 
 	decrypt := func(inp string) (out string, err error) {
-		enc, err := base64.RawURLEncoding.DecodeString(inp) // TODO TEMP HERE!!!!!!!!!
+		enc, err := ecd.Decode(inp)
 		if err != nil {
 			return
 		}

@@ -43,7 +43,7 @@ func encode(
 		defer out.Close()
 	}
 
-	err = ecd.Encode(rdr, wtr)
+	err = encodes.Encode(ecd, rdr, wtr)
 	if err != nil {
 		err = fmt.Errorf("[ENCODE] %v", err)
 	}
@@ -84,7 +84,7 @@ func decode(
 		defer out.Close()
 	}
 
-	err = ecd.Decode(rdr, wtr)
+	err = encodes.Decode(ecd, rdr, wtr)
 	if err != nil {
 		err = fmt.Errorf("[DECODE] %v", err)
 	}
