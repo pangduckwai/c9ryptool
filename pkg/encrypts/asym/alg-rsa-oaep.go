@@ -42,11 +42,11 @@ func (a *Rsa2048OaepSha256) Key() []byte {
 	if err != nil {
 		panic(err)
 	}
-	pem := pem.EncodeToMemory(&pem.Block{
+	rst := pem.EncodeToMemory(&pem.Block{
 		Type:  "PRIVATE KEY",
 		Bytes: buf,
 	})
-	return pem
+	return rst
 }
 
 func (a *Rsa2048OaepSha256) PopulateKey(key []byte) (err error) {

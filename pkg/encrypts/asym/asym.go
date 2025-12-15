@@ -18,21 +18,21 @@ func ParseKey(k []byte) (
 	err error,
 ) {
 	errs := make([]error, 0)
-	pem, _ := pem.Decode(k)
-	key, err = x509.ParsePKCS8PrivateKey(pem.Bytes)
+	blk, _ := pem.Decode(k)
+	key, err = x509.ParsePKCS8PrivateKey(blk.Bytes)
 	if err != nil {
 		errs = append(errs, err)
-		key, err = x509.ParsePKCS1PrivateKey(pem.Bytes)
+		key, err = x509.ParsePKCS1PrivateKey(blk.Bytes)
 		if err != nil {
 			errs = append(errs, err)
-			key, err = x509.ParseECPrivateKey(pem.Bytes)
+			key, err = x509.ParseECPrivateKey(blk.Bytes)
 			if err != nil {
 				errs = append(errs, err)
 				typ = true // try read as public key from this point forward
-				key, err = x509.ParsePKIXPublicKey(pem.Bytes)
+				key, err = x509.ParsePKIXPublicKey(blk.Bytes)
 				if err != nil {
 					errs = append(errs, err)
-					key, err = x509.ParsePKCS1PublicKey(pem.Bytes)
+					key, err = x509.ParsePKCS1PublicKey(blk.Bytes)
 					if err != nil {
 						errs = append(errs, err)
 					}

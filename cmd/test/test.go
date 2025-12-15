@@ -10,136 +10,52 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
-	"sea9.org/go/c9ryptool/pkg/cfgs"
+	ecies "github.com/ecies/go/v2"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
-func read(
-	cfg *cfgs.Config,
-	decode bool,
-) (
-	dat []byte,
-	err error,
-) {
-	inp := os.Stdin
-	if cfg.Input != "" {
-		inp, err = os.Open(cfg.Input)
-		if err != nil {
-			return
-		}
-		defer inp.Close()
-	}
-
-	rdr := bufio.NewReaderSize(inp, cfg.Buffer)
-	if rdr.Size() != cfg.Buffer {
-		if cfg.Verbose {
-			fmt.Printf("Read buffer size %v mismatching with the specified size %v, changing buffer size...\n", rdr.Size(), cfg.Buffer)
-		}
-		cfg.Buffer = rdr.Size()
-		rdr = bufio.NewReaderSize(inp, cfg.Buffer)
-	}
-
-	cnt, off := 0, 0
-	var err1 error
-	buf := make([]byte, 0, cfg.Buffer)
-	dat = make([]byte, 0, cfg.Buffer*2)
-	for idx := 0; ; idx++ {
-		// As described in the doc, handle read data first if n > 0 before handling error,
-		// it is because the returned error could have been EOF
-		if err1 == nil { // When loop for the last time, skip read
-			cnt, err = rdr.Read(buf[:cap(buf)])
-		}
-
-		if cnt > 0 && cfg.Input == "" {
-			// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
-			if buf[:cnt][0] == 46 { // ASCII code 46 is period ('.')
-				if cnt == 2 && buf[:cnt][1] == 10 { // ASCII code 10 is line feed LF ('\n')
-					cnt = 0
-					off = 1
-					err = io.EOF
-				} else if cnt == 3 && buf[:cnt][1] == 13 && buf[:cnt][2] == 10 { // ASCII code 13 is carriage return CR
-					cnt = 0
-					off = 2
-					err = io.EOF
-				}
-			}
-			if off > len(dat) {
-				off = len(dat)
-			}
-		}
-
-		if err1 != nil {
-			if err1 == io.EOF {
-				err = nil
-				break // Done
-			} else {
-				dat = nil
-				err = err1
-				return
-			}
-		}
-
-		if decode {
-			decoded, errr := base64.StdEncoding.DecodeString(string(buf[:cnt]))
-			if errr != nil {
-				err = errr
-				return
-			}
-			dat = append(dat[:len(dat)-off], decoded...)
-		} else {
-			dat = append(dat[:len(dat)-off], buf[:cnt]...)
-		}
-		err1 = err
-		// fmt.Printf("TEMP!!! cnt:%3v off:%3v '%v'\n", cnt, off, string(buf[:cnt]))
-	}
-	return
+func usage() {
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|secp256k1]\n")
+	os.Exit(1)
 }
 
 func main() {
-	/*
-		fmt.Println("Test command line input...")
+	if len(os.Args) < 2 {
+		usage()
+	}
+	cmd := os.Args[1]
+	switch cmd {
+	case "1line":
+		fmt.Println("01. Test command line input...")
 		rdr := bufio.NewReader(os.Stdin)
 		fmt.Print(" enter input: ")
 		inp, err := rdr.ReadString('\n')
 		if err != nil {
-			log.Fatalf("[TEST] %v", err)
+			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
-		fmt.Printf("Your input is '%v' (%v)\n", inp[:len(inp)-1], len(inp))
-	*/
-
-	/*
-		fmt.Println("Test read multiple lines...")
-		cfg := &cfgs.Config{
-			Buffer:  32768,
-			Verbose: true,
-		}
-		buff, err := read(cfg)
+		fmt.Printf("[TEST][%v] Your input is '%v' (%v)\n", cmd, inp[:len(inp)-1], len(inp))
+	case "mline":
+		fmt.Println("02. Test read multiple lines...")
+		buff, err := utils.Read("", 32768, true)
 		if err != nil {
-			log.Fatalf("[TEST] %v", err)
+			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
-		fmt.Printf("Result:\n'%v'\n", string(buff))
-	*/
-
-	/*
-		fmt.Println("Test encrypt with CR public key...")
-		cfg := &cfgs.Config{
-			Buffer:  32768,
-			Verbose: true,
-			Input:   "cr.pem",
-		}
-		buff, err := read(cfg, false)
+		fmt.Printf("[TEST][%v] Result:\n'%v'\n", cmd, string(buff))
+	case "crenc":
+		fmt.Println("03. Test encrypt with CR public key...")
+		buff, err := utils.Read("test/cr.pem", 32768, false)
 		if err != nil {
-			log.Fatalf("[TEST] %v", err)
+			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
-		fmt.Printf("[TEST] pkey read:\n%s\n", buff)
+		fmt.Printf("[TEST][%v] pkey read:\n%s\n", cmd, buff)
 
 		blck, _ := pem.Decode(buff)
 		pkey, err := x509.ParsePKIXPublicKey(blck.Bytes)
 		if err != nil {
-			log.Fatalf("[TEST] %v", err)
+			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
 
 		cipher, err := rsa.EncryptOAEP(
@@ -150,45 +66,121 @@ func main() {
 			nil,
 		)
 		if err != nil {
-			log.Fatalf("[TEST] %v", err)
+			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
-		fmt.Printf("[TEST] cipher text:\n%v\n", base64.StdEncoding.EncodeToString(cipher))
-	*/
+		fmt.Printf("[TEST][%v] cipher text:\n%v\n", cmd, base64.StdEncoding.EncodeToString(cipher))
+	case "encdec":
+		fmt.Println("04. Test encrypt with public key then decrypt with private key...")
+		buff, err := utils.Read("test/self.key", 32768, false)
+		if err != nil {
+			log.Fatalf("[TEST][%v] %v", cmd, err)
+		}
+		fmt.Printf("[TEST][%v] key read:\n%s\n", cmd, buff)
 
-	fmt.Println("Test encrypt with public key then decrypt with private key...")
-	cfg := &cfgs.Config{
-		Buffer:  32768,
-		Verbose: true,
-		Input:   "self.key",
-	}
-	buff, err := read(cfg, false)
-	if err != nil {
-		log.Fatalf("[TEST] %v", err)
-	}
-	fmt.Printf("[TEST] key read:\n%s\n", buff)
+		block, _ := pem.Decode(buff)
+		k, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			log.Fatalf("[TEST][%v] %v", cmd, err)
+		}
 
-	block, _ := pem.Decode(buff)
-	k, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		log.Fatalf("[TEST] %v", err)
+		var key *rsa.PrivateKey
+		var pkey *rsa.PublicKey
+		var okay bool
+		if key, okay = k.(*rsa.PrivateKey); okay {
+			pkey = &key.PublicKey
+		}
+
+		cipher, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pkey, []byte("This is top secret... really!"), nil)
+		if err != nil {
+			log.Fatalf("[TEST][%v] %v", cmd, err)
+		}
+		fmt.Printf("[TEST][%v] cipher text:\n%v\n", cmd, base64.StdEncoding.EncodeToString(cipher))
+
+		plainx, err := key.Decrypt(rand.Reader, cipher, &rsa.OAEPOptions{Hash: crypto.SHA256})
+		if err != nil {
+			log.Fatalf("[TEST][%v] %v", cmd, err)
+		}
+		fmt.Printf("[TEST][%v] the secret is:\n%s\n", cmd, plainx)
+	case "secp256k1":
+		fmt.Println("05. Test encrypt / decrypt using secp256k1")
+		key, err := ecies.GenerateKey()
+		if err != nil {
+			log.Fatalf("[TEST][%v] %v", cmd, err)
+		}
+		pkey := key.PublicKey
+		fmt.Printf("[TEST][%v]\n%v\n%s\n", cmd, key, pkey)
+	default:
+		usage()
 	}
 
-	var key *rsa.PrivateKey
-	var pkey *rsa.PublicKey
-	var okay bool
-	if key, okay = k.(*rsa.PrivateKey); okay {
-		pkey = &key.PublicKey
-	}
+	// Gen new key pair
+	// key, err := ecies.GenerateKey()
+	// if err != nil {
+	// 	log.Fatalf("[TEST][KEY][0]%v", err)
+	// }
+	// byt := key.Bytes()
+	// fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(byt), byt)
+	// der, err := asn1.Marshal(byt)
+	// if err != nil {
+	// 	log.Fatalf("[TEST][KEY][0]%v", err)
+	// }
+	// key := ecies.NewPrivateKeyFromBytes(byt)
+	// inp := pem.EncodeToMemory(&pem.Block{
+	// 	Type:  "PRIVATE KEY",
+	// 	Bytes: der,
+	// })
+	// fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(inp), inp)
 
-	cipher, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pkey, []byte("This is top secret... really!"), nil)
-	if err != nil {
-		log.Fatalf("[TEST] %v", err)
-	}
-	fmt.Printf("[TEST] cipher text:\n%v\n", base64.StdEncoding.EncodeToString(cipher))
+	// Read Emali key pair
+	// inp, err := utils.Read("test/emali.key", 10240, false)
+	// if err != nil {
+	// 	log.Fatalf("[TEST][KEY][0]%v", err)
+	// } else {
+	// 	fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(inp), inp)
+	// }
 
-	plainx, err := key.Decrypt(rand.Reader, cipher, &rsa.OAEPOptions{Hash: crypto.SHA256})
-	if err != nil {
-		log.Fatalf("[TEST] %v", err)
-	}
-	fmt.Printf("[TEST] the secret is:\n%s\n", plainx)
+	// Parse key
+	// blk, _ := pem.Decode(inp)
+	// fmt.Printf("[TEST][KEY][1] %v\n", blk.Type)
+	// fmt.Printf("[TEST][KEY][1] %v\n", blk.Headers)
+	// fmt.Printf("[TEST][KEY][1] (%v)\n%v\n", len(blk.Bytes), blk.Bytes)
+
+	// key := ecies.NewPrivateKeyFromBytes(blk.Bytes)
+
+	// pkey := key.PublicKey
+	// fmt.Printf("[TEST][KEY][2]\n%v\n%v\n", key, pkey)
+
+	// encrypt := func(plaintext []byte) (ciphertext []byte, err error) {
+	// 	ciphertext, err = ecies.Encrypt(pkey, plaintext)
+	// 	return
+	// }
+
+	// decrypt := func(ciphertext []byte) (plaintext []byte, err error) {
+	// 	plaintext, err = ecies.Decrypt(key, ciphertext)
+	// 	return
+	// }
+
+	// Use new message
+	// message := []byte("This is top secret")
+	// secret, err := encrypt(message)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// secret := make([]byte, 0)
+
+	// Use existing message)
+	// secret, err := utils.Read("test/test5.enc", 10240, false)
+	// if err != nil {
+	// 	log.Fatalf("[TEST][MSG]%v", err)
+	// }
+	// fmt.Printf("TEST!!!\n%s\n", secret)
+
+	// fmt.Printf("TEST!!!\n%s\n->\n%s\n", message, secret)
+
+	// Decrypt
+	// result, err := decrypt(secret)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("->\n%s\n", result)
 }
