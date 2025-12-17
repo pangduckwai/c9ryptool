@@ -66,6 +66,7 @@ func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	dat := make([]byte, 0, size*2)
 	isStdout := wtr == nil
 	var buf strings.Builder
+	enc, _ := n.Multiple()
 
 	encode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
@@ -89,7 +90,6 @@ func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	enc, _ := n.Multiple()
 	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
 		if enc > 1 {
 			lgh += cnt
@@ -125,6 +125,7 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	dat := make([]byte, 0, size*2)
 	isStdout := wtr == nil
 	buf := make([]byte, 0)
+	_, dec := n.Multiple()
 
 	decode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
@@ -153,7 +154,6 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		return
 	}
 
-	_, dec := n.Multiple()
 	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
 		if dec > 1 {
 			lgh += cnt

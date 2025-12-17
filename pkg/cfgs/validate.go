@@ -107,6 +107,11 @@ func Validate(cfg *Config) (err error) {
 			errs = append(errs, err)
 		}
 
+	case CMD_DISPLAY:
+		if cfg.Encd != "" {
+			err = encodes.Validate(cfg.Encd)
+		}
+
 	case CMD_HASHING:
 		if cfg.IsList() {
 			break

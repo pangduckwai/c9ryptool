@@ -132,6 +132,21 @@ func main() {
 			fmt.Printf("%v finished '%v' using '%v' and '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name(), encd.Name())
 		}
 
+	case cfgs.CMD_DISPLAY:
+		err = cfgs.Validate(cfg)
+		if err != nil {
+			log.Fatalf("[MAIN]%v", err)
+		}
+
+		var encd encodes.Encoding
+		if cfg.Encd != "" {
+			encd = encodes.Get(cfg.Encd)
+			if encd == nil {
+				log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
+			}
+		}
+		err = display(cfg, encd)
+
 	case cfgs.CMD_HASHING:
 		err = cfgs.Validate(cfg)
 		if err != nil {
@@ -150,7 +165,7 @@ func main() {
 		if hshs == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Hash)
 		}
-		calcHash(cfg, hshs)
+		err = calcHash(cfg, hshs)
 
 	default:
 		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())

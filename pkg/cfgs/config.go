@@ -140,19 +140,21 @@ const CMD_DECRYPT = 3
 const CMD_ENCODE = 4
 const CMD_DECODE = 5
 const CMD_HASHING = 6
-const CMD_YAMLENC = 7
-const CMD_YAMLDEC = 8
+const CMD_DISPLAY = 7
+const CMD_YAMLENC = 8
+const CMD_YAMLDEC = 9
 
 var COMMANDS = []string{
-	"help",
-	"version",
-	"encrypt",
-	"decrypt",
-	"encode",
-	"decode",
-	"hash",
-	"yamlenc",
-	"yamldec",
+	"help",    // 0
+	"version", // 1
+	"encrypt", // 2
+	"decrypt", // 3
+	"encode",  // 4
+	"decode",  // 5
+	"hash",    // 6
+	"display", // 7
+	"yamlenc", // 8
+	"yamldec", // 9
 }
 
 func Parse(args []string) (cfg *Config, err error) {
