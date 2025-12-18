@@ -156,10 +156,11 @@ func display(
 		if dec > 1 {
 			lgh -= lgh % dec
 		}
-		fmt.Printf("TEMP 0 END:%v LGH:%v\n", end, lgh)
 		to := lgh
 		for fm := 0; ; fm, to = fm+lgh, to+lgh {
-			fmt.Printf("TEMP 1 %4v %4v %s\n", fm, to, buf[fm:to])
+			if cfg.Verbose {
+				fmt.Printf("%5v %5v %s\n", fm, to, buf[fm:to])
+			}
 			err = decode(buf[fm:to], lgh)
 			if err != nil {
 				return
@@ -169,7 +170,9 @@ func display(
 			}
 		}
 		if end > to {
-			fmt.Printf("TEMP 2 %4v %4v %s\n", to, end, buf[to:])
+			if cfg.Verbose {
+				fmt.Printf("%5v %5v %s\n", to, end, buf[to:])
+			}
 			err = decode(buf[to:], end-to)
 			if err != nil {
 				return

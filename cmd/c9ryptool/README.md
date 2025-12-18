@@ -32,6 +32,9 @@ A simple cryptographic tool
 | `-g` | `--generate` | all | generate a new encrytpion key |
 | `-p` | `--password` | sym | indicate a password is input interactively |
 | - | `--salt=LEN` | sym | `LEN` is the length of salt to use for generating keys from password |
+| `-l` | `--list` | list the supported algorithms or encoding schemes |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-n ENC` | `--encoding=ENC` | yaml | `ENC` is the name of the encoding scheme to use, only applies to yaml encryption/decryption |
 
 > ### console input
@@ -63,6 +66,9 @@ A simple cryptographic tool
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
+| `-l` | `--list` | list the supported algorithms or encoding schemes |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
 
 ---
@@ -74,16 +80,28 @@ A simple cryptographic tool
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
+| `-l` | `--list` | list the supported algorithms or encoding schemes |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
+| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-h ALGR` | `--hashing=ALGR` | `ALGR` is the name of the hashing algorithm to use |
+
+---
+
+### 5. Display
+| command | description |
+| --- | --- |
+| `display` | display content of the given input as hex, and as characters if printable |
+
+| option | 2<sup>nd</sup> form | description |
+| --- | --- | --- |
+| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
+| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
 
 ---
 
 ### 5. Common options
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
-| `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
-| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
-| `-l` | `--list` | list the supported algorithms or encoding schemes |
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
@@ -94,6 +112,9 @@ A simple cryptographic tool
 - Let user to control encoding of input/output (in file, out file, key file) during encryption
 
 ## Changelog
+### v1.1.0
+- add display file contents
+
 ### v1.0.0
 - add hashing
 

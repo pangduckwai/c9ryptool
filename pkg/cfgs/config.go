@@ -54,15 +54,24 @@ func Usage() string {
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {--salt=LEN}\n" +
-		"   {-n ENC | --encoding=ENC}\n\n" +
-		"  [encode | decode]\n" +
-		"   {-n ENC | --encoding=ENC}\n\n" +
-		"  [hash]\n" +
-		"   {-h ALGR | --hashing=ALGR}\n\n" +
-		"  all commands\n" +
+		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
+		"   {-n ENC | --encoding=ENC}\n\n" +
+		"  [encode | decode]\n" +
 		"   {-l | --list}\n" +
+		"   {-i FILE | --in=FILE}\n" +
+		"   {-o FILE | --out=FILE}\n" +
+		"   {-n ENC | --encoding=ENC}\n\n" +
+		"  [hash]\n" +
+		"   {-l | --list}\n" +
+		"   {-i FILE | --in=FILE}\n" +
+		"   {-o FILE | --out=FILE}\n" +
+		"   {-h ALGR | --hashing=ALGR}\n\n" +
+		"  [display]\n" +
+		"   {-i FILE | --in=FILE}\n" +
+		"   {-n ENC | --encoding=ENC}\n\n" +
+		"  all commands\n" +
 		"   {-b SIZE | --buffer=SIZE}\n" +
 		"   {-v | --verbose}"
 }
@@ -96,26 +105,43 @@ func Help() string {
 		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    --salt=LEN\n"+
 		"       length of salt to use for generating keys from password, default: %v\n"+
+		"    -l, --list\n"+
+		"       list the supported algorithms or encoding schemes\n"+
+		"    -i FILE, --in=FILE\n"+
+		"       path of the input file, omitting means input from stdin\n"+
+		"    -o FILE, --out=FILE\n"+
+		"       path of the output file, omitting means output to stdout\n"+
 		"    -n ENC, --encoding=ENC\n"+
 		"       encoding scheme to use, only applies to yaml encryption/decryption, default: '%v'\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
 		"   * options:\n"+
-		"    -n ENC, --encoding=ENC\n"+
-		"       encoding scheme to use, default: '%v'\n\n"+
-		" # hashing\n"+
-		" . hash - hash input using the specified algorithm\n"+
-		"   * options:\n"+
-		"    -h ALGR, --hashing=ALGR\n"+
-		"       hashing algorithm to use, default: '%v'\n\n"+
-		" # common options:\n"+
+		"    -l, --list\n"+
+		"       list the supported algorithms or encoding schemes\n"+
 		"    -i FILE, --in=FILE\n"+
 		"       path of the input file, omitting means input from stdin\n"+
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
+		"    -n ENC, --encoding=ENC\n"+
+		"       encoding scheme to use, default: '%v'\n\n"+
+		" # hash - hash input using the specified algorithm\n"+
+		"   * options:\n"+
 		"    -l, --list\n"+
 		"       list the supported algorithms or encoding schemes\n"+
+		"    -i FILE, --in=FILE\n"+
+		"       path of the input file, omitting means input from stdin\n"+
+		"    -o FILE, --out=FILE\n"+
+		"       path of the output file, omitting means output to stdout\n"+
+		"    -h ALGR, --hashing=ALGR\n"+
+		"       hashing algorithm to use, default: '%v'\n\n"+
+		" # display - display content of the given input as hex, and as characters if printable\n"+
+		"   * options:\n"+
+		"    -i FILE, --in=FILE\n"+
+		"       path of the input file, omitting means input from stdin\n"+
+		"    -n ENC, --encoding=ENC\n"+
+		"       encoding scheme to use, default: do not decode\n\n"+
+		" # common options:\n"+
 		"    -b SIZE, --buffer=SIZE\n"+
 		"       size of the read buffer in # of bytes, default: %vKB\n"+
 		"    -v, --verbose\n"+
