@@ -106,6 +106,9 @@ A simple cryptographic tool
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## TODO
+### 2025-12-18
+- Improve algorithm name parsing
+
 ### 2025-10-14
 - Work on AES-CBC
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not

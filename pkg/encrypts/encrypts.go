@@ -44,6 +44,7 @@ var aLGORITHMS = map[string]Algorithm{
 	"RSA-2048-OAEP-SHA512": &asym.Rsa2048OaepSha512{},
 	"RSA-4096-OAEP-SHA512": &asym.Rsa4096OaepSha512{},
 	"RSA-2048-PKCS1v15":    &asym.Rsa2048Pkcs1v15{},
+	"SECP256K1-ECIES":      &asym.Secp256k1{},
 }
 
 func Default() string {
@@ -148,6 +149,16 @@ func Parse(inp string) (name string) {
 				s4 = "-"
 			}
 			name = fmt.Sprintf("RSA-%v%v%v%v%v", l, s3, parts[3], s4, parts[4])
+		}
+
+	case "SECP":
+		switch parts[4] {
+		case "ECIES":
+			name = fmt.Sprintf("%v%v%v-%v", parts[1], parts[2], parts[3], parts[4])
+		case "K1":
+			name = fmt.Sprintf("%v%v%v-ECIES", parts[1], parts[2], parts[4])
+		default:
+			name = "SECP256K1-ECIES"
 		}
 	}
 	return

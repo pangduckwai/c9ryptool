@@ -34,6 +34,9 @@ func TestParse(t *testing.T) {
 	display(11, "RSA-OAEP-256")
 	display(12, "RSA-2048-PKCS1v15")
 	display(13, "RSA-PKCS1v15")
+	display(14, "SECP256K1-ECIES")
+	display(15, "ECIES")
+	display(16, "SECP256K1")
 }
 
 // func read() (

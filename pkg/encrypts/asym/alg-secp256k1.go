@@ -1,9 +1,10 @@
-package main
+package asym
 
 import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"fmt"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 )
@@ -20,14 +21,17 @@ type pkixPublicKey struct {
 	BitString asn1.BitString
 }
 
-func marshal(
-	inp *secp256k1.PrivateKey,
-) (
+var oid = asn1.ObjectIdentifier{1, 3, 132, 0, 10}
+
+// marshal Marshal the given secp256k1.PrivateKey.
+// openssl ec -in prv.pem -text -noout
+// openssl ec -pubin -in pub.pem -text -noout
+// openssl pkey -in prv.pem -pubout -out pub.pem
+func marshal(inp *secp256k1.PrivateKey) (
 	prv []byte,
 	pub []byte,
 	err error,
 ) {
-	oid := asn1.ObjectIdentifier{1, 3, 132, 0, 10}
 	key := inp.ToECDSA()
 	pkey := inp.PubKey()
 	pubkeyBytes := pkey.SerializeUncompressed()
@@ -64,9 +68,8 @@ func marshal(
 	return
 }
 
-func parse(
-	inp []byte,
-) (
+// parse Parse given byte array to secp256k1.PrivateKey.
+func parse(inp []byte) (
 	prv *secp256k1.PrivateKey,
 	err error,
 ) {
@@ -78,4 +81,49 @@ func parse(
 	}
 	prv = secp256k1.PrivKeyFromBytes(privKey.PrivateKey)
 	return
+}
+
+// ///////// //
+// SECP256K1
+type Secp256k1 struct {
+	PrivateKey *secp256k1.PrivateKey
+}
+
+func (a *Secp256k1) Name() string {
+	return "SECP256K1-ECIES"
+}
+
+func (a *Secp256k1) Type() bool {
+	return false
+}
+
+func (a *Secp256k1) KeyLength() int {
+	return 256
+}
+
+func (a *Secp256k1) Key() []byte {
+	buf, _, err := marshal(a.PrivateKey)
+	if err != nil {
+		panic(err)
+	}
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: buf,
+	})
+	return rst
+}
+
+func (a *Secp256k1) PopulateKey(key []byte) (err error) {
+	a.PrivateKey, err = parse(key)
+	return
+}
+
+func (a *Secp256k1) Encrypt(input ...[]byte) ([]byte, error) {
+	fmt.Println("TEMP!!! Place holder")
+	return nil, nil
+}
+
+func (a *Secp256k1) Decrypt(input ...[]byte) ([]byte, error) {
+	fmt.Println("TEMP!!! Place holder")
+	return nil, nil
 }

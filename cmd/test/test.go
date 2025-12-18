@@ -18,7 +18,7 @@ import (
 )
 
 func usage() {
-	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|secp256k1]\n")
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|secpout|secpin]\n")
 	os.Exit(1)
 }
 
@@ -101,12 +101,37 @@ func main() {
 			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
 		fmt.Printf("[TEST][%v] the secret is:\n%s\n", cmd, plainx)
-	case "secp256k1":
-		fmt.Println("05. Test encrypt / decrypt using secp256k1")
+	case "secpout":
+		fmt.Println("05. Test output secp256k1 keys")
 		key, err := secp256k1.GeneratePrivateKey() // ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
 		if err != nil {
 			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}
+		prvb, pubb, err := marshal(key)
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+		prv := pem.EncodeToMemory(&pem.Block{
+			Type:  "EC PRIVATE KEY",
+			Bytes: prvb,
+		})
+		pub := pem.EncodeToMemory(&pem.Block{
+			Type:  "PUBLIC KEY",
+			Bytes: pubb,
+		})
+		fmt.Printf("[TEST][%v] Private key\n%s\n", cmd, prv)
+		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
+	case "secpin":
+		fmt.Println("06. Test reading secp256k1 keys")
+		inp, err := utils.Read("test/c9.pem", 65535, false)
+		if err != nil {
+			log.Fatalf("[TEST][%v][0] %v", cmd, err)
+		}
+		key, err := parse(inp)
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+		fmt.Printf("[TEST][%v] Private key\n%v\n", cmd, key)
 		prvb, pubb, err := marshal(key)
 		if err != nil {
 			log.Fatalf("[TEST][%v][1] %v", cmd, err)
