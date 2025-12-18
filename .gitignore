@@ -37,8 +37,10 @@ go.work.sum
 # .idea/
 # .vscode/
 
-bin/
 test/
+!cmd/test/
+
+bin/
 *.key
 *.pem
 temp*

@@ -13,7 +13,7 @@ import (
 	"log"
 	"os"
 
-	ecies "github.com/ecies/go/v2"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
@@ -103,12 +103,24 @@ func main() {
 		fmt.Printf("[TEST][%v] the secret is:\n%s\n", cmd, plainx)
 	case "secp256k1":
 		fmt.Println("05. Test encrypt / decrypt using secp256k1")
-		key, err := ecies.GenerateKey()
+		key, err := secp256k1.GeneratePrivateKey() // ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
 		if err != nil {
-			log.Fatalf("[TEST][%v] %v", cmd, err)
+			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}
-		pkey := key.PublicKey
-		fmt.Printf("[TEST][%v]\n%v\n%s\n", cmd, key, pkey)
+		prvb, pubb, err := marshal(key)
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+		prv := pem.EncodeToMemory(&pem.Block{
+			Type:  "EC PRIVATE KEY",
+			Bytes: prvb,
+		})
+		pub := pem.EncodeToMemory(&pem.Block{
+			Type:  "PUBLIC KEY",
+			Bytes: pubb,
+		})
+		fmt.Printf("[TEST][%v] Private key\n%s\n", cmd, prv)
+		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
 	default:
 		usage()
 	}
