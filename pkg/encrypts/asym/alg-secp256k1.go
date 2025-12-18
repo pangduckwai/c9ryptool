@@ -87,6 +87,7 @@ func parse(inp []byte) (
 // SECP256K1
 type Secp256k1 struct {
 	PrivateKey *secp256k1.PrivateKey
+	PublicKey  *secp256k1.PublicKey
 }
 
 func (a *Secp256k1) Name() string {
@@ -115,6 +116,11 @@ func (a *Secp256k1) Key() []byte {
 
 func (a *Secp256k1) PopulateKey(key []byte) (err error) {
 	a.PrivateKey, err = parse(key)
+	if err != nil {
+		// TODO try parse public key, if still fail
+		return
+	}
+	a.PublicKey = a.PrivateKey.PubKey()
 	return
 }
 
