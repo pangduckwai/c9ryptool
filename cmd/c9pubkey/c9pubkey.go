@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -10,19 +8,20 @@ import (
 	"os"
 	"strings"
 
-	"sea9.org/go/c9ryptool/pkg/encrypts/asym"
+	"sea9.org/go/c9ryptool/pkg/encrypts"
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func usage() string {
 	return "Usage:\n c9pubkey\n" +
+		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   [-k FILE | --key=FILE]\n" +
 		"   {-o FILE | --out=FILE}\n"
 }
 
 // parse Parse command line arguments.
 func parse(args []string) (
-	in, out string,
+	algr, in, out string,
 	err error,
 ) {
 	if len(args) < 3 {
@@ -32,6 +31,21 @@ func parse(args []string) (
 
 	for i := 1; i < len(args); i++ {
 		switch {
+		case args[i] == "-a":
+			i++
+			if i >= len(args) {
+				err = fmt.Errorf("[CONF] Missing algorithm argument")
+				return
+			} else {
+				algr = args[i]
+			}
+		case strings.HasPrefix(args[i], "--algorithm="):
+			if len(args[i]) <= 12 {
+				err = fmt.Errorf("[CONF] Missing algorithm")
+				return
+			} else {
+				algr = args[i][12:]
+			}
 		case args[i] == "-k":
 			i++
 			if i >= len(args) {
@@ -99,7 +113,7 @@ func validate(
 }
 
 func main() {
-	in, out, err := parse(os.Args)
+	algr, in, out, err := parse(os.Args)
 	if err != nil {
 		log.Fatalf("[PUBKEY]%v", err)
 	}
@@ -108,36 +122,60 @@ func main() {
 		log.Fatalf("[PUBKEY]%v", err)
 	}
 
+	err = encrypts.Validate(algr, -1)
+	if err != nil {
+		log.Fatalf("[PUBKEY]%v", err)
+	}
+	alg := encrypts.Get(encrypts.Parse(algr)).(encrypts.AsymAlgorithm)
+	if alg == nil {
+		log.Fatalf("[PUBKEY] unsupported algorithm '%v'", algr)
+	}
+
 	input, err := utils.Read(in, 1048576, false)
 	if err != nil {
 		log.Fatalf("[PUBKEY][INP]%v", err)
 	}
 
-	val, typ, err := asym.ParseKey(input)
+	err = alg.PopulateKey(input)
 	if err != nil {
-		log.Fatalf("[PUBKEY][PARSE]%v", err)
+		err = fmt.Errorf("[PUBKEY][POP]%v", err)
+		return
 	}
-	if typ {
-		log.Fatalf("[PUBKEY][PARSE] %v does not contain any private key", in)
+
+	ecd := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: alg.GetPublicKey(),
+	})
+	err = utils.Write(out, ecd)
+	if err != nil {
+		log.Fatalf("[PUBKEY][OUT]%v", err)
 	}
-	if key, ok := val.(*rsa.PrivateKey); ok {
-		pkey := &key.PublicKey
-		buf, err := x509.MarshalPKIXPublicKey(pkey)
-		if err != nil {
-			log.Printf("[PUBKEY][PARSE][RSA] %v\n", err)
-			buf = x509.MarshalPKCS1PublicKey(pkey)
-		}
-		ecd := pem.EncodeToMemory(&pem.Block{
-			Type:  "PUBLIC KEY",
-			Bytes: buf,
-		})
-		err = utils.Write(out, ecd)
-		if err != nil {
-			log.Fatalf("[PUBKEY][OUT]%v", err)
-		}
-	} else {
-		log.Fatalf("[PUBKEY][PARSE][RSA] casting to *rsa.PrivateKey failed")
-	}
+
+	// val, typ, err := asym.ParseKey(input)
+	// if err != nil {
+	// 	log.Fatalf("[PUBKEY][PARSE]%v", err)
+	// }
+	// if typ {
+	// 	log.Fatalf("[PUBKEY][PARSE] %v does not contain any private key", in)
+	// }
+	// if key, ok := val.(*rsa.PrivateKey); ok {
+	// 	pkey := &key.PublicKey
+	// 	buf, err := x509.MarshalPKIXPublicKey(pkey)
+	// 	if err != nil {
+	// 		log.Printf("[PUBKEY][PARSE][RSA] %v\n", err)
+	// 		buf = x509.MarshalPKCS1PublicKey(pkey)
+	// 	}
+	// 	ecd := pem.EncodeToMemory(&pem.Block{
+	// 		Type:  "PUBLIC KEY",
+	// 		Bytes: buf,
+	// 	})
+	// 	err = utils.Write(out, ecd)
+	// 	if err != nil {
+	// 		log.Fatalf("[PUBKEY][OUT]%v", err)
+	// 	}
+	// } else {
+	// 	log.Fatalf("[PUBKEY][PARSE][RSA] casting to *rsa.PrivateKey failed")
+	// }
 
 	fmt.Printf("[PUBKEY] finished exporting public key from %v\n", in)
 }

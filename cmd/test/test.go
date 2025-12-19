@@ -13,7 +13,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+	ecies "github.com/ecies/go/v2"
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
@@ -103,7 +103,7 @@ func main() {
 		fmt.Printf("[TEST][%v] the secret is:\n%s\n", cmd, plainx)
 	case "eckeygen":
 		fmt.Println("05. Test output secp256k1 keys")
-		key, err := secp256k1.GeneratePrivateKey() // ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
+		key, err := ecies.GenerateKey()
 		if err != nil {
 			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}

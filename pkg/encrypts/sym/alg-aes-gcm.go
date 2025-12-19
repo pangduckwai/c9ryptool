@@ -91,7 +91,7 @@ func (a *AesGcm128) KeyLength() int {
 	return 128 / 8
 }
 
-func (a *AesGcm128) Marshal() []byte {
+func (a *AesGcm128) GetKey() []byte {
 	return *a
 }
 
@@ -147,7 +147,7 @@ func (a *AesGcm192) KeyLength() int {
 	return 192 / 8
 }
 
-func (a *AesGcm192) Marshal() []byte {
+func (a *AesGcm192) GetKey() []byte {
 	return *a
 }
 
@@ -203,7 +203,7 @@ func (a *AesGcm256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesGcm256) Marshal() []byte {
+func (a *AesGcm256) GetKey() []byte {
 	return *a
 }
 

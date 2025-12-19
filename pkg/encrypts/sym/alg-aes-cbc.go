@@ -125,7 +125,7 @@ func (a *AesCbc256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesCbc256) Marshal() []byte {
+func (a *AesCbc256) GetKey() []byte {
 	return *a
 }
 

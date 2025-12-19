@@ -34,13 +34,25 @@ func (a *Rsa2048Pkcs1v15) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048Pkcs1v15) Marshal() []byte {
+func (a *Rsa2048Pkcs1v15) GetKey() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
 		Type:  "PRIVATE KEY",
+		Bytes: buf,
+	})
+	return rst
+}
+
+func (a *Rsa2048Pkcs1v15) GetPublicKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+	}
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
 		Bytes: buf,
 	})
 	return rst

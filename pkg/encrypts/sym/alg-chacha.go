@@ -85,7 +85,7 @@ func (a *ChaCha20Poly1305) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *ChaCha20Poly1305) Marshal() []byte {
+func (a *ChaCha20Poly1305) GetKey() []byte {
 	return *a
 }
 

@@ -38,13 +38,25 @@ func (a *Rsa2048OaepSha256) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha256) Marshal() []byte {
+func (a *Rsa2048OaepSha256) GetKey() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
 		Type:  "PRIVATE KEY",
+		Bytes: buf,
+	})
+	return rst
+}
+
+func (a *Rsa2048OaepSha256) GetPublicKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+	}
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
 		Bytes: buf,
 	})
 	return rst
@@ -82,12 +94,24 @@ func (a *Rsa2048OaepSha512) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha512) Marshal() []byte {
+func (a *Rsa2048OaepSha512) GetKey() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)
 	}
 	return buf
+}
+
+func (a *Rsa2048OaepSha512) GetPublicKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+	}
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return rst
 }
 
 func (a *Rsa2048OaepSha512) PopulateKey(key []byte) (err error) {
@@ -119,12 +143,24 @@ func (a *Rsa4096OaepSha512) KeyLength() int {
 	return 4096
 }
 
-func (a *Rsa4096OaepSha512) Marshal() []byte {
+func (a *Rsa4096OaepSha512) GetKey() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a)
 	if err != nil {
 		panic(err)
 	}
 	return buf
+}
+
+func (a *Rsa4096OaepSha512) GetPublicKey() []byte {
+	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	if err != nil {
+		buf = x509.MarshalPKCS1PublicKey(&(*rsa.PrivateKey)(a).PublicKey)
+	}
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return rst
 }
 
 func (a *Rsa4096OaepSha512) PopulateKey(key []byte) (err error) {

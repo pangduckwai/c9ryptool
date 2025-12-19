@@ -21,8 +21,8 @@ type Algorithm interface {
 	// KeyLength may be in bytes or bits, depends on the algorithm.
 	KeyLength() int
 
-	// Marshal get key
-	Marshal() []byte
+	// GetKey get key
+	GetKey() []byte
 
 	// PopulateKey populate key for the algorithm to use. If input byte slice is empty, a new key is generated.
 	PopulateKey([]byte) error
@@ -34,17 +34,28 @@ type Algorithm interface {
 	Decrypt(...[]byte) ([]byte, error)
 }
 
+type AsymAlgorithm interface {
+	Algorithm
+
+	// GetPublicKey get public key
+	GetPublicKey() []byte
+}
+
 var aLGORITHMS = map[string]Algorithm{
-	"AES-128-GCM":          &sym.AesGcm128{},
-	"AES-192-GCM":          &sym.AesGcm192{},
-	"AES-256-GCM":          &sym.AesGcm256{},
-	"AES-256-CBC":          &sym.AesCbc256{},
-	"ChaCha20-Poly1305":    &sym.ChaCha20Poly1305{},
+	"AES-128-GCM":       &sym.AesGcm128{},
+	"AES-192-GCM":       &sym.AesGcm192{},
+	"AES-256-GCM":       &sym.AesGcm256{},
+	"AES-256-CBC":       &sym.AesCbc256{},
+	"ChaCha20-Poly1305": &sym.ChaCha20Poly1305{},
+}
+
+var aSYMALGORITHMS = map[string]AsymAlgorithm{
 	"RSA-2048-OAEP-SHA256": &asym.Rsa2048OaepSha256{},
 	"RSA-2048-OAEP-SHA512": &asym.Rsa2048OaepSha512{},
 	"RSA-4096-OAEP-SHA512": &asym.Rsa4096OaepSha512{},
 	"RSA-2048-PKCS1v15":    &asym.Rsa2048Pkcs1v15{},
-	"SECP256K1-ECIES":      &asym.Secp256k1{},
+	"SECP256K1-DECRED":     &asym.Secp256k1Decred{},
+	"SECP256K1-ECIESGO":    &asym.Secp256k1Eciesgo{},
 }
 
 func Default() string {
@@ -55,17 +66,26 @@ func Default() string {
 // typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
 func List(typ int) (list []string) {
 	list = make([]string, 0)
-	for k := range aLGORITHMS {
-		if typ == 0 || (typ < 0 && !aLGORITHMS[k].Type()) || (typ > 0 && aLGORITHMS[k].Type()) {
+	if typ >= 0 {
+		for k := range aLGORITHMS {
+			list = append(list, k)
+		}
+	} else if typ <= 0 {
+		for k := range aSYMALGORITHMS {
 			list = append(list, k)
 		}
 	}
+
 	sort.Strings(list)
 	return
 }
 
 func Get(inp string) Algorithm {
-	return aLGORITHMS[inp]
+	a, ok := aLGORITHMS[inp]
+	if !ok {
+		a = aSYMALGORITHMS[inp]
+	}
+	return a
 }
 
 var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
@@ -76,16 +96,16 @@ func Validate(algr string, typ int) (err error) {
 	real := Parse(algr)
 	if real == "" {
 		err = fmt.Errorf("[ENCR] invalid encryption algorithm name pattern '%v'", algr)
-	} else if alg, okay := aLGORITHMS[real]; !okay {
-		err = fmt.Errorf("[ENCR] unsupported encryption algorithm '%v'", real)
-	} else if (typ < 0 && alg.Type()) || (typ > 0 && !alg.Type()) {
-		art := "a"
-		pfx := ""
-		if typ < 0 {
-			art = "an"
-			pfx = "a"
+	} else {
+		a0, k0 := aLGORITHMS[real]
+		a1, k1 := aSYMALGORITHMS[real]
+		if !k0 && !k1 {
+			err = fmt.Errorf("[ENCR] unsupported encryption algorithm '%v'", real)
+		} else if typ < 0 && k0 {
+			err = fmt.Errorf("[ENCR] %v is not an asymmetric algorithm as expected", a0.Name())
+		} else if typ > 0 && k1 {
+			err = fmt.Errorf("[ENCR] %v is not a symmetric algorithm as expected", a1.Name())
 		}
-		err = fmt.Errorf("[ENCR] %v is not %v %vsymmetric algorithm as expected", alg.Name(), art, pfx)
 	}
 	return
 }
@@ -153,12 +173,12 @@ func Parse(inp string) (name string) {
 
 	case "SECP":
 		switch parts[4] {
-		case "ECIES":
+		case "DECRED":
 			name = fmt.Sprintf("%v%v%v-%v", parts[1], parts[2], parts[3], parts[4])
 		case "K1":
-			name = fmt.Sprintf("%v%v%v-ECIES", parts[1], parts[2], parts[4])
+			name = fmt.Sprintf("%v%v%v-ECIESGO", parts[1], parts[2], parts[4])
 		default:
-			name = "SECP256K1-ECIES"
+			name = "SECP256K1-ECIESGO"
 		}
 	}
 	return
