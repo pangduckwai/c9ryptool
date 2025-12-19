@@ -18,7 +18,7 @@ import (
 )
 
 func usage() {
-	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|secpout|secpin]\n")
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread]\n")
 	os.Exit(1)
 }
 
@@ -101,7 +101,7 @@ func main() {
 			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
 		fmt.Printf("[TEST][%v] the secret is:\n%s\n", cmd, plainx)
-	case "secpout":
+	case "eckeygen":
 		fmt.Println("05. Test output secp256k1 keys")
 		key, err := secp256k1.GeneratePrivateKey() // ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
 		if err != nil {
@@ -121,103 +121,49 @@ func main() {
 		})
 		fmt.Printf("[TEST][%v] Private key\n%s\n", cmd, prv)
 		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
-	case "secpin":
+	case "eckeyread":
 		fmt.Println("06. Test reading secp256k1 keys")
-		inp, err := utils.Read("test/c9.pem", 65535, false)
+		prvb, err := utils.Read("test/c9.pem", 65535, false)
 		if err != nil {
 			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}
-		key, err := parse(inp)
+		key, err := parse(prvb)
 		if err != nil {
-			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}
 		fmt.Printf("[TEST][%v] Private key\n%v\n", cmd, key)
-		prvb, pubb, err := marshal(key)
+
+		pubb, err := utils.Read("test/c9-pub.pem", 65535, false)
 		if err != nil {
 			log.Fatalf("[TEST][%v][1] %v", cmd, err)
 		}
+		pkey, err := parsePub(pubb)
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+		fmt.Printf("[TEST][%v] Public key\n%v\n", cmd, pkey)
+
+		prvo, _, err := marshal(key)
+		if err != nil {
+			log.Fatalf("[TEST][%v][2] %v", cmd, err)
+		}
+
+		pubo, _, err := marshalPub(pkey)
+		if err != nil {
+			log.Fatalf("[TEST][%v][3] %v", cmd, err)
+		}
+
 		prv := pem.EncodeToMemory(&pem.Block{
 			Type:  "EC PRIVATE KEY",
-			Bytes: prvb,
+			Bytes: prvo,
 		})
 		pub := pem.EncodeToMemory(&pem.Block{
 			Type:  "PUBLIC KEY",
-			Bytes: pubb,
+			Bytes: pubo,
 		})
 		fmt.Printf("[TEST][%v] Private key\n%s\n", cmd, prv)
 		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
 	default:
 		usage()
 	}
-
-	// Gen new key pair
-	// key, err := ecies.GenerateKey()
-	// if err != nil {
-	// 	log.Fatalf("[TEST][KEY][0]%v", err)
-	// }
-	// byt := key.Bytes()
-	// fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(byt), byt)
-	// der, err := asn1.Marshal(byt)
-	// if err != nil {
-	// 	log.Fatalf("[TEST][KEY][0]%v", err)
-	// }
-	// key := ecies.NewPrivateKeyFromBytes(byt)
-	// inp := pem.EncodeToMemory(&pem.Block{
-	// 	Type:  "PRIVATE KEY",
-	// 	Bytes: der,
-	// })
-	// fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(inp), inp)
-
-	// Read Emali key pair
-	// inp, err := utils.Read("test/emali.key", 10240, false)
-	// if err != nil {
-	// 	log.Fatalf("[TEST][KEY][0]%v", err)
-	// } else {
-	// 	fmt.Printf("[TEST][KEY][0] (%v)\n%s\n", len(inp), inp)
-	// }
-
-	// Parse key
-	// blk, _ := pem.Decode(inp)
-	// fmt.Printf("[TEST][KEY][1] %v\n", blk.Type)
-	// fmt.Printf("[TEST][KEY][1] %v\n", blk.Headers)
-	// fmt.Printf("[TEST][KEY][1] (%v)\n%v\n", len(blk.Bytes), blk.Bytes)
-
-	// key := ecies.NewPrivateKeyFromBytes(blk.Bytes)
-
-	// pkey := key.PublicKey
-	// fmt.Printf("[TEST][KEY][2]\n%v\n%v\n", key, pkey)
-
-	// encrypt := func(plaintext []byte) (ciphertext []byte, err error) {
-	// 	ciphertext, err = ecies.Encrypt(pkey, plaintext)
-	// 	return
-	// }
-
-	// decrypt := func(ciphertext []byte) (plaintext []byte, err error) {
-	// 	plaintext, err = ecies.Decrypt(key, ciphertext)
-	// 	return
-	// }
-
-	// Use new message
-	// message := []byte("This is top secret")
-	// secret, err := encrypt(message)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// secret := make([]byte, 0)
-
-	// Use existing message)
-	// secret, err := utils.Read("test/test5.enc", 10240, false)
-	// if err != nil {
-	// 	log.Fatalf("[TEST][MSG]%v", err)
-	// }
-	// fmt.Printf("TEST!!!\n%s\n", secret)
-
-	// fmt.Printf("TEST!!!\n%s\n->\n%s\n", message, secret)
-
-	// Decrypt
-	// result, err := decrypt(secret)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("->\n%s\n", result)
 }

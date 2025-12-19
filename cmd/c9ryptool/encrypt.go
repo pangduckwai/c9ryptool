@@ -38,7 +38,7 @@ func encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		err = utils.Write(cfg.Key, alg.Key())
+		err = utils.Write(cfg.Key, alg.Marshal())
 		if err != nil {
 			return
 		}

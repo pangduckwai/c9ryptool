@@ -21,8 +21,8 @@ type Algorithm interface {
 	// KeyLength may be in bytes or bits, depends on the algorithm.
 	KeyLength() int
 
-	// Key get key
-	Key() []byte
+	// Marshal get key
+	Marshal() []byte
 
 	// PopulateKey populate key for the algorithm to use. If input byte slice is empty, a new key is generated.
 	PopulateKey([]byte) error

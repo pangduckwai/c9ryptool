@@ -8,6 +8,7 @@ import (
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 )
 
 /*
@@ -37,7 +38,7 @@ func (a *Rsa2048OaepSha256) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha256) Key() []byte {
+func (a *Rsa2048OaepSha256) Marshal() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -81,7 +82,7 @@ func (a *Rsa2048OaepSha512) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048OaepSha512) Key() []byte {
+func (a *Rsa2048OaepSha512) Marshal() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -118,7 +119,7 @@ func (a *Rsa4096OaepSha512) KeyLength() int {
 	return 4096
 }
 
-func (a *Rsa4096OaepSha512) Key() []byte {
+func (a *Rsa4096OaepSha512) Marshal() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a)
 	if err != nil {
 		panic(err)
@@ -128,6 +129,12 @@ func (a *Rsa4096OaepSha512) Key() []byte {
 
 func (a *Rsa4096OaepSha512) PopulateKey(key []byte) (err error) {
 	k, _, err := getRsaKey(key, a.KeyLength())
+	if k == nil {
+		err = fmt.Errorf("not a private key")
+		return
+	} else if err != nil {
+		return
+	}
 	a = (*Rsa4096OaepSha512)(k)
 	return
 }

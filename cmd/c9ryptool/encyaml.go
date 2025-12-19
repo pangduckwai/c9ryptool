@@ -41,7 +41,7 @@ func yamlEncrypt(
 			err = fmt.Errorf("[YAML][ECY][GEN]%v", err)
 			return
 		}
-		err = utils.Write(cfg.Key, alg.Key())
+		err = utils.Write(cfg.Key, alg.Marshal())
 		if err != nil {
 			return
 		}

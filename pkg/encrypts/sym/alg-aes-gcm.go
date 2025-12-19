@@ -12,34 +12,29 @@ func encryptAesGcm(
 	input []byte,
 	iv []byte,
 	aad []byte,
-) (
-	result []byte,
-	err error,
-) {
+) ([]byte, error) {
 	if len(key) <= 0 {
-		err = fmt.Errorf("[AES-GCM] not ready")
-		return
+		return nil, fmt.Errorf("[AES-GCM] not ready")
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	if iv == nil {
 		iv, err = Generate(gcm.NonceSize())
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 
-	result = gcm.Seal(iv, iv, input, aad)
-	return
+	return gcm.Seal(iv, iv, input, aad), nil
 }
 
 func decryptAesGcm(
@@ -48,23 +43,19 @@ func decryptAesGcm(
 	iv []byte,
 	tag []byte,
 	aad []byte,
-) (
-	result []byte,
-	err error,
-) {
+) ([]byte, error) {
 	if len(key) <= 0 {
-		err = fmt.Errorf("[AES-GCM] not ready")
-		return
+		return nil, fmt.Errorf("[AES-GCM] not ready")
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var txt []byte
@@ -81,8 +72,7 @@ func decryptAesGcm(
 		txt = append(txt, tag...)
 	}
 
-	result, err = gcm.Open(nil, iv, txt, aad)
-	return
+	return gcm.Open(nil, iv, txt, aad)
 }
 
 // /////////// //
@@ -101,7 +91,7 @@ func (a *AesGcm128) KeyLength() int {
 	return 128 / 8
 }
 
-func (a *AesGcm128) Key() []byte {
+func (a *AesGcm128) Marshal() []byte {
 	return *a
 }
 
@@ -126,7 +116,7 @@ func (a *AesGcm128) Encrypt(input ...[]byte) ([]byte, error) {
 	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
-func (a *AesGcm128) Decrypt(input ...[]byte) (result []byte, err error) {
+func (a *AesGcm128) Decrypt(input ...[]byte) ([]byte, error) {
 	var iv, tag, aad []byte
 	switch len(input) {
 	case 4:
@@ -157,7 +147,7 @@ func (a *AesGcm192) KeyLength() int {
 	return 192 / 8
 }
 
-func (a *AesGcm192) Key() []byte {
+func (a *AesGcm192) Marshal() []byte {
 	return *a
 }
 
@@ -182,7 +172,7 @@ func (a *AesGcm192) Encrypt(input ...[]byte) ([]byte, error) {
 	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
-func (a *AesGcm192) Decrypt(input ...[]byte) (result []byte, err error) {
+func (a *AesGcm192) Decrypt(input ...[]byte) ([]byte, error) {
 	var iv, tag, aad []byte
 	switch len(input) {
 	case 4:
@@ -213,7 +203,7 @@ func (a *AesGcm256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesGcm256) Key() []byte {
+func (a *AesGcm256) Marshal() []byte {
 	return *a
 }
 
@@ -238,7 +228,7 @@ func (a *AesGcm256) Encrypt(input ...[]byte) ([]byte, error) {
 	return encryptAesGcm(*a, input[0], iv, aad)
 }
 
-func (a *AesGcm256) Decrypt(input ...[]byte) (result []byte, err error) {
+func (a *AesGcm256) Decrypt(input ...[]byte) ([]byte, error) {
 	var iv, tag, aad []byte
 	switch len(input) {
 	case 4:

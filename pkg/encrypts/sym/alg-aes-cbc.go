@@ -125,7 +125,7 @@ func (a *AesCbc256) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *AesCbc256) Key() []byte {
+func (a *AesCbc256) Marshal() []byte {
 	return *a
 }
 
@@ -146,7 +146,7 @@ func (a *AesCbc256) Encrypt(input ...[]byte) ([]byte, error) {
 	return encryptAesCbc(*a, input[0], iv)
 }
 
-func (a *AesCbc256) Decrypt(input ...[]byte) (result []byte, err error) {
+func (a *AesCbc256) Decrypt(input ...[]byte) ([]byte, error) {
 	var iv []byte
 	if len(input) > 1 {
 		iv = input[1]

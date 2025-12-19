@@ -34,7 +34,7 @@ func (a *Rsa2048Pkcs1v15) KeyLength() int {
 	return 2048
 }
 
-func (a *Rsa2048Pkcs1v15) Key() []byte {
+func (a *Rsa2048Pkcs1v15) Marshal() []byte {
 	buf, err := x509.MarshalPKCS8PrivateKey(a.PrivateKey)
 	if err != nil {
 		panic(err)

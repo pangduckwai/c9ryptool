@@ -85,7 +85,7 @@ func (a *ChaCha20Poly1305) KeyLength() int {
 	return 256 / 8
 }
 
-func (a *ChaCha20Poly1305) Key() []byte {
+func (a *ChaCha20Poly1305) Marshal() []byte {
 	return *a
 }
 
@@ -106,7 +106,7 @@ func (a *ChaCha20Poly1305) Encrypt(input ...[]byte) ([]byte, error) {
 	return encryptChacha20Poly1305(*a, input[0], iv)
 }
 
-func (a *ChaCha20Poly1305) Decrypt(input ...[]byte) (result []byte, err error) {
+func (a *ChaCha20Poly1305) Decrypt(input ...[]byte) ([]byte, error) {
 	var iv []byte
 	if len(input) > 1 {
 		iv = input[1]

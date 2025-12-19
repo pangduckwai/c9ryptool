@@ -20,19 +20,21 @@ type pkixPublicKey struct {
 	BitString asn1.BitString
 }
 
-func marshal(
-	inp *secp256k1.PrivateKey,
-) (
+var oid = asn1.ObjectIdentifier{1, 3, 132, 0, 10}
+
+func marshal(inp *secp256k1.PrivateKey) (
 	prv []byte,
 	pub []byte,
 	err error,
 ) {
-	oid := asn1.ObjectIdentifier{1, 3, 132, 0, 10}
-	key := inp.ToECDSA()
-	pkey := inp.PubKey()
-	pubkeyBytes := pkey.SerializeUncompressed()
+	// Public key
+	pub, pubkeyBytes, err := marshalPub(inp.PubKey())
+	if err != nil {
+		return
+	}
 
 	// Private key
+	key := inp.ToECDSA()
 	privateKeyBytes := make([]byte, (key.Curve.Params().N.BitLen()+7)/8)
 	prv, err = asn1.Marshal(ecPrivateKey{
 		Version:       1,
@@ -42,11 +44,18 @@ func marshal(
 			Bytes: pubkeyBytes,
 		},
 	})
-	if err != nil {
-		return
-	}
 
-	// Public key
+	return
+}
+
+func marshalPub(
+	inp *secp256k1.PublicKey,
+) (
+	pub, pubkeyBytes []byte,
+	err error,
+) {
+	pubkeyBytes = inp.SerializeUncompressed()
+
 	var pubkeyAlgr pkix.AlgorithmIdentifier
 	pubkeyAlgr.Algorithm = asn1.ObjectIdentifier{1, 2, 840, 10045, 2, 1}
 	paramBytes, err := asn1.Marshal(oid)
@@ -77,5 +86,21 @@ func parse(
 		return
 	}
 	prv = secp256k1.PrivKeyFromBytes(privKey.PrivateKey)
+	return
+}
+
+func parsePub(
+	inp []byte,
+) (
+	pub *secp256k1.PublicKey,
+	err error,
+) {
+	var pubKey pkixPublicKey
+	blk, _ := pem.Decode(inp)
+	_, err = asn1.Unmarshal(blk.Bytes, &pubKey)
+	if err != nil {
+		return
+	}
+	pub, err = secp256k1.ParsePubKey(pubKey.BitString.Bytes)
 	return
 }
