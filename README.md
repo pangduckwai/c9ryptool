@@ -97,8 +97,6 @@ A collection of cryptographic related tools
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
 
-> ---
-
 ### 6. Common options
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
