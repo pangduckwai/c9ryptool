@@ -49,11 +49,13 @@ func (a *Rsa2048Pkcs1v15) GetKey() []byte {
 
 func (a *Rsa2048Pkcs1v15) GetPublicKey() []byte {
 	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	typ := "PUBLIC KEY"
 	if err != nil {
 		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+		typ = "RSA PUBLIC KEY"
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  typ,
 		Bytes: buf,
 	})
 	return rst
@@ -65,7 +67,7 @@ func (a *Rsa2048Pkcs1v15) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Rsa2048Pkcs1v15) Encrypt(input ...[]byte) ([]byte, error) {
-	if a.PublicKey != nil {
+	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 	return rsa.EncryptPKCS1v15(rand.Reader, a.PublicKey, input[0])

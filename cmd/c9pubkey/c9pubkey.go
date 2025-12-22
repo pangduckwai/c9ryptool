@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"log"
@@ -142,40 +141,10 @@ func main() {
 		return
 	}
 
-	ecd := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: alg.GetPublicKey(),
-	})
-	err = utils.Write(out, ecd)
+	err = utils.Write(out, alg.GetPublicKey())
 	if err != nil {
 		log.Fatalf("[PUBKEY][OUT]%v", err)
 	}
-
-	// val, typ, err := asym.ParseKey(input)
-	// if err != nil {
-	// 	log.Fatalf("[PUBKEY][PARSE]%v", err)
-	// }
-	// if typ {
-	// 	log.Fatalf("[PUBKEY][PARSE] %v does not contain any private key", in)
-	// }
-	// if key, ok := val.(*rsa.PrivateKey); ok {
-	// 	pkey := &key.PublicKey
-	// 	buf, err := x509.MarshalPKIXPublicKey(pkey)
-	// 	if err != nil {
-	// 		log.Printf("[PUBKEY][PARSE][RSA] %v\n", err)
-	// 		buf = x509.MarshalPKCS1PublicKey(pkey)
-	// 	}
-	// 	ecd := pem.EncodeToMemory(&pem.Block{
-	// 		Type:  "PUBLIC KEY",
-	// 		Bytes: buf,
-	// 	})
-	// 	err = utils.Write(out, ecd)
-	// 	if err != nil {
-	// 		log.Fatalf("[PUBKEY][OUT]%v", err)
-	// 	}
-	// } else {
-	// 	log.Fatalf("[PUBKEY][PARSE][RSA] casting to *rsa.PrivateKey failed")
-	// }
 
 	fmt.Printf("[PUBKEY] finished exporting public key from %v\n", in)
 }

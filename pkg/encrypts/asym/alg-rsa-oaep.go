@@ -52,11 +52,13 @@ func (a *Rsa2048OaepSha256) GetKey() []byte {
 
 func (a *Rsa2048OaepSha256) GetPublicKey() []byte {
 	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	typ := "PUBLIC KEY"
 	if err != nil {
 		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+		typ = "RSA PUBLIC KEY"
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  typ,
 		Bytes: buf,
 	})
 	return rst
@@ -68,7 +70,7 @@ func (a *Rsa2048OaepSha256) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Rsa2048OaepSha256) Encrypt(input ...[]byte) ([]byte, error) {
-	if a.PublicKey != nil {
+	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 	return rsa.EncryptOAEP(sha256.New(), rand.Reader, a.PublicKey, input[0], nil)
@@ -117,11 +119,13 @@ func (a *Rsa2048OaepSha512) GetKey() []byte {
 
 func (a *Rsa2048OaepSha512) GetPublicKey() []byte {
 	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	typ := "PUBLIC KEY"
 	if err != nil {
 		buf = x509.MarshalPKCS1PublicKey(a.PublicKey)
+		typ = "RSA PUBLIC KEY"
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  typ,
 		Bytes: buf,
 	})
 	return rst
@@ -133,7 +137,7 @@ func (a *Rsa2048OaepSha512) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Rsa2048OaepSha512) Encrypt(input ...[]byte) ([]byte, error) {
-	if a.PublicKey != nil {
+	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 	return rsa.EncryptOAEP(sha512.New(), rand.Reader, a.PublicKey, input[0], nil)
@@ -179,11 +183,13 @@ func (a *Rsa4096OaepSha512) GetKey() []byte {
 
 func (a *Rsa4096OaepSha512) GetPublicKey() []byte {
 	buf, err := x509.MarshalPKIXPublicKey(a.PublicKey)
+	typ := "PUBLIC KEY"
 	if err != nil {
 		buf = x509.MarshalPKCS1PublicKey(&(*rsa.PrivateKey)(a).PublicKey)
+		typ = "RSA PUBLIC KEY"
 	}
 	rst := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  typ,
 		Bytes: buf,
 	})
 	return rst

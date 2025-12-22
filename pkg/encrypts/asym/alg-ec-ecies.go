@@ -122,7 +122,7 @@ func (a *Secp256k1Eciesgo) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Secp256k1Eciesgo) Encrypt(input ...[]byte) ([]byte, error) {
-	if a.PublicKey != nil {
+	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 	return ecies.Encrypt(a.PublicKey, input[0])

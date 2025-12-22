@@ -70,7 +70,8 @@ func List(typ int) (list []string) {
 		for k := range aLGORITHMS {
 			list = append(list, k)
 		}
-	} else if typ <= 0 {
+	}
+	if typ <= 0 {
 		for k := range aSYMALGORITHMS {
 			list = append(list, k)
 		}

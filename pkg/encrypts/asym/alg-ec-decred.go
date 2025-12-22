@@ -154,7 +154,7 @@ func (a *Secp256k1Decred) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Secp256k1Decred) Encrypt(input ...[]byte) (result []byte, err error) {
-	if a.PublicKey != nil {
+	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 
