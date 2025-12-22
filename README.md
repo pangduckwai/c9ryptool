@@ -143,6 +143,8 @@ A collection of cryptographic related tools
 ## Changelog
 ### v1.2.0
 - add `secp256k1` encryption/decryption
+  - Use both `github.com/decred/dcrd/dcrec/secp256k1/v4` and `github.com/ecies/go/v2` as 2 algorithms
+  - Import/Export `secp256k1` key pairs from/to `.pem` files
 
 ### v1.1.0
 - add display file contents
