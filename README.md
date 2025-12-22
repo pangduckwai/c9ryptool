@@ -1,8 +1,7 @@
 # c9ryptool
 A collection of cryptographic related tools
 
-## Entry points
-| - | description |
+|  tool | description |
 | --- | --- |
 | [`c9ryptool`](#c9ryptool) | A simple cryptographic tool |
 | [`c9pubkey`](#c9pubkey) | Extract and export the public key from a private key |
@@ -10,8 +9,10 @@ A collection of cryptographic related tools
 | `test` | Test various functions from the command line |
 
 ## c9ryptool
-``` bash
-> ./c9ryptool [command] {options}
+A simple cryptographic tool
+
+```bash
+> ./cmd/c9ryptool [command] {options}
 ```
 
 ### 1. Miscellaneous
@@ -106,8 +107,10 @@ A collection of cryptographic related tools
 ---
 
 ## c9pubkey
-``` bash
-> ./c9pubkey [options]
+Extract and export the public key from a private key
+
+```bash
+> ./cmd/c9pubkey [options]
 ```
 
 | option | 2<sup>nd</sup> form | description |
@@ -119,16 +122,18 @@ A collection of cryptographic related tools
 ---
 
 ## c9split
-``` bash
-> ./c9split [options]
+Split a file into 2 by number of bytes
+
+```bash
+> ./cmd/c9split [options]
 ```
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
-| `-o FILE` | `--out0=FILE` | `FILE` is the path of the 1<sup>st</sup> output file, omitting means output to stdout |
-| `-p FILE` | `--out1=FILE` | `FILE` is the path of the 2<sup>nd</sup> output file, omitting means output to stdout |
-| `-l LEN` | `--len=LEN` | `LEN` is the ??? |
+| `-o FILE` | `--out0=FILE` | `FILE` is the path of the 1<sup>st</sup> output file |
+| `-p FILE` | `--out1=FILE` | `FILE` is the path of the 2<sup>nd</sup> output file |
+| `-l LEN` | `--len=LEN` | `LEN` is the number of bytes to split the input file |
 
 ---
 
