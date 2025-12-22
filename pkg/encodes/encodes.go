@@ -53,9 +53,26 @@ func Get(scheme string) Encoding {
 }
 
 // Validate validate the given scheme name.
-func Validate(scheme string) (err error) {
-	if _, okay := eNCODINGS[scheme]; !okay {
-		err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", scheme)
+func Validate(inp string) (err error) {
+	scheme := Parse(inp)
+	if scheme == "" {
+		err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", inp)
+	}
+	return
+}
+
+// Parse return the actual encoding scheme name
+func Parse(inp string) (name string) {
+	algrs := make([]string, len(eNCODINGS))
+	i := 0
+	for n := range eNCODINGS {
+		algrs[i] = n
+		i++
+	}
+
+	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	if len(indices) == 1 {
+		name = str
 	}
 	return
 }

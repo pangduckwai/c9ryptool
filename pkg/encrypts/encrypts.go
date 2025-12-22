@@ -2,12 +2,11 @@ package encrypts
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
-	"strconv"
 
 	"sea9.org/go/c9ryptool/pkg/encrypts/asym"
 	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 // Algorithm encryption algorithms
@@ -50,12 +49,12 @@ var aLGORITHMS = map[string]Algorithm{
 }
 
 var aSYMALGORITHMS = map[string]AsymAlgorithm{
-	"RSA-2048-OAEP-SHA256": &asym.Rsa2048OaepSha256{},
-	"RSA-2048-OAEP-SHA512": &asym.Rsa2048OaepSha512{},
-	"RSA-4096-OAEP-SHA512": &asym.Rsa4096OaepSha512{},
-	"RSA-2048-PKCS1v15":    &asym.Rsa2048Pkcs1v15{},
-	"SECP256K1-DECRED":     &asym.Secp256k1Decred{},
-	"SECP256K1-ECIESGO":    &asym.Secp256k1Eciesgo{},
+	"RSA-2048-OAEP-SHA256":    &asym.Rsa2048OaepSha256{},
+	"RSA-2048-OAEP-SHA512":    &asym.Rsa2048OaepSha512{},
+	"RSA-4096-OAEP-SHA512":    &asym.Rsa4096OaepSha512{},
+	"RSA-2048-PKCS1v15":       &asym.Rsa2048Pkcs1v15{},
+	"ECIES-SECP256K1-DECRED":  &asym.Secp256k1Decred{},
+	"ECIES-SECP256K1-ECIESGO": &asym.Secp256k1Eciesgo{},
 }
 
 func Default() string {
@@ -89,8 +88,6 @@ func Get(inp string) Algorithm {
 	return a
 }
 
-var algrPattern = regexp.MustCompile("^([0-9]{0,1}[A-Za-z]+)[-]{0,1}([0-9]*)[-]{0,1}([A-Za-z0-9]*?)[-]{0,1}([A-Za-z0-9]*?)$")
-
 // Validate validate the given algorithm name.
 // typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
 func Validate(algr string, typ int) (err error) {
@@ -113,74 +110,20 @@ func Validate(algr string, typ int) (err error) {
 
 // Parse return details of the given encryption algorithm
 func Parse(inp string) (name string) {
-	parts := algrPattern.FindStringSubmatch(inp)
-	if len(parts) < 5 {
-		return
+	algrs := make([]string, len(aLGORITHMS)+len(aSYMALGORITHMS))
+	i := 0
+	for _, a := range aLGORITHMS {
+		algrs[i] = a.Name()
+		i++
+	}
+	for _, a := range aSYMALGORITHMS {
+		algrs[i] = a.Name()
+		i++
 	}
 
-	switch parts[1] {
-	case "A":
-		fallthrough
-	case "AES":
-		l, err := strconv.Atoi(parts[2])
-		if err != nil {
-			return
-		}
-		mo := parts[3]
-		if parts[4] != "" {
-			s0 := ""
-			if mo != "" {
-				s0 = "-"
-			}
-			mo = fmt.Sprintf("%v%v%v", mo, s0, parts[4])
-		}
-		s1 := ""
-		if mo != "" {
-			s1 = "-"
-		}
-		name = fmt.Sprintf("AES-%v%v%v", l, s1, mo)
-	case "ChaCha":
-		if parts[2] == "20" && parts[4] == "Poly1305" {
-			name = inp
-		}
-
-	case "RSA":
-		var err error
-		var l, h int
-		if parts[2] != "" {
-			if l, err = strconv.Atoi(parts[2]); err != nil {
-				return
-			}
-		} else {
-			l = 2048
-		}
-		hsh := parts[4]
-		if h, err = strconv.Atoi(hsh); err == nil {
-			hsh = fmt.Sprintf("SHA%v", h)
-		}
-		if parts[3] == "OAEP" {
-			name = fmt.Sprintf("RSA-%v-%v-%v", l, parts[3], hsh)
-		} else {
-			s3 := ""
-			if parts[3] != "" {
-				s3 = "-"
-			}
-			s4 := ""
-			if parts[4] != "" {
-				s4 = "-"
-			}
-			name = fmt.Sprintf("RSA-%v%v%v%v%v", l, s3, parts[3], s4, parts[4])
-		}
-
-	case "SECP":
-		switch parts[4] {
-		case "DECRED":
-			name = fmt.Sprintf("%v%v%v-%v", parts[1], parts[2], parts[3], parts[4])
-		case "K1":
-			name = fmt.Sprintf("%v%v%v-ECIESGO", parts[1], parts[2], parts[4])
-		default:
-			name = "SECP256K1-ECIESGO"
-		}
+	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	if len(indices) == 1 {
+		name = str
 	}
 	return
 }

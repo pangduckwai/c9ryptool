@@ -53,7 +53,7 @@ type Secp256k1Eciesgo struct {
 }
 
 func (a *Secp256k1Eciesgo) Name() string {
-	return "SECP256K1-ECIESGO"
+	return "ECIES-SECP256K1-ECIESGO"
 }
 
 func (a *Secp256k1Eciesgo) Type() bool {
@@ -111,11 +111,19 @@ func (a *Secp256k1Eciesgo) PopulateKey(key []byte) (err error) {
 		return
 	}
 
-	a.PrivateKey, a.PublicKey, err = parse(key)
-	if err != nil {
-		a.PublicKey, err = parsePub(key)
+	if key == nil {
+		a.PrivateKey, err = ecies.GenerateKey()
 		if err != nil {
 			return
+		}
+		a.PublicKey = a.PrivateKey.PublicKey
+	} else {
+		a.PrivateKey, a.PublicKey, err = parse(key)
+		if err != nil {
+			a.PublicKey, err = parsePub(key)
+			if err != nil {
+				return
+			}
 		}
 	}
 	return

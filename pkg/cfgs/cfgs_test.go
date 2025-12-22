@@ -57,7 +57,7 @@ func TestMatchs(t *testing.T) {
 	e := -1
 	f := 0
 	for i, input := range inputs {
-		indices, str, typ := utils.BestMatch(input, COMMANDS)
+		indices, str, typ := utils.BestMatch(input, COMMANDS, false)
 		switch len(indices) {
 		case 0:
 			fmt.Printf("TestMatchs() %2v - in:%-9v no match found\n", i, fmt.Sprintf("\"%v\"", input))

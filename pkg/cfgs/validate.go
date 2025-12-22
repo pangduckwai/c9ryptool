@@ -133,7 +133,7 @@ func Validate(cfg *Config) (err error) {
 }
 
 func cmdMatch(inp string) (idx int, mth string, err error) {
-	indices, str, typ := utils.BestMatch(inp, COMMANDS)
+	indices, str, typ := utils.BestMatch(inp, COMMANDS, false)
 	switch len(indices) {
 	case 0:
 		idx = -1

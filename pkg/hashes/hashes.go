@@ -37,9 +37,26 @@ func Get(algr string) hash.Hash {
 }
 
 // Validate validate the given algorithm name. TODO HERE!!! change to use parsing similar to encryption algorithm names
-func Validate(algr string) (err error) {
-	if _, okay := hASHINGS[algr]; !okay {
-		err = fmt.Errorf("[HASH] unsupported hashing algorithm '%v'", algr)
+func Validate(inp string) (err error) {
+	algr := Parse(inp)
+	if algr == "" {
+		err = fmt.Errorf("[HASH] unsupported hashing algorithm '%v'", inp)
+	}
+	return
+}
+
+// Parse return the actual hashing algorithm name
+func Parse(inp string) (name string) {
+	algrs := make([]string, len(hASHINGS))
+	i := 0
+	for n := range hASHINGS {
+		algrs[i] = n
+		i++
+	}
+
+	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	if len(indices) == 1 {
+		name = str
 	}
 	return
 }

@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.1.0 2025121810"
+	return "v1.2.0 2025122217"
 }
 
 func desc() string {
@@ -81,7 +81,7 @@ func main() {
 			return
 		}
 
-		encd := encodes.Get(cfg.Encd)
+		encd := encodes.Get(encodes.Parse(cfg.Encd))
 		if encd == nil {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
@@ -161,7 +161,7 @@ func main() {
 			return
 		}
 
-		hshs := hashes.Get(cfg.Hash) // TODO HERE!!! change to use parsing similar to encryption algorithm names
+		hshs := hashes.Get(hashes.Parse(cfg.Hash))
 		if hshs == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Hash)
 		}

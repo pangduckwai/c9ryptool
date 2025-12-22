@@ -106,15 +106,15 @@ A simple cryptographic tool
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
 ## TODO
-### 2025-12-18
-- Improve algorithm name parsing
-
 ### 2025-10-14
 - Work on AES-CBC
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
 - Let user to control encoding of input/output (in file, out file, key file) during encryption
 
 ## Changelog
+### v1.2.0
+- add `secp256k1` encryption/decryption
+
 ### v1.1.0
 - add display file contents
 

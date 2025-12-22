@@ -3,6 +3,7 @@ package asym
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509/pkix"
 	"encoding/asn1"
@@ -85,7 +86,7 @@ type Secp256k1Decred struct {
 }
 
 func (a *Secp256k1Decred) Name() string {
-	return "SECP256K1-DECRED"
+	return "ECIES-SECP256K1-DECRED"
 }
 
 func (a *Secp256k1Decred) Type() bool {
@@ -143,11 +144,19 @@ func (a *Secp256k1Decred) PopulateKey(key []byte) (err error) {
 		return
 	}
 
-	a.PrivateKey, a.PublicKey, err = parse(key)
-	if err != nil {
-		a.PublicKey, err = parsePub(key)
-		if err == nil {
+	if key == nil {
+		a.PrivateKey, err = secp256k1.GeneratePrivateKeyFromRand(rand.Reader)
+		if err != nil {
 			return
+		}
+		a.PublicKey = a.PrivateKey.PubKey()
+	} else {
+		a.PrivateKey, a.PublicKey, err = parse(key)
+		if err != nil {
+			a.PublicKey, err = parsePub(key)
+			if err == nil {
+				return
+			}
 		}
 	}
 	return
