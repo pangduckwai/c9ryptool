@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
 	"sea9.org/go/c9ryptool/pkg/hashes"
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 // Validate validate parameters.
@@ -132,54 +132,25 @@ func Validate(cfg *Config) (err error) {
 	return
 }
 
-func cmdMatch(inp string) (int, string, error) {
-	fltr := make([]int, 0)
-	li := len(inp)
-
-	for i, cmd := range COMMANDS {
-		lc := len(cmd)
-		if li == lc {
-			if inp == cmd {
-				fltr = append(fltr, i)
-			}
-		} else if li < lc {
-			if strings.Contains(cmd, inp) {
-				fltr = append(fltr, i)
-			}
-		}
-	}
-
-	lf := len(fltr)
-	if lf == 1 {
-		return fltr[0], COMMANDS[fltr[0]], nil
-	} else if lf > 1 {
+func cmdMatch(inp string) (idx int, mth string, err error) {
+	indices, str, typ := utils.BestMatch(inp, COMMANDS)
+	switch len(indices) {
+	case 0:
+		idx = -1
+	case 1:
+		idx = indices[0]
+		mth = str
+	default:
 		ms := make([]string, 0)
-		for x := range fltr {
-			ms = append(ms, COMMANDS[fltr[x]])
+		for x := range indices {
+			ms = append(ms, COMMANDS[indices[x]])
 		}
-		return -3, "", fmt.Errorf("'%v' ambiguously matched to %v", inp, ms)
-	} else {
-		var pstr string
-		for _, r := range inp {
-			pstr = fmt.Sprintf("%v.*%c", pstr, r)
+		if typ == 1 {
+			idx = -3
+		} else {
+			idx = -2
 		}
-		var pttn = regexp.MustCompile(fmt.Sprintf("%v.*", pstr))
-
-		for i, cmd := range COMMANDS {
-			if pttn.MatchString(cmd) {
-				fltr = append(fltr, i)
-			}
-		}
-		lf = len(fltr)
-		if lf == 1 {
-			return fltr[0], COMMANDS[fltr[0]], nil
-		} else if lf > 1 {
-			ms := make([]string, 0)
-			for x := range fltr {
-				ms = append(ms, COMMANDS[fltr[x]])
-			}
-			return -2, "", fmt.Errorf("\"%v\" ambiguously matched to %v", inp, ms)
-		}
-		return -1, "", nil
+		err = fmt.Errorf("'%v' ambiguously matched to %v", inp, ms)
 	}
+	return
 }

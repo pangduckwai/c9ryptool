@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+
+	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func TestBitwise(t *testing.T) {
@@ -39,34 +41,49 @@ func TestMatchs(t *testing.T) {
 		"help", "hlp", "elp", "hl", "hp", // #0
 		"version", "v", "si", "er", // #5
 		"encrypt", "encr", "ncry", "nrp", "ny", // #9
-		"decrypt", "decr", "ecry", "drp", "dy", // #14
-		"encode", "enco", "nco", "ncd", "nd", "no", // #19
-		"decode", "deco", "eco", "dco", "dd", "do", // #25
-		"hash", "hsh", "ash", "hs", "hh", "ha", // #31
-		"yamlenc", "yan", "yn", // #37
-		"yamldec", "yad", "yd", // #40
-		"enc", "dec", "ery", "ecd", // fail
+		"decrypt", "decr", "ecry", "drp", "dry", "dyp", // #14
+		"encode", "enco", "nco", "ncd", "nd", "no", // #20
+		"decode", "deco", "eco", "dco", "dd", "do", // #26
+		"hash", "hsh", "ash", "hs", "hh", "ha", // #32
+		"yamlenc", "yan", "yn", // #38
+		"yamldec", "yad", "yd", // #41
+		"display", "dsp", "dpy", "di", "ds", "is", // #44
+		"dp", "dy", "enc", "dec", "ery", "ecd", // fail
 		"nc", "ec", "ed", "dc", "de", "ya", // fail
 		"h", "a", "s", "l", "y", // fail
 	}
 
-	h := 43
+	h := 50
 	e := -1
 	f := 0
 	for i, input := range inputs {
-		idx, rst, err := cmdMatch(input)
-		if err != nil {
+		indices, str, typ := utils.BestMatch(input, COMMANDS)
+		switch len(indices) {
+		case 0:
+			fmt.Printf("TestMatchs() %2v - in:%-9v no match found\n", i, fmt.Sprintf("\"%v\"", input))
+		case 1:
+			t := "regex"
+			switch typ {
+			case 1:
+				t = "partial"
+			case 2:
+				t = "exact"
+			}
+			fmt.Printf("TestMatchs() %2v - in:%-9v out:%-9v (%v)\n", i, fmt.Sprintf("\"%v\"", input), fmt.Sprintf("\"%v\"", str), t)
+		default:
 			f++
 			if e < 0 {
 				e = i
 			}
-			fmt.Printf("TestMatchs() %2v - in:%-9v err:%v\n", i, fmt.Sprintf("\"%v\"", input), err)
-		} else {
-			fmt.Printf("TestMatchs() %2v - in:%-9v out:%-9v (%v)\n", i, fmt.Sprintf("\"%v\"", input), fmt.Sprintf("\"%v\"", rst), idx)
+			mths := make([]string, 0)
+			for _, idx := range indices {
+				mths = append(mths, COMMANDS[idx])
+			}
+			fmt.Printf("TestMatchs() %2v - in:%-9v err: ambiguously matched %v\n", i, fmt.Sprintf("\"%v\"", input), mths)
 		}
 	}
 	if e != h {
-		t.Fatalf("Test 1 to %v should be successful, while the rest should fail, found %v failed", h, e)
+		t.Fatalf("Test 1 to %v should be successful, while the rest should fail, found starts to fail at %v", h, e)
 	} else if f != len(inputs)-h {
 		t.Fatalf("Expecting %v fails, got %v", len(inputs)-h, f)
 	}
