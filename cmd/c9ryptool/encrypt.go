@@ -111,7 +111,8 @@ func decrypt(
 			return
 		}
 	} else if cfg.Genkey {
-		// not allowed
+		err = fmt.Errorf("[DCY][PWD] generate new key for decryption makes no sense")
+		return
 	} else {
 		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
 		if err != nil {

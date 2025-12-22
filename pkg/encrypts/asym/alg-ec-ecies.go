@@ -4,6 +4,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"fmt"
 
 	ecies "github.com/ecies/go/v2"
 )
@@ -121,9 +122,18 @@ func (a *Secp256k1Eciesgo) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Secp256k1Eciesgo) Encrypt(input ...[]byte) ([]byte, error) {
+	if a.PublicKey != nil {
+		return nil, fmt.Errorf("key not ready")
+	}
 	return ecies.Encrypt(a.PublicKey, input[0])
 }
 
 func (a *Secp256k1Eciesgo) Decrypt(input ...[]byte) ([]byte, error) {
+	if a.PrivateKey == nil {
+		if a.PublicKey != nil {
+			return nil, fmt.Errorf("public key cannot be used for decryption")
+		}
+		return nil, fmt.Errorf("keys not ready")
+	}
 	return ecies.Decrypt(a.PrivateKey, input[0])
 }

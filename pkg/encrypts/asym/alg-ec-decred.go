@@ -8,6 +8,7 @@ import (
 	"encoding/asn1"
 	"encoding/binary"
 	"encoding/pem"
+	"fmt"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 )
@@ -153,6 +154,10 @@ func (a *Secp256k1Decred) PopulateKey(key []byte) (err error) {
 }
 
 func (a *Secp256k1Decred) Encrypt(input ...[]byte) (result []byte, err error) {
+	if a.PublicKey != nil {
+		return nil, fmt.Errorf("key not ready")
+	}
+
 	ikey, err := secp256k1.GeneratePrivateKey()
 	if err != nil {
 		return
@@ -176,6 +181,13 @@ func (a *Secp256k1Decred) Encrypt(input ...[]byte) (result []byte, err error) {
 }
 
 func (a *Secp256k1Decred) Decrypt(input ...[]byte) ([]byte, error) {
+	if a.PrivateKey == nil {
+		if a.PublicKey != nil {
+			return nil, fmt.Errorf("public key cannot be used for decryption")
+		}
+		return nil, fmt.Errorf("keys not ready")
+	}
+
 	ikeyLen := binary.LittleEndian.Uint32(input[0][:4]) + 4
 	ikeyPub, err := secp256k1.ParsePubKey(input[0][4:ikeyLen])
 	if err != nil {
