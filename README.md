@@ -6,7 +6,6 @@ A collection of cryptographic related tools
 | [`c9ryptool`](#c9ryptool) | A simple cryptographic tool |
 | [`c9pubkey`](#c9pubkey) | Extract and export the public key from a private key |
 | [`c9split`](#c9split) | Split a file into 2 by number of bytes |
-| `test` | Test various functions from the command line |
 
 ## c9ryptool
 A simple cryptographic tool
@@ -26,23 +25,22 @@ A simple cryptographic tool
 | --- | --- |
 | `encrypt` | encrypt input using the provided encryption key |
 | `decrypt` | decrypt encrypted input back to the original form |
-| `yamlenc` | encrypt values in the given YAML file while preserving the file structure |
-| `yamldec` | decrypt values in the given YAML file |
 
 | option | 2<sup>nd</sup> form | - | description |
 | --- | --- | --- | --- |
 | `-a ALGR` | `--algorithm=ALGR` | all | `ALGR` is the name of the encryption algorithm to use |
 | `-k FILE` | `--key=FILE` | all | `FILE` is the path of the file containing the encryption (private) key |
-| - | `--iv=IV` | sym | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the<br/>ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64<br/>decoding |
-| - | `--tag=TAG` | sym | `TAG` is the path of the file containing the message authentication tag |
-| - | `--aad=AAD` | sym | `AAD` is the path of the file containing the additional authenticated data |
+| - | `--iv=IV` | symmetric | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the<br/>ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64<br/>decoding |
+| - | `--tag=TAG` | symmetric | `TAG` is the path of the file containing the message authentication tag |
+| - | `--aad=AAD` | symmetric | `AAD` is the path of the file containing the additional authenticated data |
 | `-g` | `--generate` | all | generate a new encrytpion key |
-| `-p` | `--password` | sym | indicate a password is input interactively |
-| - | `--salt=LEN` | sym | `LEN` is the length of salt to use for generating keys from password |
+| `-p` | `--password` | symmetric | indicate a password is input interactively |
+| - | `--salt=LEN` | symmetric | `LEN` is the length of salt to use for generating keys from password |
 | `-l` | `--list` | all | list the supported algorithms or encoding schemes |
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
-| `-n ENC` | `--encoding=ENC` | yaml | `ENC` is the name of the encoding scheme to use, only applies to yaml encryption/decryption |
+| `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file, which is kept in the output:<br/>1. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>2. `json` - to be added |
+| `-n ENC` | `--encoding=ENC` | `format` != none | `ENC` is the name of the encoding scheme to use, only applies to yaml encryption/decryption |
 
 > ### console input
 > #### 1. password
@@ -146,6 +144,9 @@ Split a file into 2 by number of bytes
 ---
 
 ## Changelog
+### v1.2.1
+- change `yaml` encryption from separate commands to a switch
+
 ### v1.2.0
 - add `secp256k1` encryption/decryption
   - Use both `github.com/decred/dcrd/dcrec/secp256k1/v4` and `github.com/ecies/go/v2` as 2 algorithms

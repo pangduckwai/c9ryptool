@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.2.0 2025122217"
+	return "v1.2.1 2025122311"
 }
 
 func desc() string {
@@ -56,10 +56,25 @@ func main() {
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
-		if cfg.Command() == cfgs.CMD_ENCRYPT {
-			err = encrypt(cfg, algr)
-		} else {
-			err = decrypt(cfg, algr)
+		switch cfg.Format {
+		case cfgs.FORMAT_YAML:
+			encd := encodes.Get(cfg.Encd)
+			if encd == nil {
+				log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
+			}
+			if cfg.Command() == cfgs.CMD_ENCRYPT {
+				err = yamlEncrypt(cfg, algr, encd)
+			} else {
+				err = yamlDecrypt(cfg, algr, encd)
+			}
+		case cfgs.FORMAT_JSON:
+			// TODO HERE!!! add json value encryption!
+		default:
+			if cfg.Command() == cfgs.CMD_ENCRYPT {
+				err = encrypt(cfg, algr)
+			} else {
+				err = decrypt(cfg, algr)
+			}
 		}
 		if cfg.Verbose {
 			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name())
@@ -92,44 +107,6 @@ func main() {
 		}
 		if cfg.Verbose {
 			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], encd.Name())
-		}
-
-	case cfgs.CMD_YAMLENC:
-		fallthrough
-	case cfgs.CMD_YAMLDEC:
-		err = cfgs.Validate(cfg)
-		if err != nil {
-			log.Fatalf("[MAIN]%v", err)
-		}
-
-		if cfg.IsList() {
-			fmt.Println(desc())
-			for i, n := range encrypts.List(0) {
-				a := encrypts.Get(n)
-				if a.Type() {
-					fmt.Printf(" %2v sym  %v\n", i+1, n)
-				} else {
-					fmt.Printf(" %2v asym %v\n", i+1, n)
-				}
-			}
-			return
-		}
-
-		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
-		if algr == nil {
-			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
-		}
-		encd := encodes.Get(cfg.Encd)
-		if encd == nil {
-			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
-		}
-		if cfg.Command() == cfgs.CMD_YAMLENC {
-			err = yamlEncrypt(cfg, algr, encd)
-		} else {
-			err = yamlDecrypt(cfg, algr, encd)
-		}
-		if cfg.Verbose {
-			fmt.Printf("%v finished '%v' using '%v' and '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name(), encd.Name())
 		}
 
 	case cfgs.CMD_DISPLAY:

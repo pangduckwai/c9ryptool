@@ -23,6 +23,7 @@ type Config struct {
 	Hash    string // hashing algorithm
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
+	Format  string // specify input file format
 	Key     string // secret key file path
 	Iv      string // initialization vector file path, nil - auto-gen
 	Tag     string // message authentication tag file path
@@ -42,10 +43,33 @@ func (cfg *Config) Command() uint8 {
 	return cfg.cmd & MASK_FLAG
 }
 
+const CMD_HELP = 0
+const CMD_VERSION = 1
+const CMD_ENCRYPT = 2
+const CMD_DECRYPT = 3
+const CMD_ENCODE = 4
+const CMD_DECODE = 5
+const CMD_HASHING = 6
+const CMD_DISPLAY = 7
+
+var COMMANDS = []string{
+	"help",    // 0
+	"version", // 1
+	"encrypt", // 2
+	"decrypt", // 3
+	"encode",  // 4
+	"decode",  // 5
+	"hash",    // 6
+	"display", // 7
+}
+
+const FORMAT_YAML = "yaml"
+const FORMAT_JSON = "json"
+
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
-		"  [encrypt | decrypt | yamlenc | yamldec]\n" +
+		"  [encrypt | decrypt]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
 		"   {--iv=IV }\n" +
@@ -57,6 +81,7 @@ func Usage() string {
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
+		"   {-f FORMAT | --format=FORMAT}\n" +
 		"   {-n ENC | --encoding=ENC}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-l | --list}\n" +
@@ -84,8 +109,6 @@ func Help() string {
 		" # encryption\n"+
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
-		" . yamlenc - encrypt values in the given YAML file while preserving the file structure\n"+
-		" . yamldec - decrypt values in the given YAML file\n"+
 		"   * options:\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
@@ -111,6 +134,10 @@ func Help() string {
 		"       path of the input file, omitting means input from stdin\n"+
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
+		"    -f FORMAT, --format=FORMAT\n"+
+		"       format of the input file, which is kept in the output, default is none:\n"+
+		"        1. 'yaml' - encrypt/decrypt values in the given YAML file while preserving the file structure\n"+
+		"        2. 'json' - to be added\n"+
 		"    -n ENC, --encoding=ENC\n"+
 		"       encoding scheme to use, only applies to yaml encryption/decryption, default: '%v'\n\n"+
 		" # encoding\n"+
@@ -159,30 +186,6 @@ func Help() string {
 	)
 }
 
-const CMD_HELP = 0
-const CMD_VERSION = 1
-const CMD_ENCRYPT = 2
-const CMD_DECRYPT = 3
-const CMD_ENCODE = 4
-const CMD_DECODE = 5
-const CMD_HASHING = 6
-const CMD_DISPLAY = 7
-const CMD_YAMLENC = 8
-const CMD_YAMLDEC = 9
-
-var COMMANDS = []string{
-	"help",    // 0
-	"version", // 1
-	"encrypt", // 2
-	"decrypt", // 3
-	"encode",  // 4
-	"decode",  // 5
-	"hash",    // 6
-	"display", // 7
-	"yamlenc", // 8
-	"yamldec", // 9
-}
-
 func Parse(args []string) (cfg *Config, err error) {
 	if len(args) < 2 {
 		err = fmt.Errorf("[CONF] Command missing")
@@ -207,15 +210,11 @@ func Parse(args []string) (cfg *Config, err error) {
 	cfg.cmd = uint8(idx)
 
 	switch cfg.cmd {
-	case CMD_YAMLENC:
-		fallthrough
-	case CMD_YAMLDEC:
-		cfg.Encd = encodes.Default()
-		fallthrough
 	case CMD_ENCRYPT:
 		fallthrough
 	case CMD_DECRYPT:
 		cfg.Algr = encrypts.Default()
+		cfg.Encd = encodes.Default()
 	case CMD_ENCODE:
 		fallthrough
 	case CMD_DECODE:
@@ -377,6 +376,21 @@ func Parse(args []string) (cfg *Config, err error) {
 				return
 			} else {
 				cfg.Output = args[i][6:]
+			}
+		case args[i] == "-f":
+			i++
+			if i >= len(args) {
+				err = fmt.Errorf("[CONF] Missing input file format argument")
+				return
+			} else {
+				cfg.Format = args[i]
+			}
+		case strings.HasPrefix(args[i], "--format="):
+			if len(args[i]) <= 6 {
+				err = fmt.Errorf("[CONF] Missing input file format")
+				return
+			} else {
+				cfg.Format = args[i][9:]
 			}
 		default:
 			err = fmt.Errorf("[CONF] Invalid option '%v'", args[i])
