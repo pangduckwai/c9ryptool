@@ -144,6 +144,9 @@ Split a file into 2 by number of bytes
 ---
 
 ## Changelog
+### v1.2.2
+- preserve file order when doing `yaml` encryption/decryption
+
 ### v1.2.1
 - change `yaml` encryption from separate commands to a switch
 

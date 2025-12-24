@@ -1,17 +1,27 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
 
-// Traverse traverse a map[string]interface{}
+	"gopkg.in/yaml.v2"
+)
+
+// Traverse traverse a 'MapSlice'
 func Traverse(
-	inp, out map[string]interface{},
-	convert func(string) (string, error),
-) (err error) {
-	for k, v := range inp {
-		err = _traverse(k, v, out, convert)
+	inp []yaml.MapItem,
+	action func(string) (string, error),
+) (
+	out []yaml.MapItem,
+	err error,
+) {
+	var nxt []yaml.MapItem
+	out = make([]yaml.MapItem, 0)
+	for _, itm := range inp {
+		nxt, err = _traverse(itm.Key.(string), itm.Value, action)
 		if err != nil {
 			break
 		}
+		out = append(out, nxt...)
 	}
 	return
 }
@@ -19,30 +29,36 @@ func Traverse(
 func _traverse(
 	key string,
 	ifc interface{},
-	out map[string]interface{},
-	convert func(string) (string, error),
-) (err error) {
+	action func(string) (string, error),
+) (
+	out []yaml.MapItem,
+	err error,
+) {
+	var enc string
 	switch typ := ifc.(type) {
+	case []yaml.MapItem:
+		nxt, err := Traverse(typ, action)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, yaml.MapItem{Key: key, Value: nxt})
 	case []interface{}:
 		nxt := make([]interface{}, len(typ))
-		out[key] = nxt
+		out = append(out, yaml.MapItem{Key: key, Value: nxt})
 		for i, f := range typ {
-			err = __traverse(key, i, f, nxt, convert)
+			err = __traverse(key, i, f, nxt, action)
 			if err != nil {
 				break
 			}
 		}
-	case map[string]interface{}:
-		nxt := make(map[string]interface{})
-		out[key] = nxt
-		err = Traverse(typ, nxt, convert)
 	case string:
-		out[key], err = convert(typ)
+		enc, err = action(typ)
 		if err != nil {
 			err = fmt.Errorf("[%v]%v", key, err)
 		}
+		out = append(out, yaml.MapItem{Key: key, Value: enc})
 	default:
-		out[key] = typ
+		out = append(out, yaml.MapItem{Key: key, Value: typ})
 	}
 	return
 }
@@ -51,24 +67,26 @@ func __traverse(
 	key string, idx int,
 	ifc interface{},
 	out []interface{},
-	convert func(string) (string, error),
+	action func(string) (string, error),
 ) (err error) {
 	switch typ := ifc.(type) {
+	case []yaml.MapItem:
+		nxt, err := Traverse(typ, action)
+		if err != nil {
+			return err
+		}
+		out[idx] = nxt
 	case []interface{}:
 		nxt := make([]interface{}, len(typ))
 		out[idx] = nxt
 		for i, f := range typ {
-			err = __traverse(key, i, f, nxt, convert)
+			err = __traverse(key, i, f, nxt, action)
 			if err != nil {
 				break
 			}
 		}
-	case map[string]interface{}:
-		nxt := make(map[string]interface{})
-		out[idx] = nxt
-		err = Traverse(typ, nxt, convert)
 	case string:
-		out[idx], err = convert(typ)
+		out[idx], err = action(typ)
 		if err != nil {
 			err = fmt.Errorf("[%v][%v]%v", key, idx, err)
 		}

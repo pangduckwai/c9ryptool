@@ -18,7 +18,7 @@ import (
 )
 
 func usage() {
-	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread]\n")
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread|yaml]\n")
 	os.Exit(1)
 }
 
@@ -163,6 +163,11 @@ func main() {
 		})
 		fmt.Printf("[TEST][%v] Private key\n%s\n", cmd, prv)
 		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
+	case "yaml":
+		err := yamlTest()
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
 	default:
 		usage()
 	}

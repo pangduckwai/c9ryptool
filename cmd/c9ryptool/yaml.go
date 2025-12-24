@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
@@ -83,22 +83,22 @@ func yamlEncrypt(
 		return
 	}
 
-	inp := make(map[string]interface{})
-	err = yaml.Unmarshal(input, inp)
+	inp := make([]yaml.MapItem, 0)
+	err = yaml.Unmarshal(input, &inp)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][UNM]%v", err)
 		return
 	}
 
-	sec := make(map[string]interface{})
-	err = utils.Traverse(inp, sec, encrypt)
+	// sec := make(map[string]interface{})
+	sec, err := utils.Traverse(inp, encrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][NAV]%v", err)
 		return
 	}
 
 	if salt != nil {
-		sec["salt"] = ecd.Encode(salt) // TODO name of "salt"
+		sec = append(sec, yaml.MapItem{Key: "salt", Value: ecd.Encode(salt)}) // TODO name of "salt"
 	}
 
 	output, err = yaml.Marshal(sec)
@@ -127,21 +127,19 @@ func yamlDecrypt(
 		return
 	}
 
-	inp := make(map[string]interface{})
-	err = yaml.Unmarshal(input, inp)
+	inp := make([]yaml.MapItem, 0)
+	err = yaml.Unmarshal(input, &inp)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][UNM]%v", err)
 		return
 	}
 
-	if s0, ok := inp["salt"]; ok { // TODO name of "salt"
-		if s1, ok := s0.(string); ok {
-			salt, err = ecd.Decode(s1)
-			if err != nil {
-				return
-			}
+	for i, itm := range inp {
+		if itm.Key.(string) == "salt" { // TODO name of "salt"
+			salt, err = ecd.Decode(itm.Value.(string))
+			inp = append(inp[:i], inp[i+1:]...)
+			break
 		}
-		delete(inp, "salt")
 	}
 
 	if cfg.Passwd {
@@ -208,8 +206,7 @@ func yamlDecrypt(
 		return
 	}
 
-	clr := make(map[string]interface{})
-	err = utils.Traverse(inp, clr, decrypt)
+	clr, err := utils.Traverse(inp, decrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][NAV]%v", err)
 		return
