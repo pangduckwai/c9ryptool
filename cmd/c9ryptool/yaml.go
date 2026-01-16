@@ -24,9 +24,13 @@ func yamlEncrypt(
 		return
 	}
 
-	if cfg.Passwd {
+	if cfg.Passwd != "" {
+		pwd := cfg.Passwd
+		if cfg.Passwd == cfgs.PWD_INTERACTIVE {
+			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+		}
 		salt, err = sym.PopulateKeyFromPassword(
-			desc(),
+			pwd,
 			nil,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,
@@ -155,9 +159,13 @@ func yamlDecrypt(
 		}
 	}
 
-	if cfg.Passwd {
+	if cfg.Passwd != "" {
+		pwd := cfg.Passwd
+		if cfg.Passwd == cfgs.PWD_INTERACTIVE {
+			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+		}
 		_, err = sym.PopulateKeyFromPassword(
-			desc(),
+			pwd,
 			salt,
 			alg.KeyLength(), cfg.SaltLen,
 			alg.PopulateKey,

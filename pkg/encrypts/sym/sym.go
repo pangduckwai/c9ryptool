@@ -1,11 +1,8 @@
 package sym
 
 import (
-	"bufio"
 	"crypto/rand"
 	"fmt"
-	"io"
-	"os"
 
 	"golang.org/x/crypto/scrypt"
 )
@@ -19,7 +16,7 @@ const P = 1
 // using the scrypt method. The salt to use is stored at the end of the cipher text,
 // separated by a dot (`.`)
 func PopulateKeyFromPassword(
-	prompt string,
+	passwd string,
 	input []byte,
 	keyLen, saltLen int,
 	populate func([]byte) error,
@@ -38,20 +35,7 @@ func PopulateKeyFromPassword(
 		}
 	}
 
-	var str string
-	rdr := bufio.NewReader(os.Stdin)
-	fmt.Printf("%v:\n", prompt)
-	fmt.Print("Enter password: ")
-	str, err = rdr.ReadString('\n')
-	if err != nil {
-		if err == io.EOF {
-			err = fmt.Errorf("[PASS] stdin already ended, cannot read password")
-		} else {
-			err = fmt.Errorf("[PASS] %v", err)
-		}
-		return
-	}
-	key, err := scrypt.Key([]byte(str[:len(str)-1]), salt, N, R, P, keyLen)
+	key, err := scrypt.Key([]byte(passwd[:len(passwd)-1]), salt, N, R, P, keyLen)
 	if err != nil {
 		err = fmt.Errorf("[PASS] %v", err)
 		return

@@ -29,7 +29,7 @@ type Config struct {
 	Tag     string // message authentication tag file path
 	Aad     string // additional authenticated data
 	Genkey  bool   // generate key enabled
-	Passwd  bool   // interactively input password
+	Passwd  string // key-generating password
 	SaltLen int    // length of salt to use for generating keys from password
 	Buffer  int    // buffer size
 	Verbose bool
@@ -65,6 +65,7 @@ var COMMANDS = []string{
 
 const FORMAT_YAML = "yaml"
 const FORMAT_JSON = "json"
+const PWD_INTERACTIVE = "{[INTERACTIVE]}"
 
 func Usage() string {
 	return "Usage:\n c9ryptool\n" +
@@ -72,11 +73,12 @@ func Usage() string {
 		"  [encrypt | decrypt]\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
-		"   {--iv=IV }\n" +
-		"   {--tag=TAG }\n" +
-		"   {--aad=AAD }\n" +
+		"   {--iv=IV}\n" +
+		"   {--tag=TAG}\n" +
+		"   {--aad=AAD}\n" +
 		"   {-g | --generate}\n" +
-		"   {-p | --password}\n" +
+		"   {-p\n" +
+		"   {--password=PASS}\n" +
 		"   {--salt=LEN}\n" +
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
@@ -124,8 +126,10 @@ func Help() string {
 		"       path of the file containing the additional authenticated data\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
-		"    -p, --password\n"+
+		"    -p\n"+
 		"       indicate a password, for encryption key generation, is input interactively\n"+
+		"    --password=PASS\n"+
+		"       input the key-generating password via the command line\n"+
 		"    --salt=LEN\n"+
 		"       length of salt to use for generating keys from password, default: %v\n"+
 		"    -l, --list\n"+
@@ -197,7 +201,7 @@ func Parse(args []string) (cfg *Config, err error) {
 
 	cfg = &Config{
 		Buffer:  bUFFER,
-		Passwd:  false,
+		Passwd:  "",
 		SaltLen: sym.SALTLEN,
 		Verbose: false,
 	}
@@ -318,8 +322,15 @@ func Parse(args []string) (cfg *Config, err error) {
 			}
 		case args[i] == "-g" || args[i] == "--generate":
 			cfg.Genkey = true
-		case args[i] == "-p" || args[i] == "--password":
-			cfg.Passwd = true
+		case args[i] == "-p":
+			cfg.Passwd = PWD_INTERACTIVE
+		case strings.HasPrefix(args[i], "--password="):
+			if len(args[i]) <= 11 {
+				err = fmt.Errorf("[CONF] Missing password value")
+				return
+			} else {
+				cfg.Passwd = args[i][11:]
+			}
 		case args[i] == "-n":
 			i++
 			if i >= len(args) {

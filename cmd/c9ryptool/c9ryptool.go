@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.3.0 2026011611"
+	return "v1.3.0 2026011616"
 }
 
 func desc() string {

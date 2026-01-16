@@ -53,13 +53,13 @@ func Validate(cfg *Config) (err error) {
 			break
 		}
 
-		if cfg.Passwd && cfg.Genkey {
+		if cfg.Passwd != "" && cfg.Genkey {
 			err = fmt.Errorf("[VLDT] incompatable options '-g' and '-p'") // > c9ryptool e|d -p -g -i README.md
 			return
 		}
 
 		if cfg.Key != "" {
-			if cfg.Passwd {
+			if cfg.Passwd != "" {
 				err = fmt.Errorf("[VLDT] incompatable options '-k' and '-p'")
 				return
 			}
@@ -73,7 +73,7 @@ func Validate(cfg *Config) (err error) {
 			} else if cfg.Genkey {
 				errs = append(errs, fmt.Errorf("key file '%v' already exists", cfg.Key))
 			}
-		} else if !cfg.Passwd {
+		} else if cfg.Passwd == "" {
 			errs = append(errs, fmt.Errorf("encryption key filename missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
 		}
 
@@ -82,7 +82,7 @@ func Validate(cfg *Config) (err error) {
 		}
 
 		var typ int
-		if cfg.Passwd || cfg.Iv != "" || cfg.Tag != "" || cfg.Aad != "" {
+		if cfg.Passwd != "" || cfg.Iv != "" || cfg.Tag != "" || cfg.Aad != "" {
 			// must be symmetric algorithm if:
 			// 1. encryption key is generated from a passphrase
 			// 2. IV is given

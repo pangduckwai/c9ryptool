@@ -34,13 +34,14 @@ A simple cryptographic tool
 | - | `--tag=TAG` | symmetric | `TAG` is the path of the file containing the message authentication tag |
 | - | `--aad=AAD` | symmetric | `AAD` is the path of the file containing the additional authenticated data |
 | `-g` | `--generate` | all | generate a new encrytpion key |
-| `-p` | `--password` | symmetric | indicate a password is input interactively |
+| `-p` | - | symmetric | iindicate a password, for encryption key generation, is input interactively |
+| - | `--password=PASS` | symmetric | `PASS` is the key-generating password, input via the command line |
 | - | `--salt=LEN` | symmetric | `LEN` is the length of salt to use for generating keys from password |
 | `-l` | `--list` | all | list the supported algorithms or encoding schemes |
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
 | `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
-| `-n ENC` | `--encoding=ENC` | `-k` / `--key`; and<br/>symmetric; and/or<br/>`format` != none | `ENC` is the name of the encoding scheme to use, applies to:<br/>1. reading/writing the key file (if one is provided), as well as<br/>2. encoding field values in yaml encryption/decryption<br/>note: `none` is allowed when input file format is `none` |
+| `-n ENC` | `--encoding=ENC` | symmetric<br/>`-k` / `--key`<br/>`format` != none | `ENC` is the name of the encoding scheme to use, applies to:<br/>1. reading/writing the key file (if one is provided), as well as<br/>2. encoding field values in yaml encryption/decryption<br/>note: `none` is allowed when input file format is `none` |
 
 > ### console input
 > #### 1. password

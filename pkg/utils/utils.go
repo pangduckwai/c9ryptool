@@ -107,3 +107,26 @@ func Write(
 	}
 	return
 }
+
+// InteractiveSingle get a single line interactive input from the prompt
+func InteractiveSingle(header, prompt string) (str string, err error) {
+	rdr := bufio.NewReader(os.Stdin)
+	fmt.Printf("%v:\n", header)
+	fmt.Printf("%v: ", prompt)
+	str, err = rdr.ReadString('\n')
+	if err != nil {
+		if err == io.EOF {
+			err = fmt.Errorf("[IACTS] stdin already ended, cannot read input")
+		} else {
+			err = fmt.Errorf("[IACTS] %v", err)
+		}
+	}
+
+	switch []byte(str)[len(str)-1] {
+	case 10:
+		fallthrough
+	case 13:
+		str = str[:len(str)-1]
+	}
+	return
+}
