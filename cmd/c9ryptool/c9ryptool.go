@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.2.2 2025122409"
+	return "v1.3.0 2026011611"
 }
 
 func desc() string {
@@ -56,9 +56,11 @@ func main() {
 		if algr == nil {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
+
+		encd := encodes.Get(cfg.Encd)
+
 		switch cfg.Format {
 		case cfgs.FORMAT_YAML:
-			encd := encodes.Get(cfg.Encd)
 			if encd == nil {
 				log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 			}
@@ -71,9 +73,9 @@ func main() {
 			// TODO HERE!!! add json value encryption!
 		default:
 			if cfg.Command() == cfgs.CMD_ENCRYPT {
-				err = encrypt(cfg, algr)
+				err = encrypt(cfg, algr, encd)
 			} else {
-				err = decrypt(cfg, algr)
+				err = decrypt(cfg, algr, encd)
 			}
 		}
 		if cfg.Verbose {

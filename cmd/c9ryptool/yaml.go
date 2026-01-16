@@ -16,7 +16,7 @@ func yamlEncrypt(
 	alg encrypts.Algorithm,
 	ecd encodes.Encoding,
 ) (err error) {
-	var key, input, output, salt, iv, aad []byte
+	var buf, key, input, output, salt, iv, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -41,7 +41,11 @@ func yamlEncrypt(
 			err = fmt.Errorf("[YAML][ECY][GEN]%v", err)
 			return
 		}
-		err = utils.Write(cfg.Key, alg.GetKey())
+		if !alg.Type() {
+			err = utils.Write(cfg.Key, alg.GetKey())
+		} else {
+			err = utils.Write(cfg.Key, []byte(ecd.Encode(alg.GetKey())))
+		}
 		if err != nil {
 			return
 		}
@@ -51,7 +55,16 @@ func yamlEncrypt(
 			err = fmt.Errorf("[YAML][ECY][KEY]%v", err)
 			return
 		}
-		err = alg.PopulateKey(key)
+		if !alg.Type() {
+			err = alg.PopulateKey(key)
+		} else {
+			buf, err = ecd.Decode(string(key))
+			if err != nil {
+				err = fmt.Errorf("[YAML][ECY][DCD]%v", err)
+				return
+			}
+			err = alg.PopulateKey(buf)
+		}
 		if err != nil {
 			err = fmt.Errorf("[YAML][ECY][POP]%v", err)
 			return
@@ -119,7 +132,7 @@ func yamlDecrypt(
 	alg encrypts.Algorithm,
 	ecd encodes.Encoding,
 ) (err error) {
-	var key, input, output, salt, iv, tag, aad []byte
+	var buf, key, input, output, salt, iv, tag, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -161,7 +174,16 @@ func yamlDecrypt(
 			err = fmt.Errorf("[YAML][DCY][KEY]%v", err)
 			return
 		}
-		err = alg.PopulateKey(key)
+		if !alg.Type() {
+			err = alg.PopulateKey(key)
+		} else {
+			buf, err = ecd.Decode(string(key))
+			if err != nil {
+				err = fmt.Errorf("[YAML][DCY][DCD]%v", err)
+				return
+			}
+			err = alg.PopulateKey(buf)
+		}
 		if err != nil {
 			err = fmt.Errorf("[YAML][DCY][POP]%v", err)
 			return

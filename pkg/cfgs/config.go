@@ -135,11 +135,14 @@ func Help() string {
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
 		"    -f FORMAT, --format=FORMAT\n"+
-		"       format of the input file, which is kept in the output, default is none:\n"+
-		"        1. 'yaml' - encrypt/decrypt values in the given YAML file while preserving the file structure\n"+
-		"        2. 'json' - to be added\n"+
+		"       format of the input file, default is none:\n"+
+		"        1. 'none' - no format, the entire input is treated as a stream of bytes\n"+
+		"        2. 'yaml' - encrypt/decrypt field values in the given YAML file while preserving the file structure\n"+
+		"        3. 'json' - to be added\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       encoding scheme to use, only applies to yaml encryption/decryption, default: '%v'\n\n"+
+		"       encoding scheme name, default: '%v', allows 'none' when input file format is 'none'\n"+
+		"        1. encoding scheme of the provided key file (when option -k / --key is specified), as well as\n"+
+		"        2. encoding scheme of field values for yaml encryption/decryption\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+

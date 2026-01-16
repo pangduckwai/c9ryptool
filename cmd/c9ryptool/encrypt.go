@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"sea9.org/go/c9ryptool/pkg/cfgs"
+	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
 	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
 	"sea9.org/go/c9ryptool/pkg/utils"
@@ -12,8 +13,9 @@ import (
 func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
+	ecd encodes.Encoding,
 ) (err error) {
-	var key, input, result, salt, iv, aad []byte
+	var buf, key, input, result, salt, iv, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -38,7 +40,11 @@ func encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		err = utils.Write(cfg.Key, alg.GetKey())
+		if ecd == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
+			err = utils.Write(cfg.Key, alg.GetKey())
+		} else {
+			err = utils.Write(cfg.Key, []byte(ecd.Encode(alg.GetKey())))
+		}
 		if err != nil {
 			return
 		}
@@ -48,7 +54,16 @@ func encrypt(
 			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
 		}
-		err = alg.PopulateKey(key)
+		if ecd == nil || !alg.Type() {
+			err = alg.PopulateKey(key)
+		} else {
+			buf, err = ecd.Decode(string(key))
+			if err != nil {
+				err = fmt.Errorf("[ECY][DCD]%v", err)
+				return
+			}
+			err = alg.PopulateKey(buf)
+		}
 		if err != nil {
 			err = fmt.Errorf("[ECY][POP]%v", err)
 			return
@@ -90,8 +105,9 @@ func encrypt(
 func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
+	ecd encodes.Encoding,
 ) (err error) {
-	var key, input, result, salt, iv, tag, aad []byte
+	var buf, key, input, result, salt, iv, tag, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -119,7 +135,16 @@ func decrypt(
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
 		}
-		err = alg.PopulateKey(key)
+		if ecd == nil || !alg.Type() {
+			err = alg.PopulateKey(key)
+		} else {
+			buf, err = ecd.Decode(string(key))
+			if err != nil {
+				err = fmt.Errorf("[DCY][DCD]%v", err)
+				return
+			}
+			err = alg.PopulateKey(buf)
+		}
 		if err != nil {
 			err = fmt.Errorf("[DCY][POP]%v", err)
 			return

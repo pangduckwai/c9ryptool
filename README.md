@@ -39,8 +39,8 @@ A simple cryptographic tool
 | `-l` | `--list` | all | list the supported algorithms or encoding schemes |
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
-| `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file, which is kept in the output:<br/>1. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>2. `json` - to be added |
-| `-n ENC` | `--encoding=ENC` | `format` != none | `ENC` is the name of the encoding scheme to use, only applies to yaml encryption/decryption |
+| `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
+| `-n ENC` | `--encoding=ENC` | `-k` / `--key`; and<br/>symmetric; and/or<br/>`format` != none | `ENC` is the name of the encoding scheme to use, applies to:<br/>1. reading/writing the key file (if one is provided), as well as<br/>2. encoding field values in yaml encryption/decryption<br/>note: `none` is allowed when input file format is `none` |
 
 > ### console input
 > #### 1. password
@@ -139,11 +139,13 @@ Split a file into 2 by number of bytes
 ### 2025-10-14
 - Work on AES-CBC
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
-- Let user to control encoding of input/output (in file, out file, key file) during encryption
 
 ---
 
 ## Changelog
+### v1.3.0
+- Add control for key file encoding for symmetric encryption
+
 ### v1.2.2
 - preserve file order when doing `yaml` encryption/decryption
 
