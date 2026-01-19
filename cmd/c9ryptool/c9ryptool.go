@@ -12,7 +12,7 @@ import (
 )
 
 func version() string {
-	return "v1.3.0 2026011616"
+	return "v1.4.1 2026011919"
 }
 
 func desc() string {
@@ -57,29 +57,51 @@ func main() {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
 
-		encd := encodes.Get(cfg.Encd)
+		enci := encodes.Get(cfg.Encd)
+		enco := encodes.Get(cfg.Enco)
+		enck := encodes.Get(cfg.Enck)
 
 		switch cfg.Format {
 		case cfgs.FORMAT_YAML:
-			if encd == nil {
-				log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
-			}
 			if cfg.Command() == cfgs.CMD_ENCRYPT {
-				err = yamlEncrypt(cfg, algr, encd)
+				if enco == nil {
+					log.Fatalf("[MAIN] unsupported output encoding '%v'", cfg.Enco)
+				}
+				err = yamlEncrypt(cfg, algr, enco, enck)
 			} else {
-				err = yamlDecrypt(cfg, algr, encd)
+				if enci == nil {
+					log.Fatalf("[MAIN] unsupported input encoding '%v'", cfg.Encd)
+				}
+				err = yamlDecrypt(cfg, algr, enci, enck)
 			}
 		case cfgs.FORMAT_JSON:
 			// TODO HERE!!! add json value encryption!
 		default:
 			if cfg.Command() == cfgs.CMD_ENCRYPT {
-				err = encrypt(cfg, algr, encd)
+				err = encrypt(cfg, algr, enci, enco, enck)
 			} else {
-				err = decrypt(cfg, algr, encd)
+				err = decrypt(cfg, algr, enci, enco, enck)
 			}
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], algr.Name())
+			cd, ei, eo, ek := cfgs.COMMANDS[cfg.Command()], "nil", "nil", ""
+			if cfg.Format == cfgs.FORMAT_YAML || cfg.Format == cfgs.FORMAT_JSON {
+				cd = fmt.Sprintf("%v(%v)", cd, cfg.Format)
+			}
+			if enci != nil {
+				ei = enci.Name()
+			}
+			if enco != nil {
+				eo = enco.Name()
+			}
+			if algr.Type() {
+				if enck != nil {
+					ek = fmt.Sprintf("/%v", enck.Name())
+				} else {
+					ek = "/nil"
+				}
+			}
+			fmt.Printf("\n%v finished '%v' using '%v' (%v/%v%v)\n", desc(), cd, algr.Name(), ei, eo, ek)
 		}
 
 	case cfgs.CMD_ENCODE:
@@ -108,7 +130,7 @@ func main() {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], encd.Name())
+			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], encd.Name())
 		}
 
 	case cfgs.CMD_DISPLAY:

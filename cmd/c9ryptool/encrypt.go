@@ -13,7 +13,7 @@ import (
 func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	ecd encodes.Encoding,
+	eci, eco, eck encodes.Encoding,
 ) (err error) {
 	var buf, key, input, result, salt, iv, aad []byte
 
@@ -21,6 +21,13 @@ func encrypt(
 	if err != nil {
 		err = fmt.Errorf("[ECY][INP]%v", err)
 		return
+	}
+	if eci != nil {
+		input, err = eci.Decode(string(input))
+		if err != nil {
+			err = fmt.Errorf("[ECY][INP][DCD]%v", err)
+			return
+		}
 	}
 
 	if cfg.Passwd != "" {
@@ -44,10 +51,10 @@ func encrypt(
 			err = fmt.Errorf("[ECY][GEN]%v", err)
 			return
 		}
-		if ecd == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
+		if eck == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
 			err = utils.Write(cfg.Key, alg.GetKey())
 		} else {
-			err = utils.Write(cfg.Key, []byte(ecd.Encode(alg.GetKey())))
+			err = utils.Write(cfg.Key, []byte(eck.Encode(alg.GetKey())))
 		}
 		if err != nil {
 			return
@@ -58,12 +65,12 @@ func encrypt(
 			err = fmt.Errorf("[ECY][KEY]%v", err)
 			return
 		}
-		if ecd == nil || !alg.Type() {
+		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = ecd.Decode(string(key))
+			buf, err = eck.Decode(string(key))
 			if err != nil {
-				err = fmt.Errorf("[ECY][DCD]%v", err)
+				err = fmt.Errorf("[ECY][POP][DCD]%v", err)
 				return
 			}
 			err = alg.PopulateKey(buf)
@@ -80,6 +87,13 @@ func encrypt(
 			err = fmt.Errorf("[ECY][IV]%v", err)
 			return
 		}
+		if eci != nil {
+			iv, err = eci.Decode(string(iv))
+			if err != nil {
+				err = fmt.Errorf("[ECY][IV][DCD]%v", err)
+				return
+			}
+		}
 	}
 
 	if cfg.Aad != "" {
@@ -87,6 +101,13 @@ func encrypt(
 		if err != nil {
 			err = fmt.Errorf("[ECY][AAD]%v", err)
 			return
+		}
+		if eci != nil {
+			aad, err = eci.Decode(string(aad))
+			if err != nil {
+				err = fmt.Errorf("[ECY][AAD][DCD]%v", err)
+				return
+			}
 		}
 	}
 
@@ -99,7 +120,11 @@ func encrypt(
 	if salt != nil {
 		result = append(result, salt...)
 	}
-	err = utils.Write(cfg.Output, result)
+	if eco == nil {
+		err = utils.Write(cfg.Output, result)
+	} else {
+		err = utils.Write(cfg.Output, []byte(eco.Encode(result)))
+	}
 	if err != nil {
 		err = fmt.Errorf("[ECY][OUT]%v", err)
 	}
@@ -109,7 +134,7 @@ func encrypt(
 func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	ecd encodes.Encoding,
+	eci, eco, eck encodes.Encoding,
 ) (err error) {
 	var buf, key, input, result, salt, iv, tag, aad []byte
 
@@ -117,6 +142,13 @@ func decrypt(
 	if err != nil {
 		err = fmt.Errorf("[DCY][INP]%v", err)
 		return
+	}
+	if eci != nil {
+		input, err = eci.Decode(string(input))
+		if err != nil {
+			err = fmt.Errorf("[DCY][INP][DCD]%v", err)
+			return
+		}
 	}
 
 	if cfg.Passwd != "" {
@@ -135,7 +167,7 @@ func decrypt(
 			return
 		}
 	} else if cfg.Genkey {
-		err = fmt.Errorf("[DCY][PWD] generate new key for decryption makes no sense")
+		err = fmt.Errorf("[DCY][GEN] generate new key for decryption makes no sense")
 		return
 	} else {
 		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
@@ -143,12 +175,12 @@ func decrypt(
 			err = fmt.Errorf("[DCY][KEY]%v", err)
 			return
 		}
-		if ecd == nil || !alg.Type() {
+		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = ecd.Decode(string(key))
+			buf, err = eck.Decode(string(key))
 			if err != nil {
-				err = fmt.Errorf("[DCY][DCD]%v", err)
+				err = fmt.Errorf("[DCY][POP][DCD]%v", err)
 				return
 			}
 			err = alg.PopulateKey(buf)
@@ -165,6 +197,13 @@ func decrypt(
 			err = fmt.Errorf("[DCY][IV]%v", err)
 			return
 		}
+		if eci != nil {
+			iv, err = eci.Decode(string(iv))
+			if err != nil {
+				err = fmt.Errorf("[DCY][IV][DCD]%v", err)
+				return
+			}
+		}
 	}
 
 	if cfg.Tag != "" {
@@ -173,6 +212,13 @@ func decrypt(
 			err = fmt.Errorf("[DCY][TAG]%v", err)
 			return
 		}
+		if eci != nil {
+			tag, err = eci.Decode(string(tag))
+			if err != nil {
+				err = fmt.Errorf("[DCY][TAG][DCD]%v", err)
+				return
+			}
+		}
 	}
 
 	if cfg.Aad != "" {
@@ -180,6 +226,13 @@ func decrypt(
 		if err != nil {
 			err = fmt.Errorf("[DCY][AAD]%v", err)
 			return
+		}
+		if eci != nil {
+			aad, err = eci.Decode(string(aad))
+			if err != nil {
+				err = fmt.Errorf("[DCY][AAD][DCD]%v", err)
+				return
+			}
 		}
 	}
 
@@ -193,7 +246,11 @@ func decrypt(
 		return
 	}
 
-	err = utils.Write(cfg.Output, result)
+	if eco == nil {
+		err = utils.Write(cfg.Output, result)
+	} else {
+		err = utils.Write(cfg.Output, []byte(eco.Encode(result)))
+	}
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)
 	}

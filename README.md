@@ -41,12 +41,15 @@ A simple cryptographic tool
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
 | `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
-| `-n ENC` | `--encoding=ENC` | symmetric<br/>`-k` / `--key`<br/>`format` != none | `ENC` is the name of the encoding scheme to use, applies to:<br/>1. reading/writing the key file (if one is provided), as well as<br/>2. encoding field values in yaml encryption/decryption<br/>note: `none` is allowed when input file format is `none` |
+| `-n ENC` | `--encoding=ENC` | all | `ENC` is the name of the overall encoding scheme to use for:<br/>1. output and symmetric key for encryption, and<br/>2. input and symmetric key for decryption<br/>NOTE: for the 4 encoding related options, those appear later overwrite the former ones, e.g. if `-n` appear last, it overwrites all the other 3 encoding options |
+| - | `--encode-in=ENC` | all | `ENC` is the name of the encoding scheme to use for input:<br/>1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json'<br/>2. encoding scheme to decode the entire input when input format is 'none'<br/>3. encoding scheme to decode AAD, IV and TAG values when given<br/>NOTE 1: normally encryption inputs do not need to be decoded (except e.g. JWE cases)<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| - | `--encode-out=ENC` | all | `ENC` is the name of the encoding scheme to use for output:<br/>1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json'<br/>2. encoding scheme to encode the entire output when input format is 'none'<br/>NOTE 1: normally decryption outputs do not need to be encoded<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| - | `--encode-key=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for encoding/decoding symmetric keys (when option -k / --key is specified) when writing/reading the key files<br/>NOTE: ignored for asymmetric encryption, as asymmetric keys are encoded in PEM format |
 
 > ### console input
 > #### 1. password
 > Specify the option `-p` or `--password` to use keys generated from password for the encryption. When
-> these options are specified, a prompt will appear for the user to type in the password.
+> `-p` is specified, a prompt will appear for the user to type in the password.
 
 > #### 2. salt
 > To enhance security of the keys used, a random value known as `salt` is needed when generating keys
@@ -144,6 +147,9 @@ Split a file into 2 by number of bytes
 ---
 
 ## Changelog
+### v1.4.1
+- Add control of encoding of encryption input, output and symmetric key file
+
 ### v1.3.0
 - Add control for key file encoding for symmetric encryption
 

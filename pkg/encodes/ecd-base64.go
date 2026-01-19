@@ -27,7 +27,7 @@ func padding(inp []byte) (out []byte, err error) {
 type Base64 int
 
 func (n Base64) Name() string {
-	return "base64 encoding"
+	return "base64"
 }
 
 func (n Base64) Padding(inp []byte) []byte {
@@ -56,7 +56,7 @@ func (n Base64) Decode(inp string) (out []byte, err error) {
 type Base64Url int
 
 func (n Base64Url) Name() string {
-	return "base64 URL encoding"
+	return "base64url"
 }
 
 func (n Base64Url) Padding(inp []byte) []byte {
@@ -85,7 +85,7 @@ func (n Base64Url) Decode(inp string) (out []byte, err error) {
 type RawBase64Url int
 
 func (n RawBase64Url) Name() string {
-	return "raw base64 URL encoding"
+	return "raw-base64url"
 }
 
 func (n RawBase64Url) Padding(inp []byte) []byte {

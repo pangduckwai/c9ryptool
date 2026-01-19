@@ -19,7 +19,9 @@ const MASK_FLAG = 127
 type Config struct {
 	cmd     uint8  // 0 - encrypt; 1 - decrypt
 	Algr    string // encryption algorithms
-	Encd    string // encoding schemes
+	Encd    string // encoding schemes for inputs
+	Enco    string // encoding schemes for outputs
+	Enck    string // encoding schemes for symmetric keys
 	Hash    string // hashing algorithm
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
@@ -77,14 +79,17 @@ func Usage() string {
 		"   {--tag=TAG}\n" +
 		"   {--aad=AAD}\n" +
 		"   {-g | --generate}\n" +
-		"   {-p\n" +
+		"   {-p}\n" +
 		"   {--password=PASS}\n" +
 		"   {--salt=LEN}\n" +
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
 		"   {-f FORMAT | --format=FORMAT}\n" +
-		"   {-n ENC | --encoding=ENC}\n\n" +
+		"   {-n ENC | --encoding=ENC}\n" +
+		"   {--encode-in=ENC}\n" +
+		"   {--encode-out=ENC}\n" +
+		"   {--encode-key=ENC}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
@@ -144,9 +149,18 @@ func Help() string {
 		"        2. 'yaml' - encrypt/decrypt field values in the given YAML file while preserving the file structure\n"+
 		"        3. 'json' - to be added\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       encoding scheme name, default: '%v', allows 'none' when input file format is 'none'\n"+
-		"        1. encoding scheme of the provided key file (when option -k / --key is specified), as well as\n"+
-		"        2. encoding scheme of field values for yaml encryption/decryption\n\n"+
+		"       overall encoding scheme to use for output and symmetric key (encryption), and input and symmetric key (decryption)\n"+
+		"    --encode-in=ENC\n"+
+		"       encoding scheme of encryption/decryption input\n"+
+		"        1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json', default: %v\n"+
+		"        2. encoding scheme to decode the entire input when input format is 'none', default: none\n"+
+		"        3. encoding scheme to decode AAD, IV and TAG values when given\n"+
+		"    --encode-out=ENC\n"+
+		"       encoding scheme of encryption/decryption output\n"+
+		"        1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json', default: %v\n"+
+		"        2. encoding scheme to encode the entire output when input file format is 'none', default: none\n"+
+		"    --encode-key=ENC\n"+
+		"       encoding scheme of the symmetric key (when option -k / --key is specified), default: none\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
@@ -188,6 +202,7 @@ func Help() string {
 		sym.SALTLEN,
 		encodes.Default(),
 		encodes.Default(),
+		encodes.Default(),
 		hashes.Default(),
 		bUFFER/1024,
 	)
@@ -206,6 +221,19 @@ func Parse(args []string) (cfg *Config, err error) {
 		Verbose: false,
 	}
 
+	encd := func(val string) {
+		switch cfg.cmd {
+		case CMD_ENCRYPT:
+			cfg.Enco = val
+			cfg.Enck = val
+		case CMD_DECRYPT:
+			cfg.Encd = val
+			cfg.Enck = val
+		default:
+			cfg.Encd = val
+		}
+	}
+
 	idx, _, err := cmdMatch(args[1])
 	if err != nil {
 		err = fmt.Errorf("[CONF] %v", err)
@@ -215,20 +243,6 @@ func Parse(args []string) (cfg *Config, err error) {
 		return
 	}
 	cfg.cmd = uint8(idx)
-
-	switch cfg.cmd {
-	case CMD_ENCRYPT:
-		fallthrough
-	case CMD_DECRYPT:
-		cfg.Algr = encrypts.Default()
-		cfg.Encd = encodes.Default()
-	case CMD_ENCODE:
-		fallthrough
-	case CMD_DECODE:
-		cfg.Encd = encodes.Default()
-	case CMD_HASHING:
-		cfg.Hash = hashes.Default()
-	}
 
 	var val int
 	for i := 2; i < len(args); i++ {
@@ -337,14 +351,35 @@ func Parse(args []string) (cfg *Config, err error) {
 				err = fmt.Errorf("[CONF] Missing encoding argument")
 				return
 			} else {
-				cfg.Encd = args[i]
+				encd(args[i])
 			}
 		case strings.HasPrefix(args[i], "--encoding="):
 			if len(args[i]) <= 11 {
 				err = fmt.Errorf("[CONF] Missing encoding")
 				return
 			} else {
-				cfg.Encd = args[i][11:]
+				encd(args[i][11:])
+			}
+		case strings.HasPrefix(args[i], "--encode-in="):
+			if len(args[i]) <= 12 {
+				err = fmt.Errorf("[CONF] Missing input encoding")
+				return
+			} else {
+				cfg.Encd = args[i][12:]
+			}
+		case strings.HasPrefix(args[i], "--encode-out="):
+			if len(args[i]) <= 13 {
+				err = fmt.Errorf("[CONF] Missing output encoding")
+				return
+			} else {
+				cfg.Enco = args[i][13:]
+			}
+		case strings.HasPrefix(args[i], "--encode-key="):
+			if len(args[i]) <= 13 {
+				err = fmt.Errorf("[CONF] Missing key encoding")
+				return
+			} else {
+				cfg.Enck = args[i][13:]
 			}
 		case args[i] == "-h":
 			i++
@@ -409,6 +444,33 @@ func Parse(args []string) (cfg *Config, err error) {
 		default:
 			err = fmt.Errorf("[CONF] Invalid option '%v'", args[i])
 			return
+		}
+	}
+
+	switch cfg.cmd {
+	case CMD_ENCRYPT:
+		fallthrough
+	case CMD_DECRYPT:
+		if cfg.Algr == "" {
+			cfg.Algr = encrypts.Default()
+		}
+		if cfg.Format != "" && cfg.Format != "none" {
+			if cfg.cmd == CMD_DECRYPT && cfg.Encd == "" {
+				cfg.Encd = encodes.Default()
+			}
+			if cfg.cmd == CMD_ENCRYPT && cfg.Enco == "" {
+				cfg.Enco = encodes.Default()
+			}
+		}
+	case CMD_ENCODE:
+		fallthrough
+	case CMD_DECODE:
+		if cfg.Encd == "" {
+			cfg.Encd = encodes.Default()
+		}
+	case CMD_HASHING:
+		if cfg.Hash == "" {
+			cfg.Hash = hashes.Default()
 		}
 	}
 

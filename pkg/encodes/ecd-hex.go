@@ -9,7 +9,7 @@ import (
 type Hex int
 
 func (n Hex) Name() string {
-	return "hex encoding"
+	return "hex"
 }
 
 func (n Hex) Padding(inp []byte) []byte {
