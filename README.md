@@ -56,13 +56,13 @@ A simple cryptographic tool
 > output at the end of the cipher text, separated with a dot (`.`). During decryption this `salt` is
 > read from the input cipher text.
 
-> #### 3. interactive input
+> #### 3. piped input
+> If input content is piped, the stdin will be put to the EOF state. As a result a password can no
+> longer be entered via the command line. In these cases interactive password input cannot be used.
+
+> #### 4. interactive input
 > If the option `-i` or `--in=` is omitted, the input text to be encryption is read from stdin.
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
-
-> #### 4. piped input
-> If input content is piped, the stdin will be put to the EOF state. As a result a password can no
-> longer be entered via the command line. In these cases password generated keys cannot be used.
 
 ### 3. Encoding
 | command | description |
