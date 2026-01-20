@@ -32,7 +32,7 @@ func encrypt(
 
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
-		if cfg.Passwd == cfgs.PWD_INTERACTIVE {
+		if cfg.Passwd == PWD_INTERACTIVE {
 			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
@@ -153,7 +153,7 @@ func decrypt(
 
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
-		if cfg.Passwd == cfgs.PWD_INTERACTIVE {
+		if cfg.Passwd == PWD_INTERACTIVE {
 			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(

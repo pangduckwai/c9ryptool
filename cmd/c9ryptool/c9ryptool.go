@@ -11,30 +11,26 @@ import (
 	"sea9.org/go/c9ryptool/pkg/hashes"
 )
 
-func version() string {
-	return "v1.4.1 2026011919"
-}
-
 func desc() string {
-	return fmt.Sprintf("c9rypTool (version %v)", version())
+	return fmt.Sprintf("c9rypTool (version %v)", cfgs.Version())
 }
 
 func main() {
-	cfg, err := cfgs.Parse(os.Args)
+	cfg, err := parse(os.Args)
 	if err != nil {
-		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, desc(), cfgs.Usage())
+		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, desc(), usage())
 	}
 
 	switch cfg.Command() {
-	case cfgs.CMD_HELP:
-		fmt.Printf("%v\n%v\n", desc(), cfgs.Help())
-	case cfgs.CMD_VERSION:
+	case CMD_HELP:
+		fmt.Printf("%v\n%v\n", desc(), help())
+	case CMD_VERSION:
 		fmt.Println(desc())
 
-	case cfgs.CMD_ENCRYPT:
+	case CMD_ENCRYPT:
 		fallthrough
-	case cfgs.CMD_DECRYPT:
-		err = cfgs.Validate(cfg)
+	case CMD_DECRYPT:
+		err = validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
@@ -62,8 +58,8 @@ func main() {
 		enck := encodes.Get(cfg.Enck)
 
 		switch cfg.Format {
-		case cfgs.FORMAT_YAML:
-			if cfg.Command() == cfgs.CMD_ENCRYPT {
+		case FORMAT_YAML:
+			if cfg.Command() == CMD_ENCRYPT {
 				if enco == nil {
 					log.Fatalf("[MAIN] unsupported output encoding '%v'", cfg.Enco)
 				}
@@ -74,18 +70,18 @@ func main() {
 				}
 				err = yamlDecrypt(cfg, algr, enci, enck)
 			}
-		case cfgs.FORMAT_JSON:
+		case FORMAT_JSON:
 			// TODO HERE!!! add json value encryption!
 		default:
-			if cfg.Command() == cfgs.CMD_ENCRYPT {
+			if cfg.Command() == CMD_ENCRYPT {
 				err = encrypt(cfg, algr, enci, enco, enck)
 			} else {
 				err = decrypt(cfg, algr, enci, enco, enck)
 			}
 		}
 		if cfg.Verbose {
-			cd, ei, eo, ek := cfgs.COMMANDS[cfg.Command()], "nil", "nil", ""
-			if cfg.Format == cfgs.FORMAT_YAML || cfg.Format == cfgs.FORMAT_JSON {
+			cd, ei, eo, ek := COMMANDS[cfg.Command()], "nil", "nil", ""
+			if cfg.Format == FORMAT_YAML || cfg.Format == FORMAT_JSON {
 				cd = fmt.Sprintf("%v(%v)", cd, cfg.Format)
 			}
 			if enci != nil {
@@ -104,10 +100,10 @@ func main() {
 			fmt.Printf("\n%v finished '%v' using '%v' (%v/%v%v)\n", desc(), cd, algr.Name(), ei, eo, ek)
 		}
 
-	case cfgs.CMD_ENCODE:
+	case CMD_ENCODE:
 		fallthrough
-	case cfgs.CMD_DECODE:
-		err = cfgs.Validate(cfg)
+	case CMD_DECODE:
+		err = validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
@@ -124,17 +120,17 @@ func main() {
 		if encd == nil {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
-		if cfg.Command() == cfgs.CMD_ENCODE {
+		if cfg.Command() == CMD_ENCODE {
 			err = encode(cfg, encd)
 		} else {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), cfgs.COMMANDS[cfg.Command()], encd.Name())
+			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), COMMANDS[cfg.Command()], encd.Name())
 		}
 
-	case cfgs.CMD_DISPLAY:
-		err = cfgs.Validate(cfg)
+	case CMD_DISPLAY:
+		err = validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
@@ -148,8 +144,8 @@ func main() {
 		}
 		err = display(cfg, encd)
 
-	case cfgs.CMD_HASHING:
-		err = cfgs.Validate(cfg)
+	case CMD_HASHING:
+		err = validate(cfg)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}

@@ -9,16 +9,20 @@ import (
 	"strings"
 )
 
-// ParseKey parse the given input into a key in one of the PEM formats.
+// parseKey parse the given input into a key in one of the PEM formats.
 // returns:
 // - typ: false - private key; true - public key
-func ParseKey(k []byte) (
+func parseKey(k []byte) (
 	key any,
 	typ bool,
 	err error,
 ) {
 	errs := make([]error, 0)
 	blk, _ := pem.Decode(k)
+	if blk == nil {
+		err = fmt.Errorf("[RSA] non-PEM input not supported")
+		return
+	}
 	key, err = x509.ParsePKCS8PrivateKey(blk.Bytes)
 	if err != nil {
 		errs = append(errs, err)
@@ -67,7 +71,7 @@ func getRsaKey(k []byte, lgth int) (
 	} else {
 		var ok, typ bool
 		var b any
-		b, typ, err = ParseKey(k)
+		b, typ, err = parseKey(k)
 		if err != nil {
 			return
 		}

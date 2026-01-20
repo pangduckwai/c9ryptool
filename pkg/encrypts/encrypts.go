@@ -90,7 +90,8 @@ func Get(inp string) Algorithm {
 
 // Validate validate the given algorithm name.
 // typ: -1 - asymmetric; 0 - don't care; 1 - symmetric
-func Validate(algr string, typ int) (err error) {
+// returns t: 'true' is symmetric, false is asymmetric
+func Validate(algr string, typ int) (t bool, err error) {
 	real := Parse(algr)
 	if real == "" {
 		err = fmt.Errorf("[ENCR] invalid encryption algorithm name pattern '%v'", algr)
@@ -104,6 +105,7 @@ func Validate(algr string, typ int) (err error) {
 		} else if typ > 0 && k1 {
 			err = fmt.Errorf("[ENCR] %v is not a symmetric algorithm as expected", a1.Name())
 		}
+		t = k0
 	}
 	return
 }

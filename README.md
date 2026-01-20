@@ -4,8 +4,7 @@ A collection of cryptographic related tools
 |  tool | description |
 | --- | --- |
 | [`c9ryptool`](#c9ryptool) | A simple cryptographic tool |
-| [`c9pubkey`](#c9pubkey) | Extract and export the public key from a private key |
-| [`c9split`](#c9split) | Split a file into 2 by number of bytes |
+| [`c9utils`](#c9utils) | Misc. utilities accompany `c9ryptool` |
 
 ## c9ryptool
 A simple cryptographic tool
@@ -37,7 +36,7 @@ A simple cryptographic tool
 | `-p` | - | symmetric | iindicate a password, for encryption key generation, is input interactively |
 | - | `--password=PASS` | symmetric | `PASS` is the key-generating password, input via the command line |
 | - | `--salt=LEN` | symmetric | `LEN` is the length of salt to use for generating keys from password |
-| `-l` | `--list` | all | list the supported algorithms or encoding schemes |
+| `-l` | `--list` | all | list the supported encryption algorithms |
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
 | `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
@@ -73,7 +72,7 @@ A simple cryptographic tool
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
-| `-l` | `--list` | list the supported algorithms or encoding schemes |
+| `-l` | `--list` | list the supported encoding schemes |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
@@ -85,7 +84,7 @@ A simple cryptographic tool
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
-| `-l` | `--list` | list the supported algorithms or encoding schemes |
+| `-l` | `--list` | list the supported hashing algorithms |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 | `-h ALGR` | `--hashing=ALGR` | `ALGR` is the name of the hashing algorithm to use |
@@ -108,27 +107,47 @@ A simple cryptographic tool
 
 ---
 
-## c9pubkey
-Extract and export the public key from a private key
+## c9utils
+Miscellaneous utilities accompany `c9ryptool`
 
 ```bash
-> ./cmd/c9pubkey [options]
+> ./cmd/c9utils [command] {options}
 ```
 
-| option | 2<sup>nd</sup> form | description |
-| --- | --- | --- |
-| `-a ALGR` | `--algorithm=ALGR` | `ALGR` is the name of the encryption algorithm to use |
-| `-k FILE` | `--key=FILE` | `FILE` is the path of the file containing the encryption (private) key |
-| `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
+### 1. Miscellaneous
+| command | description |
+| --- | --- |
+| `version` | display current version of `c9utils` |
 
----
+### 2. Generate key
+| command | description |
+| --- | --- |
+| `genkey` | generate and export the newly generated encryption key |
 
-## c9split
-Split a file into 2 by number of bytes
+| option | 2<sup>nd</sup> form | - | description |
+| --- | --- | --- | --- |
+| `-a ALGR` | `--algorithm=ALGR` | all | `ALGR` is the name of the encryption algorithm to use |
+| `-o FILE` | `--out0=FILE` | all | `FILE` is the path of the file to write the generated key to |
+| `-p FILE` | `--out1=FILE` | asymmetric | `FILE` is the path of the file to write the public key of the generated key to, if the specified algorithm is asymmetric |
+| `-n ENC` | `--encoding=ENC` | symmetric | `ENC` is the name of the encoding scheme to use to encode the generated symmetric key when writing to file. Asymmetric keys always use PEM encoding |
+| `-l` | `--list` | all | list the supported encryption algorithms |
 
-```bash
-> ./cmd/c9split [options]
-```
+### 3. Export public key
+| command | description |
+| --- | --- |
+| `pubkey` | extract and export the public key from the given private key |
+
+| option | 2<sup>nd</sup> form | - | description |
+| --- | --- | --- | --- |
+| `-a ALGR` | `--algorithm=ALGR` | asymmetric | `ALGR` is the name of the asymmetric encryption algorithm to use |
+| `-i FILE` | `--in=FILE` | asymmetric | `FILE` is the path of the file containing the private key |
+| `-o FILE` | `--out=FILE` | asymmetric | `FILE` is the path of the file to write the extracted public key to |
+| `-l` | `--list` | asymmetric | list the supported asymmetric encryption algorithms |
+
+### 4. Split file
+| command | description |
+| --- | --- |
+| `split` | split a file into 2 by number of bytes |
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
@@ -136,6 +155,12 @@ Split a file into 2 by number of bytes
 | `-o FILE` | `--out0=FILE` | `FILE` is the path of the 1<sup>st</sup> output file |
 | `-p FILE` | `--out1=FILE` | `FILE` is the path of the 2<sup>nd</sup> output file |
 | `-l LEN` | `--len=LEN` | `LEN` is the number of bytes to split the input file |
+
+### 5. Common options
+| option | 2<sup>nd</sup> form | description |
+| --- | --- | --- |
+| `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
+| `-v` | `--verbose` |  display detail operation messages during processing |
 
 ---
 
@@ -147,6 +172,9 @@ Split a file into 2 by number of bytes
 ---
 
 ## Changelog
+### v1.5.0
+- Combine functions under `/cmd` into `c9utils`
+
 ### v1.4.1
 - Add control of encoding of encryption input, output and symmetric key file
 
