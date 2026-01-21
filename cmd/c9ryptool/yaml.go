@@ -12,6 +12,8 @@ import (
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
+const sALT = "s94ffb825" // "s" + fnv32 hashing of the string "c9rypTool-salt"
+
 // yamlEncrypt yaml input is printable, so don't need input encoding. but IV and AAG may need encoding so use output encoding in these cases.
 func yamlEncrypt(
 	cfg *cfgs.Config,
@@ -146,7 +148,7 @@ func yamlEncrypt(
 	}
 
 	if salt != nil {
-		sec = append(sec, yaml.MapItem{Key: "salt", Value: eco.Encode(salt)}) // TODO name of "salt"
+		sec = append(sec, yaml.MapItem{Key: sALT, Value: eco.Encode(salt)})
 	}
 
 	output, err = yaml.Marshal(sec)
@@ -183,7 +185,7 @@ func yamlDecrypt(
 	}
 
 	for i, itm := range inp {
-		if itm.Key.(string) == "salt" { // TODO name of "salt"
+		if itm.Key.(string) == sALT {
 			salt, err = eci.Decode(itm.Value.(string))
 			inp = append(inp[:i], inp[i+1:]...)
 			break

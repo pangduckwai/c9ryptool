@@ -172,9 +172,10 @@ Miscellaneous utilities accompany `c9ryptool`
 ---
 
 ## Changelog
-### v1.5.1
+### v1.5.2
 - Combine functions under `/cmd` into `c9utils`
 - Make yaml traversal function more generic
+- Use a 'better' field name for the 'salt' value in yaml encryption with password generated key
 
 ### v1.4.1
 - Add control of encoding of encryption input, output and symmetric key file

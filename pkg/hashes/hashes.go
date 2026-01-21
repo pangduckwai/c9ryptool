@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash"
+	"hash/fnv"
 	"sort"
 
 	"sea9.org/go/c9ryptool/pkg/utils"
@@ -17,6 +18,8 @@ var hASHINGS = map[string]hash.Hash{
 	"md5":    md5.New(),
 	"sha1":   sha1.New(),
 	"sha256": sha256.New(),
+	"fnv":    fnv.New128(),
+	"fnv32":  fnv.New32(),
 }
 
 func Default() string {

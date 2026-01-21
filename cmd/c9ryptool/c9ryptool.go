@@ -163,6 +163,9 @@ func main() {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Hash)
 		}
 		err = calcHash(cfg, hshs)
+		if cfg.Verbose {
+			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), COMMANDS[cfg.Command()], cfg.Hash)
+		}
 
 	default:
 		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())
