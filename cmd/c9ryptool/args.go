@@ -48,7 +48,7 @@ func usage() string {
 		"   {--tag=TAG}\n" +
 		"   {--aad=AAD}\n" +
 		"   {-g | --generate}\n" +
-		"   {-p}\n" +
+		"   {-p | --password}\n" +
 		"   {--password=PASS}\n" +
 		"   {--salt=LEN}\n" +
 		"   {-l | --list}\n" +
@@ -100,7 +100,7 @@ func help() string {
 		"       path of the file containing the additional authenticated data\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
-		"    -p\n"+
+		"    -p, --password\n"+
 		"       indicate a password, for encryption key generation, is input interactively\n"+
 		"    --password=PASS\n"+
 		"       input the key-generating password via the command line\n"+
@@ -306,7 +306,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 			}
 		case args[i] == "-g" || args[i] == "--generate":
 			cfg.Genkey = true
-		case args[i] == "-p":
+		case args[i] == "-p" || args[i] == "--password":
 			cfg.Passwd = PWD_INTERACTIVE
 		case strings.HasPrefix(args[i], "--password="):
 			if len(args[i]) <= 11 {
