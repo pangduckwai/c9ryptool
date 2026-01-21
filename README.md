@@ -172,8 +172,9 @@ Miscellaneous utilities accompany `c9ryptool`
 ---
 
 ## Changelog
-### v1.5.0
+### v1.5.1
 - Combine functions under `/cmd` into `c9utils`
+- Make yaml traversal function more generic
 
 ### v1.4.1
 - Add control of encoding of encryption input, output and symmetric key file

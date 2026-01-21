@@ -9,7 +9,7 @@ import (
 // Traverse traverse a 'MapSlice'
 func Traverse(
 	inp []yaml.MapItem,
-	action func(string) (string, error),
+	action func(interface{}) (interface{}, error),
 ) (
 	out []yaml.MapItem,
 	err error,
@@ -29,12 +29,11 @@ func Traverse(
 func _traverse(
 	key string,
 	ifc interface{},
-	action func(string) (string, error),
+	action func(interface{}) (interface{}, error),
 ) (
 	out []yaml.MapItem,
 	err error,
 ) {
-	var enc string
 	switch typ := ifc.(type) {
 	case []yaml.MapItem:
 		nxt, err := Traverse(typ, action)
@@ -51,14 +50,14 @@ func _traverse(
 				break
 			}
 		}
-	case string:
-		enc, err = action(typ)
+	default:
+		var act interface{}
+		act, err = action(typ)
 		if err != nil {
 			err = fmt.Errorf("[%v]%v", key, err)
+		} else {
+			out = append(out, yaml.MapItem{Key: key, Value: act})
 		}
-		out = append(out, yaml.MapItem{Key: key, Value: enc})
-	default:
-		out = append(out, yaml.MapItem{Key: key, Value: typ})
 	}
 	return
 }
@@ -67,7 +66,7 @@ func __traverse(
 	key string, idx int,
 	ifc interface{},
 	out []interface{},
-	action func(string) (string, error),
+	action func(interface{}) (interface{}, error),
 ) (err error) {
 	switch typ := ifc.(type) {
 	case []yaml.MapItem:
@@ -85,13 +84,11 @@ func __traverse(
 				break
 			}
 		}
-	case string:
+	default:
 		out[idx], err = action(typ)
 		if err != nil {
 			err = fmt.Errorf("[%v][%v]%v", key, idx, err)
 		}
-	default:
-		out[idx] = typ
 	}
 	return
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"gopkg.in/yaml.v2"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
@@ -106,13 +107,29 @@ func yamlEncrypt(
 		}
 	}
 
-	encrypt := func(inp string) (out string, err error) {
-		enc, err := alg.Encrypt([]byte(inp), iv, aad)
-		if err != nil {
-			return
+	encrypt := func(inp interface{}) (interface{}, error) {
+		switch typ := inp.(type) {
+		case string:
+			enc, err := alg.Encrypt([]byte(typ), iv, aad)
+			if err != nil {
+				return nil, err
+			}
+			return eco.Encode(enc), nil
+		case int:
+			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
+			if err != nil {
+				return nil, err
+			}
+			return eco.Encode(enc), nil
+		case bool:
+			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
+			if err != nil {
+				return nil, err
+			}
+			return eco.Encode(enc), nil
+		default:
+			return inp, nil
 		}
-		out = eco.Encode(enc)
-		return
 	}
 
 	inp := make([]yaml.MapItem, 0)
@@ -258,18 +275,32 @@ func yamlDecrypt(
 		}
 	}
 
-	decrypt := func(inp string) (out string, err error) {
-		enc, err := eci.Decode(inp)
-		if err != nil {
-			return
+	decrypt := func(inp interface{}) (interface{}, error) {
+		switch typ := inp.(type) {
+		case string:
+			enc, err := eci.Decode(typ)
+			if err != nil {
+				return nil, err
+			}
+			dec, err := alg.Decrypt(enc, iv, tag, aad)
+			if err != nil {
+				return nil, err
+			}
+
+			str := string(dec)
+			v0, err := strconv.Atoi(str)
+			if err == nil {
+				return v0, nil
+			}
+			v1, err := strconv.ParseBool(str)
+			if err == nil {
+				return v1, nil
+			}
+
+			return str, nil
+		default:
+			return inp, nil
 		}
-		var dec []byte
-		dec, err = alg.Decrypt(enc, iv, tag, aad)
-		if err != nil {
-			return
-		}
-		out = string(dec)
-		return
 	}
 
 	clr, err := utils.Traverse(inp, decrypt)
