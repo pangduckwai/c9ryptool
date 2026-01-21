@@ -24,7 +24,7 @@ func BufferedRead(
 
 		// If getting input from stdin interactively, pressing <enter> would signify the end of an input line.
 		// An entire line with a signle period ('.') means the end of input.
-		if (cnt == 2 && buf[:cnt][1] == 10) || (cnt == 3 && buf[:cnt][1] == 13 && buf[:cnt][2] == 10) {
+		if (cnt == 2 && buf[:cnt][1] == 10) || (cnt == 3 && (buf[:cnt][1] == 13 && buf[:cnt][2] == 10 || buf[:cnt][1] == 10 && buf[:cnt][2] == 13)) {
 			// ASCII code 10: line feed (LF)
 			// ASCII code 13: carriage return (CR)
 			// ASCII code 46: period ('.')
@@ -122,11 +122,13 @@ func InteractiveSingle(header, prompt string) (str string, err error) {
 		}
 	}
 
-	switch []byte(str)[len(str)-1] {
-	case 10:
-		fallthrough
-	case 13:
-		str = str[:len(str)-1]
+	buf := []byte(str)
+	lgh := len(buf)
+	if lgh > 1 && (buf[lgh-2] == 13 && buf[lgh-1] == 10 || buf[lgh-2] == 10 && buf[lgh-1] == 13) {
+		str = str[:lgh-2]
+	} else if lgh > 0 && buf[lgh-1] == 10 {
+		str = str[:lgh-1]
 	}
+
 	return
 }
