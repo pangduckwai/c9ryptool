@@ -54,6 +54,9 @@ func main() {
 		}
 
 		enci := encodes.Get(cfg.Encd)
+		encv := encodes.Get(cfg.Encv)
+		enct := encodes.Get(cfg.Enct)
+		enca := encodes.Get(cfg.Enca)
 		enco := encodes.Get(cfg.Enco)
 		enck := encodes.Get(cfg.Enck)
 
@@ -63,24 +66,24 @@ func main() {
 				if enco == nil {
 					log.Fatalf("[MAIN] unsupported output encoding '%v'", cfg.Enco)
 				}
-				err = yamlEncrypt(cfg, algr, enco, enck)
+				err = yamlEncrypt(cfg, algr, enco, enck, encv, enct, enca)
 			} else {
 				if enci == nil {
 					log.Fatalf("[MAIN] unsupported input encoding '%v'", cfg.Encd)
 				}
-				err = yamlDecrypt(cfg, algr, enci, enck)
+				err = yamlDecrypt(cfg, algr, enci, enck, encv, enct, enca)
 			}
 		case FORMAT_JSON:
 			// TODO HERE!!! add json value encryption!
 		default:
 			if cfg.Command() == CMD_ENCRYPT {
-				err = encrypt(cfg, algr, enci, enco, enck)
+				err = encrypt(cfg, algr, enci, enco, enck, encv, enct, enca)
 			} else {
-				err = decrypt(cfg, algr, enci, enco, enck)
+				err = decrypt(cfg, algr, enci, enco, enck, encv, enct, enca)
 			}
 		}
 		if cfg.Verbose {
-			cd, ei, eo, ek := COMMANDS[cfg.Command()], "nil", "nil", ""
+			cd, ei, ev, et, ea, eo, ek := COMMANDS[cfg.Command()], "", "", "", "nil", "nil", ""
 			if cfg.Format == FORMAT_YAML || cfg.Format == FORMAT_JSON {
 				cd = fmt.Sprintf("%v(%v)", cd, cfg.Format)
 			}
@@ -91,13 +94,28 @@ func main() {
 				eo = enco.Name()
 			}
 			if algr.Type() {
+				if encv != nil {
+					ev = fmt.Sprintf("/%v", encv.Name())
+				} else {
+					ev = "/nil"
+				}
+				if enct != nil {
+					et = fmt.Sprintf("/%v", enct.Name())
+				} else {
+					et = "/nil"
+				}
+				if enca != nil {
+					ea = fmt.Sprintf("/%v", enca.Name())
+				} else {
+					ea = "/nil"
+				}
 				if enck != nil {
 					ek = fmt.Sprintf("/%v", enck.Name())
 				} else {
 					ek = "/nil"
 				}
 			}
-			fmt.Printf("\n%v finished '%v' using '%v' (%v/%v%v)\n", desc(), cd, algr.Name(), ei, eo, ek)
+			fmt.Printf("\n%v finished '%v' using '%v' (%v%v%v%v/%v%v)\n", desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
 		}
 
 	case CMD_ENCODE:

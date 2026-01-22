@@ -86,18 +86,12 @@ func help() string {
 		" . encrypt - encrypt input using the provided encryption key\n"+
 		" . decrypt - decrypt encrypted input back to the original form\n"+
 		"   * options:\n"+
+		"    -l, --list\n"+
+		"       list the supported algorithms or encoding schemes\n"+
 		"    -a ALGR, --algorithm=ALGR\n"+
 		"       encryption algorithm to use, default: '%v'\n"+
 		"    -k FILE, --key=FILE\n"+
 		"       path of the file containing the encryption key\n"+
-		"    --iv=IV\n"+
-		"       path of the file containing the initialization vector, if omitted:\n"+
-		"        1. encryption - auto-generate and concat at the begining the ciphertext before base64 encoding\n"+
-		"        2. decryption - read from the begining of the ciphertext after base64 decoding\n"+
-		"    --tag=TAG\n"+
-		"       path of the file containing the message authentication tag\n"+
-		"    --aad=AAD\n"+
-		"       path of the file containing the additional authenticated data\n"+
 		"    -g, --generate\n"+
 		"       generate a new encrytpion key\n"+
 		"    -p, --password\n"+
@@ -106,24 +100,35 @@ func help() string {
 		"       input the key-generating password via the command line\n"+
 		"    --salt=LEN\n"+
 		"       length of salt to use for generating keys from password, default: %v\n"+
-		"    -l, --list\n"+
-		"       list the supported algorithms or encoding schemes\n"+
-		"    -i FILE, --in=FILE\n"+
-		"       path of the input file, omitting means input from stdin\n"+
-		"    -o FILE, --out=FILE\n"+
-		"       path of the output file, omitting means output to stdout\n"+
 		"    -f FORMAT, --format=FORMAT\n"+
 		"       format of the input file, default is none:\n"+
 		"        1. 'none' - no format, the entire input is treated as a stream of bytes\n"+
 		"        2. 'yaml' - encrypt/decrypt field values in the given YAML file while preserving the file structure\n"+
 		"        3. 'json' - to be added\n"+
+		"    -i FILE, --in=FILE\n"+
+		"       path of the input file, omitting means input from stdin\n"+
+		"    -o FILE, --out=FILE\n"+
+		"       path of the output file, omitting means output to stdout\n"+
+		"    --iv=IV\n"+
+		"       path of the file containing the initialization vector, if omitted:\n"+
+		"        1. encryption - auto-generate and concat at the begining the ciphertext before any encoding\n"+
+		"        2. decryption - read from the begining of the ciphertext after any decoding\n"+
+		"    --tag=TAG\n"+
+		"       path of the file containing the message authentication tag\n"+
+		"    --aad=AAD\n"+
+		"       path of the file containing the additional authenticated data\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       overall encoding scheme to use for output and symmetric key (encryption), and input and symmetric key (decryption)\n"+
+		"       overall encoding scheme to use in output and symmetric key for encryption, and input and symmetric key for decryption\n"+
 		"    --encode-in=ENC\n"+
 		"       encoding scheme of encryption/decryption input\n"+
 		"        1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json', default: %v\n"+
 		"        2. encoding scheme to decode the entire input when input format is 'none', default: none\n"+
-		"        3. encoding scheme to decode AAD, IV and TAG values when given\n"+
+		"    --encode-iv=ENC\n"+
+		"       encoding scheme of iv input, default: none\n"+
+		"    --encode-tag=ENC\n"+
+		"       encoding scheme of tag input, default: none\n"+
+		"    --encode-aad=ENC\n"+
+		"       encoding scheme of aad input, default: none\n"+
 		"    --encode-out=ENC\n"+
 		"       encoding scheme of encryption/decryption output\n"+
 		"        1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json', default: %v\n"+
@@ -336,6 +341,27 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 				return
 			} else {
 				cfg.Encd = args[i][12:]
+			}
+		case strings.HasPrefix(args[i], "--encode-iv="):
+			if len(args[i]) <= 12 {
+				err = fmt.Errorf("[CONF] Missing iv encoding")
+				return
+			} else {
+				cfg.Encv = args[i][12:]
+			}
+		case strings.HasPrefix(args[i], "--encode-tag="):
+			if len(args[i]) <= 13 {
+				err = fmt.Errorf("[CONF] Missing tag encoding")
+				return
+			} else {
+				cfg.Enct = args[i][13:]
+			}
+		case strings.HasPrefix(args[i], "--encode-aad="):
+			if len(args[i]) <= 13 {
+				err = fmt.Errorf("[CONF] Missing aad encoding")
+				return
+			} else {
+				cfg.Enca = args[i][13:]
 			}
 		case strings.HasPrefix(args[i], "--encode-out="):
 			if len(args[i]) <= 13 {

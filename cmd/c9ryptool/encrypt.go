@@ -13,9 +13,9 @@ import (
 func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck encodes.Encoding,
+	eci, eco, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
-	var buf, key, input, result, salt, iv, aad []byte
+	var buf, key, input, result, salt, iv, tag, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -87,10 +87,25 @@ func encrypt(
 			err = fmt.Errorf("[ECY][IV]%v", err)
 			return
 		}
-		if eci != nil {
-			iv, err = eci.Decode(string(iv))
+		if ecv != nil {
+			iv, err = ecv.Decode(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[ECY][IV][DCD]%v", err)
+				return
+			}
+		}
+	}
+
+	if cfg.Tag != "" {
+		tag, err = utils.Read(cfg.Tag, cfg.Buffer, cfg.Verbose)
+		if err != nil {
+			err = fmt.Errorf("[DCY][TAG]%v", err)
+			return
+		}
+		if ect != nil {
+			tag, err = ect.Decode(string(tag))
+			if err != nil {
+				err = fmt.Errorf("[DCY][TAG][DCD]%v", err)
 				return
 			}
 		}
@@ -102,8 +117,8 @@ func encrypt(
 			err = fmt.Errorf("[ECY][AAD]%v", err)
 			return
 		}
-		if eci != nil {
-			aad, err = eci.Decode(string(aad))
+		if eca != nil {
+			aad, err = eca.Decode(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[ECY][AAD][DCD]%v", err)
 				return
@@ -111,7 +126,7 @@ func encrypt(
 		}
 	}
 
-	result, err = alg.Encrypt(input, iv, aad)
+	result, err = alg.Encrypt(input, iv, tag, aad)
 	if err != nil {
 		err = fmt.Errorf("[ECY]%v", err)
 		return
@@ -134,7 +149,7 @@ func encrypt(
 func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck encodes.Encoding,
+	eci, eco, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
 	var buf, key, input, result, salt, iv, tag, aad []byte
 
@@ -197,8 +212,8 @@ func decrypt(
 			err = fmt.Errorf("[DCY][IV]%v", err)
 			return
 		}
-		if eci != nil {
-			iv, err = eci.Decode(string(iv))
+		if ecv != nil {
+			iv, err = ecv.Decode(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[DCY][IV][DCD]%v", err)
 				return
@@ -212,8 +227,8 @@ func decrypt(
 			err = fmt.Errorf("[DCY][TAG]%v", err)
 			return
 		}
-		if eci != nil {
-			tag, err = eci.Decode(string(tag))
+		if ect != nil {
+			tag, err = ect.Decode(string(tag))
 			if err != nil {
 				err = fmt.Errorf("[DCY][TAG][DCD]%v", err)
 				return
@@ -227,8 +242,8 @@ func decrypt(
 			err = fmt.Errorf("[DCY][AAD]%v", err)
 			return
 		}
-		if eci != nil {
-			aad, err = eci.Decode(string(aad))
+		if eca != nil {
+			aad, err = eca.Decode(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[DCY][AAD][DCD]%v", err)
 				return

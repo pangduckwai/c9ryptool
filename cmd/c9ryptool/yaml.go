@@ -18,7 +18,7 @@ const sALT = "s94ffb825" // "s" + fnv32 hashing of the string "c9rypTool-salt"
 func yamlEncrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eco, eck encodes.Encoding,
+	eco, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
 	var buf, key, input, output, salt, iv, aad []byte
 
@@ -167,7 +167,7 @@ func yamlEncrypt(
 func yamlDecrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eck encodes.Encoding,
+	eci, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
 	var buf, key, input, output, salt, iv, tag, aad []byte
 

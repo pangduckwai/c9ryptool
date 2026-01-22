@@ -27,21 +27,24 @@ A simple cryptographic tool
 
 | option | 2<sup>nd</sup> form | - | description |
 | --- | --- | --- | --- |
+| `-l` | `--list` | all | list the supported encryption algorithms |
 | `-a ALGR` | `--algorithm=ALGR` | all | `ALGR` is the name of the encryption algorithm to use |
 | `-k FILE` | `--key=FILE` | all | `FILE` is the path of the file containing the encryption (private) key |
-| - | `--iv=IV` | symmetric | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the<br/>ciphertext before base64 encoding<br/>2. decryption - read from the begining of the ciphertext after base64<br/>decoding |
-| - | `--tag=TAG` | symmetric | `TAG` is the path of the file containing the message authentication tag |
-| - | `--aad=AAD` | symmetric | `AAD` is the path of the file containing the additional authenticated data |
 | `-g` | `--generate` | all | generate a new encrytpion key |
-| `-p` | - | symmetric | iindicate a password, for encryption key generation, is input interactively |
+| `-p` | `--password` | symmetric | iindicate a password, for encryption key generation, is input interactively |
 | - | `--password=PASS` | symmetric | `PASS` is the key-generating password, input via the command line |
 | - | `--salt=LEN` | symmetric | `LEN` is the length of salt to use for generating keys from password |
-| `-l` | `--list` | all | list the supported encryption algorithms |
+| `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
 | `-i FILE` | `--in=FILE` | all | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | all | `FILE` is the path of the output file, omitting means output to stdout |
-| `-f FORMAT` | `--format=FORMAT` | all | `FORMAT` format of the input file:<br/>1. `none` - no format, the entire input is treated as a stream of bytes<br/>2. `yaml` - encrypt/decrypt values in the given YAML file while preserving the file structure<br/>3. `json` - to be added |
+| - | `--iv=IV` | symmetric | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before any encoding<br/>2. decryption - read from the begining of the ciphertext after any decoding |
+| - | `--tag=TAG` | symmetric | `TAG` is the path of the file containing the message authentication tag |
+| - | `--aad=AAD` | symmetric | `AAD` is the path of the file containing the additional authenticated data |
 | `-n ENC` | `--encoding=ENC` | all | `ENC` is the name of the overall encoding scheme to use for:<br/>1. output and symmetric key for encryption, and<br/>2. input and symmetric key for decryption<br/>NOTE: for the 4 encoding related options, those appear later overwrite the former ones, e.g. if `-n` appear last, it overwrites all the other 3 encoding options |
-| - | `--encode-in=ENC` | all | `ENC` is the name of the encoding scheme to use for input:<br/>1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json'<br/>2. encoding scheme to decode the entire input when input format is 'none'<br/>3. encoding scheme to decode AAD, IV and TAG values when given<br/>NOTE 1: normally encryption inputs do not need to be decoded (except e.g. JWE cases)<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| - | `--encode-in=ENC` | all | `ENC` is the name of the encoding scheme to use for input:<br/>1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json'<br/>2. encoding scheme to decode the entire input when input format is 'none'<br/>NOTE 1: normally encryption inputs do not need to be decoded (except e.g. JWE cases)<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| - | `--encode-iv=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for iv input |
+| - | `--encode-tag=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for tag input |
+| - | `--encode-aad=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for aad input |
 | - | `--encode-out=ENC` | all | `ENC` is the name of the encoding scheme to use for output:<br/>1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json'<br/>2. encoding scheme to encode the entire output when input format is 'none'<br/>NOTE 1: normally decryption outputs do not need to be encoded<br/>NOTE 2: `none` is not allowed when input format is not `none` |
 | - | `--encode-key=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for encoding/decoding symmetric keys (when option -k / --key is specified) when writing/reading the key files<br/>NOTE: ignored for asymmetric encryption, as asymmetric keys are encoded in PEM format |
 
@@ -73,9 +76,9 @@ A simple cryptographic tool
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-l` | `--list` | list the supported encoding schemes |
+| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
-| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
 
 ### 4. Hashing
 | command | description |
@@ -85,9 +88,9 @@ A simple cryptographic tool
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-l` | `--list` | list the supported hashing algorithms |
+| `-h ALGR` | `--hashing=ALGR` | `ALGR` is the name of the hashing algorithm to use |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
-| `-h ALGR` | `--hashing=ALGR` | `ALGR` is the name of the hashing algorithm to use |
 
 ### 5. Display
 | command | description |
@@ -172,10 +175,11 @@ Miscellaneous utilities accompany `c9ryptool`
 ---
 
 ## Changelog
-### v1.5.2
+### v1.5.3
 - Combine functions under `/cmd` into `c9utils`
 - Make yaml traversal function more generic
 - Use a 'better' field name for the 'salt' value in yaml encryption with password generated key
+- Add further input encoding control for symmetric encryption
 
 ### v1.4.1
 - Add control of encoding of encryption input, output and symmetric key file

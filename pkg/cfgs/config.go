@@ -7,7 +7,7 @@ import (
 )
 
 func Version() string {
-	return "v1.5.2 2026012115"
+	return "v1.5.3 2026012218"
 }
 
 const BUFFER = 1048576 // 1024x1024
@@ -19,6 +19,9 @@ type Config struct {
 	cmd     uint8  // 0 - encrypt; 1 - decrypt
 	Algr    string // encryption algorithms
 	Encd    string // encoding schemes
+	Encv    string // encoding schemes for IV
+	Enct    string // encoding schemes for TAG
+	Enca    string // encoding schemes for AAD
 	Enco    string // encoding schemes for outputs
 	Enck    string // encoding schemes for symmetric keys
 	Hash    string // hashing algorithm
