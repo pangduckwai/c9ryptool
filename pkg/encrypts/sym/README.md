@@ -29,7 +29,7 @@ Apparent JWE libraries behaviour (without very clear documentation):
 >   -k private.key \
 >   -i cek.jwe --encode-in=rawbase64url \
 >   -o cek.hex --encode-out=hex
->
+
 > c9ryptool decrypt -a AES-256-GCM \
 >   -k cek.hex     --encode-key=hex \
 >   -i payload.jwe --encode-in=rawbase64url \
