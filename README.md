@@ -40,13 +40,25 @@ A simple cryptographic tool
 | - | `--iv=IV` | symmetric | `IV` is the path of the file containing the initialization vector, if omitted:<br/>1. encryption - auto-generate and concat at the begining the ciphertext before any encoding<br/>2. decryption - read from the begining of the ciphertext after any decoding |
 | - | `--tag=TAG` | symmetric | `TAG` is the path of the file containing the message authentication tag |
 | - | `--aad=AAD` | symmetric | `AAD` is the path of the file containing the additional authenticated data |
-| `-n ENC` | `--encoding=ENC` | all | `ENC` is the name of the overall encoding scheme to use for:<br/>1. output and symmetric key for encryption, and<br/>2. input and symmetric key for decryption<br/>NOTE: for the 4 encoding related options, those appear later overwrite the former ones, e.g. if `-n` appear last, it overwrites all the other 3 encoding options |
-| - | `--encode-in=ENC` | all | `ENC` is the name of the encoding scheme to use for input:<br/>1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json'<br/>2. encoding scheme to decode the entire input when input format is 'none'<br/>NOTE 1: normally encryption inputs do not need to be decoded (except e.g. JWE cases)<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| `-n ENC` | `--encoding=ENC` | all | `ENC` is the name of the default encoding scheme to use, please refer to the table [default encoding](#default-encoding) for affected encoding when this option is specified<br/>NOTE: for the encoding related options, those appear later overwrite the former ones, e.g. if `-n` appear last, it overwrites the other affected encoding options |
+| - | `--encode-in=ENC` | all | `ENC` is the name of the encoding scheme to use for input<br/>NOTE: `none` is not allowed when input format is `yaml` or `json` |
 | - | `--encode-iv=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for iv input |
 | - | `--encode-tag=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for tag input |
 | - | `--encode-aad=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for aad input |
-| - | `--encode-out=ENC` | all | `ENC` is the name of the encoding scheme to use for output:<br/>1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json'<br/>2. encoding scheme to encode the entire output when input format is 'none'<br/>NOTE 1: normally decryption outputs do not need to be encoded<br/>NOTE 2: `none` is not allowed when input format is not `none` |
+| - | `--encode-out=ENC` | all | `ENC` is the name of the encoding scheme to use for output<br/>NOTE: `none` is not allowed when input format is is `yaml` or `json` |
 | - | `--encode-key=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for encoding/decoding symmetric keys (when option -k / --key is specified) when writing/reading the key files<br/>NOTE: ignored for asymmetric encryption, as asymmetric keys are encoded in PEM format |
+
+> ### default encoding
+> | command | type | format | inputs | aad | output | key |
+> | --- | --- | --- | --- | --- | --- | --- |
+> | encrypt | sym  | none | - | - | _{ENC}_ | - |
+> | encrypt | sym  | yaml / json | - | - | **[ENC]** | - |
+> | encrypt | asym | none | - | - | _{ENC}_ | pem |
+> | encrypt | asym | yaml / json | - | - | **[ENC]** | pem |
+> | decrypt | sym  | none | _{ENC}_ | - | - | - |
+> | decrypt | sym  | yaml / json | **[ENC]** | - | - | - |
+> | decrypt | asym | none | _{ENC}_ | - | - | pem |
+> | decrypt | asym | yaml / json | **[ENC]** | - | - | pem |
 
 > ### console input
 > #### 1. password

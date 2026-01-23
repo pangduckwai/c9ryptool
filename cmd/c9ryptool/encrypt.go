@@ -13,9 +13,9 @@ import (
 func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck, ecv, ect, eca encodes.Encoding,
+	eci, eco, eck, ecv, eca encodes.Encoding,
 ) (err error) {
-	var buf, key, input, result, salt, iv, tag, aad []byte
+	var buf, key, input, result, salt, iv, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
 	if err != nil {
@@ -96,21 +96,6 @@ func encrypt(
 		}
 	}
 
-	if cfg.Tag != "" {
-		tag, err = utils.Read(cfg.Tag, cfg.Buffer, cfg.Verbose)
-		if err != nil {
-			err = fmt.Errorf("[DCY][TAG]%v", err)
-			return
-		}
-		if ect != nil {
-			tag, err = ect.Decode(string(tag))
-			if err != nil {
-				err = fmt.Errorf("[DCY][TAG][DCD]%v", err)
-				return
-			}
-		}
-	}
-
 	if cfg.Aad != "" {
 		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
 		if err != nil {
@@ -126,7 +111,7 @@ func encrypt(
 		}
 	}
 
-	result, err = alg.Encrypt(input, iv, tag, aad)
+	result, err = alg.Encrypt(input, iv, aad)
 	if err != nil {
 		err = fmt.Errorf("[ECY]%v", err)
 		return

@@ -27,8 +27,8 @@ func encryptAesGcm(
 
 	var iv, aad []byte
 	switch len(inputs) {
-	case 4:
-		aad = inputs[3]
+	case 3:
+		aad = inputs[2]
 		fallthrough
 	case 2:
 		iv = inputs[1]

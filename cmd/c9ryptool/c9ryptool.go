@@ -77,13 +77,13 @@ func main() {
 			// TODO HERE!!! add json value encryption!
 		default:
 			if cfg.Command() == CMD_ENCRYPT {
-				err = encrypt(cfg, algr, enci, enco, enck, encv, enct, enca)
+				err = encrypt(cfg, algr, enci, enco, enck, encv, enca)
 			} else {
 				err = decrypt(cfg, algr, enci, enco, enck, encv, enct, enca)
 			}
 		}
 		if cfg.Verbose {
-			cd, ei, ev, et, ea, eo, ek := COMMANDS[cfg.Command()], "", "", "", "nil", "nil", ""
+			cd, ei, ev, et, ea, eo, ek := COMMANDS[cfg.Command()], "nil", "", "", "", "nil", ""
 			if cfg.Format == FORMAT_YAML || cfg.Format == FORMAT_JSON {
 				cd = fmt.Sprintf("%v(%v)", cd, cfg.Format)
 			}
@@ -95,27 +95,27 @@ func main() {
 			}
 			if algr.Type() {
 				if encv != nil {
-					ev = fmt.Sprintf("/%v", encv.Name())
+					ev = fmt.Sprintf("/V:%v", encv.Name())
 				} else {
-					ev = "/nil"
+					ev = "/V:nil"
 				}
 				if enct != nil {
-					et = fmt.Sprintf("/%v", enct.Name())
+					et = fmt.Sprintf("/T:%v", enct.Name())
 				} else {
-					et = "/nil"
+					et = "/T:nil"
 				}
 				if enca != nil {
-					ea = fmt.Sprintf("/%v", enca.Name())
+					ea = fmt.Sprintf("/A:%v", enca.Name())
 				} else {
-					ea = "/nil"
+					ea = "/A:nil"
 				}
 				if enck != nil {
-					ek = fmt.Sprintf("/%v", enck.Name())
+					ek = fmt.Sprintf("/K:%v", enck.Name())
 				} else {
-					ek = "/nil"
+					ek = "/K:nil"
 				}
 			}
-			fmt.Printf("\n%v finished '%v' using '%v' (%v%v%v%v/%v%v)\n", desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
+			fmt.Printf("\n%v finished '%v' using '%v' (I:%v%v%v%v/O:%v%v)\n", desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
 		}
 
 	case CMD_ENCODE:

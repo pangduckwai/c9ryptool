@@ -42,21 +42,24 @@ func usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
 		"  [encrypt | decrypt]\n" +
+		"   {-l | --list}\n" +
 		"   {-a ALGR | --algorithm=ALGR}\n" +
 		"   {-k FILE | --key=FILE}\n" +
-		"   {--iv=IV}\n" +
-		"   {--tag=TAG}\n" +
-		"   {--aad=AAD}\n" +
 		"   {-g | --generate}\n" +
 		"   {-p | --password}\n" +
 		"   {--password=PASS}\n" +
 		"   {--salt=LEN}\n" +
-		"   {-l | --list}\n" +
+		"   {-f FORMAT | --format=FORMAT}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
-		"   {-f FORMAT | --format=FORMAT}\n" +
+		"   {--iv=IV}\n" +
+		"   {--tag=TAG}\n" +
+		"   {--aad=AAD}\n" +
 		"   {-n ENC | --encoding=ENC}\n" +
 		"   {--encode-in=ENC}\n" +
+		"   {--encode-iv=ENC}\n" +
+		"   {--encode-tag=ENC}\n" +
+		"   {--encode-aad=ENC}\n" +
 		"   {--encode-out=ENC}\n" +
 		"   {--encode-key=ENC}\n\n" +
 		"  [encode | decode]\n" +
@@ -118,23 +121,19 @@ func help() string {
 		"    --aad=AAD\n"+
 		"       path of the file containing the additional authenticated data\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       overall encoding scheme to use in output and symmetric key for encryption, and input and symmetric key for decryption\n"+
+		"       default encoding scheme to use, default %v\n"+
 		"    --encode-in=ENC\n"+
 		"       encoding scheme of encryption/decryption input\n"+
-		"        1. encoding scheme to decode field values before decryption when input format is 'yaml'/'json', default: %v\n"+
-		"        2. encoding scheme to decode the entire input when input format is 'none', default: none\n"+
 		"    --encode-iv=ENC\n"+
-		"       encoding scheme of iv input, default: none\n"+
+		"       encoding scheme of iv input\n"+
 		"    --encode-tag=ENC\n"+
-		"       encoding scheme of tag input, default: none\n"+
+		"       encoding scheme of tag input\n"+
 		"    --encode-aad=ENC\n"+
-		"       encoding scheme of aad input, default: none\n"+
+		"       encoding scheme of aad input\n"+
 		"    --encode-out=ENC\n"+
 		"       encoding scheme of encryption/decryption output\n"+
-		"        1. encoding scheme to encode field values after encryption when output format is 'yaml'/'json', default: %v\n"+
-		"        2. encoding scheme to encode the entire output when input file format is 'none', default: none\n"+
 		"    --encode-key=ENC\n"+
-		"       encoding scheme of the symmetric key (when option -k / --key is specified), default: none\n\n"+
+		"       encoding scheme of the symmetric key (when option -k / --key is specified)\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
@@ -176,7 +175,6 @@ func help() string {
 		sym.SALTLEN,
 		encodes.Default(),
 		encodes.Default(),
-		encodes.Default(),
 		hashes.Default(),
 		cfgs.BUFFER/1024,
 	)
@@ -200,10 +198,10 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		switch cfg.Command() {
 		case CMD_ENCRYPT:
 			cfg.Enco = val
-			cfg.Enck = val
 		case CMD_DECRYPT:
 			cfg.Encd = val
-			cfg.Enck = val
+			cfg.Encv = val
+			cfg.Enct = val
 		default:
 			cfg.Encd = val
 		}
@@ -448,19 +446,15 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		if cfg.Algr == "" {
 			cfg.Algr = encrypts.Default()
 		}
-		if cfg.Format != "" && cfg.Format != "none" {
-			if cfg.Enco == "" {
-				cfg.Enco = encodes.Default()
-			}
+		if cfg.Enco == "" && cfg.Format != "" && cfg.Format != "none" {
+			cfg.Enco = encodes.Default()
 		}
 	case CMD_DECRYPT:
 		if cfg.Algr == "" {
 			cfg.Algr = encrypts.Default()
 		}
-		if cfg.Format != "" && cfg.Format != "none" {
-			if cfg.Encd == "" {
-				cfg.Encd = encodes.Default()
-			}
+		if cfg.Encd == "" && cfg.Format != "" && cfg.Format != "none" {
+			cfg.Encd = encodes.Default()
 		}
 	case CMD_ENCODE:
 		fallthrough
@@ -510,7 +504,7 @@ func validate(cfg *cfgs.Config) (err error) {
 			break
 		}
 		if cfg.Tag != "" {
-			err = fmt.Errorf("[VLDT] unsupported option '--tag'")
+			err = fmt.Errorf("[VLDT] unsupported option '--tag'") // authentication tags are generated during encryption, not being provided
 			return
 		}
 		fallthrough
