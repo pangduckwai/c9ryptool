@@ -18,7 +18,7 @@ const sALT = "s94ffb825" // "s" + fnv32 hashing of the string "c9rypTool-salt"
 func yamlEncrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eco, eck, ecv, ect, eca encodes.Encoding,
+	eco, eck, ecv, eca encodes.Encoding,
 ) (err error) {
 	var buf, key, input, output, salt, iv, aad []byte
 
@@ -85,8 +85,8 @@ func yamlEncrypt(
 			err = fmt.Errorf("[YAML][ECY][IV]%v", err)
 			return
 		}
-		if eco != nil {
-			iv, err = eco.Decode(string(iv))
+		if ecv != nil {
+			iv, err = ecv.Decode(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[YAML][ECY][IV][DCD]%v", err)
 				return
@@ -100,8 +100,8 @@ func yamlEncrypt(
 			err = fmt.Errorf("[YAML][ECY][AAD]%v", err)
 			return
 		}
-		if eco != nil {
-			aad, err = eco.Decode(string(aad))
+		if eca != nil {
+			aad, err = eca.Decode(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[YAML][ECY][AAD][DCD]%v", err)
 				return
@@ -244,8 +244,8 @@ func yamlDecrypt(
 			err = fmt.Errorf("[YAML][DCY][IV]%v", err)
 			return
 		}
-		if eci != nil {
-			iv, err = eci.Decode(string(iv))
+		if ecv != nil {
+			iv, err = ecv.Decode(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][IV][DCD]%v", err)
 				return
@@ -259,8 +259,8 @@ func yamlDecrypt(
 			err = fmt.Errorf("[YAML][DCY][TAG]%v", err)
 			return
 		}
-		if eci != nil {
-			tag, err = eci.Decode(string(tag))
+		if ect != nil {
+			tag, err = ect.Decode(string(tag))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][TAG][DCD]%v", err)
 				return
@@ -274,8 +274,8 @@ func yamlDecrypt(
 			err = fmt.Errorf("[YAML][DCY][AAD]%v", err)
 			return
 		}
-		if eci != nil {
-			aad, err = eci.Decode(string(aad))
+		if eca != nil {
+			aad, err = eca.Decode(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][AAD][DCD]%v", err)
 				return

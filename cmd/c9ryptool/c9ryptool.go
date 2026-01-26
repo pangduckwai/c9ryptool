@@ -69,7 +69,7 @@ func main() {
 				if enco == nil {
 					log.Fatalf("[MAIN] unsupported output encoding '%v'", cfg.Enco)
 				}
-				err = yamlEncrypt(cfg, algr, enco, enck, encv, enct, enca)
+				err = yamlEncrypt(cfg, algr, enco, enck, encv, enca)
 			} else {
 				if enci == nil {
 					log.Fatalf("[MAIN] unsupported input encoding '%v'", cfg.Encd)
