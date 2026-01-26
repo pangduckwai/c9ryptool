@@ -15,6 +15,7 @@ func encrypt(
 	alg encrypts.Algorithm,
 	eci, eco, eck, ecv, eca encodes.Encoding,
 ) (err error) {
+	var results [][]byte
 	var buf, key, input, result, salt, iv, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
@@ -111,12 +112,16 @@ func encrypt(
 		}
 	}
 
-	result, err = alg.Encrypt(input, iv, aad)
+	results, err = alg.Encrypt(input, iv, aad)
 	if err != nil {
 		err = fmt.Errorf("[ECY]%v", err)
 		return
+	} else if len(results) < 1 || results[0] == nil {
+		err = fmt.Errorf("[ECY] result missing")
+		return
 	}
 
+	result = results[0]
 	if salt != nil {
 		result = append(result, salt...)
 	}
@@ -136,6 +141,7 @@ func decrypt(
 	alg encrypts.Algorithm,
 	eci, eco, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
+	var results [][]byte
 	var buf, key, input, result, salt, iv, tag, aad []byte
 
 	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
@@ -237,15 +243,19 @@ func decrypt(
 	}
 
 	if salt != nil {
-		result, err = alg.Decrypt(input[:len(input)-len(salt)], iv, tag, aad)
+		results, err = alg.Decrypt(input[:len(input)-len(salt)], iv, tag, aad)
 	} else {
-		result, err = alg.Decrypt(input, iv, tag, aad)
+		results, err = alg.Decrypt(input, iv, tag, aad)
 	}
 	if err != nil {
 		err = fmt.Errorf("[DCY]%v", err)
 		return
+	} else if len(results) < 1 || results[0] == nil {
+		err = fmt.Errorf("[DCY] result missing")
+		return
 	}
 
+	result = results[0]
 	if eco == nil {
 		err = utils.Write(cfg.Output, result)
 	} else {

@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
 	"sea9.org/go/c9ryptool/pkg/hashes"
 )
+
+const LOG_FRM_MILLI = "2006-01-02T15:04:05.000"
 
 func desc() string {
 	return fmt.Sprintf("c9rypTool (version %v)", cfgs.Version())
@@ -115,7 +118,7 @@ func main() {
 					ek = "/K:nil"
 				}
 			}
-			fmt.Printf("\n%v finished '%v' using '%v' (I:%v%v%v%v/O:%v%v)\n", desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
+			fmt.Printf("\n%v [%v] finished '%v' using '%v' (I:%v%v%v%v/O:%v%v)\n", time.Now().Format(LOG_FRM_MILLI), desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
 		}
 
 	case CMD_ENCODE:
@@ -144,7 +147,7 @@ func main() {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), COMMANDS[cfg.Command()], encd.Name())
+			fmt.Printf("\n%v [%v] finished '%v' using '%v'\n", time.Now().Format(LOG_FRM_MILLI), desc(), COMMANDS[cfg.Command()], encd.Name())
 		}
 
 	case CMD_DISPLAY:
@@ -182,7 +185,7 @@ func main() {
 		}
 		err = calcHash(cfg, hshs)
 		if cfg.Verbose {
-			fmt.Printf("\n%v finished '%v' using '%v'\n", desc(), COMMANDS[cfg.Command()], cfg.Hash)
+			fmt.Printf("\n%v [%v] finished '%v' using '%v'\n", time.Now().Format(LOG_FRM_MILLI), desc(), COMMANDS[cfg.Command()], cfg.Hash)
 		}
 
 	default:

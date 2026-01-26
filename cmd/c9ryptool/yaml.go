@@ -115,20 +115,26 @@ func yamlEncrypt(
 			enc, err := alg.Encrypt([]byte(typ), iv, aad)
 			if err != nil {
 				return nil, err
+			} else if len(enc) < 1 || enc[0] == nil {
+				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc), nil
+			return eco.Encode(enc[0]), nil
 		case int:
 			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
 			if err != nil {
 				return nil, err
+			} else if len(enc) < 1 || enc[0] == nil {
+				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc), nil
+			return eco.Encode(enc[0]), nil
 		case bool:
 			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
 			if err != nil {
 				return nil, err
+			} else if len(enc) < 1 || enc[0] == nil {
+				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc), nil
+			return eco.Encode(enc[0]), nil
 		default:
 			return inp, nil
 		}
@@ -287,9 +293,11 @@ func yamlDecrypt(
 			dec, err := alg.Decrypt(enc, iv, tag, aad)
 			if err != nil {
 				return nil, err
+			} else if len(dec) < 1 || dec[0] == nil {
+				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
 
-			str := string(dec)
+			str := string(dec[0])
 			v0, err := strconv.Atoi(str)
 			if err == nil {
 				return v0, nil

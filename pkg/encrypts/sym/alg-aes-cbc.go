@@ -138,18 +138,26 @@ func (a *AesCbc256) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *AesCbc256) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *AesCbc256) Encrypt(input ...[]byte) ([][]byte, error) {
 	var iv []byte
 	if len(input) > 1 {
 		iv = input[1]
 	}
-	return encryptAesCbc(*a, input[0], iv)
+	tmp, err := encryptAesCbc(*a, input[0], iv)
+	if err != nil {
+		return nil, err
+	}
+	return [][]byte{tmp}, nil
 }
 
-func (a *AesCbc256) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *AesCbc256) Decrypt(input ...[]byte) ([][]byte, error) {
 	var iv []byte
 	if len(input) > 1 {
 		iv = input[1]
 	}
-	return decryptAesCbc(*a, input[0], iv)
+	tmp, err := decryptAesCbc(*a, input[0], iv)
+	if err != nil {
+		return nil, err
+	}
+	return [][]byte{tmp}, nil
 }

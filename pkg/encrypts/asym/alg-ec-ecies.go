@@ -129,19 +129,31 @@ func (a *Secp256k1Eciesgo) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Secp256k1Eciesgo) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *Secp256k1Eciesgo) Encrypt(input ...[]byte) ([][]byte, error) {
 	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
-	return ecies.Encrypt(a.PublicKey, input[0])
+	rst, err := ecies.Encrypt(a.PublicKey, input[0])
+	if err != nil {
+		return nil, err
+	}
+	rsts := make([][]byte, 0)
+	rsts = append(rsts, rst)
+	return rsts, nil
 }
 
-func (a *Secp256k1Eciesgo) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *Secp256k1Eciesgo) Decrypt(input ...[]byte) ([][]byte, error) {
 	if a.PrivateKey == nil {
 		if a.PublicKey != nil {
 			return nil, fmt.Errorf("public key cannot be used for decryption")
 		}
 		return nil, fmt.Errorf("keys not ready")
 	}
-	return ecies.Decrypt(a.PrivateKey, input[0])
+	rst, err := ecies.Decrypt(a.PrivateKey, input[0])
+	if err != nil {
+		return nil, err
+	}
+	rsts := make([][]byte, 0)
+	rsts = append(rsts, rst)
+	return rsts, nil
 }

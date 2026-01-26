@@ -10,22 +10,27 @@ import (
 func encryptAesGcm(
 	key []byte,
 	inputs [][]byte,
-) ([]byte, error) {
+) (
+	results [][]byte,
+	err error,
+) {
 	if len(key) <= 0 {
-		return nil, fmt.Errorf("[AES-GCM] not ready")
+		err = fmt.Errorf("[AES-GCM] not ready")
+		return
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	var iv, aad []byte
+	nsize := gcm.NonceSize()
 	switch len(inputs) {
 	case 3:
 		aad = inputs[2]
@@ -34,22 +39,31 @@ func encryptAesGcm(
 		iv = inputs[1]
 	case 0:
 		err = fmt.Errorf("input missing")
-		return nil, err
+		return
 	}
 	if iv == nil {
-		iv, err = Generate(gcm.NonceSize())
+		iv, err = Generate(nsize)
 		if err != nil {
-			return nil, err
+			return
 		}
 	}
 
-	return gcm.Seal(iv, iv, inputs[0], aad), nil
+	rst := gcm.Seal(iv, iv, inputs[0], aad)
+	tsize := len(rst) - gcm.Overhead()
+	results = make([][]byte, 0)
+	results = append(results,
+		rst,              // the complete output
+		rst[:nsize],      // iv/nonce
+		rst[nsize:tsize], // the actual ciphertext
+		rst[tsize:],      // authentication tag
+	)
+	return
 }
 
 func decryptAesGcm(
 	key []byte,
 	inputs [][]byte,
-) ([]byte, error) {
+) ([][]byte, error) {
 	if len(key) <= 0 {
 		return nil, fmt.Errorf("[AES-GCM] not ready")
 	}
@@ -64,7 +78,7 @@ func decryptAesGcm(
 		return nil, err
 	}
 
-	var txt, iv, tag, aad []byte
+	var pay, iv, tag, aad []byte
 	switch len(inputs) {
 	case 4:
 		aad = inputs[3]
@@ -75,23 +89,28 @@ func decryptAesGcm(
 	case 2:
 		iv = inputs[1]
 	case 0:
-		err = fmt.Errorf("input missing")
-		return nil, err
+		return nil, fmt.Errorf("input missing")
 	}
 	if iv == nil {
-		iv, txt = inputs[0][:gcm.NonceSize()], inputs[0][gcm.NonceSize():]
+		iv, pay = inputs[0][:gcm.NonceSize()], inputs[0][gcm.NonceSize():]
 	} else {
 		if bytes.Index(inputs[0], iv) == 0 {
-			txt = inputs[0][len(iv):]
+			pay = inputs[0][len(iv):]
 		} else {
-			txt = inputs[0][:]
+			pay = inputs[0][:]
 		}
 	}
 	if tag != nil {
-		txt = append(txt, tag...)
+		pay = append(pay, tag...)
 	}
 
-	return gcm.Open(nil, iv, txt, aad)
+	rst, err := gcm.Open(nil, iv, pay, aad)
+	if err != nil {
+		return nil, err
+	}
+	results := make([][]byte, 0)
+	results = append(results, rst)
+	return results, nil
 }
 
 // /////////// //
@@ -123,11 +142,11 @@ func (a *AesGcm128) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *AesGcm128) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm128) Encrypt(input ...[]byte) ([][]byte, error) {
 	return encryptAesGcm(*a, input)
 }
 
-func (a *AesGcm128) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm128) Decrypt(input ...[]byte) ([][]byte, error) {
 	return decryptAesGcm(*a, input)
 }
 
@@ -160,11 +179,11 @@ func (a *AesGcm192) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *AesGcm192) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm192) Encrypt(input ...[]byte) ([][]byte, error) {
 	return encryptAesGcm(*a, input)
 }
 
-func (a *AesGcm192) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm192) Decrypt(input ...[]byte) ([][]byte, error) {
 	return decryptAesGcm(*a, input)
 }
 
@@ -197,10 +216,10 @@ func (a *AesGcm256) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *AesGcm256) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm256) Encrypt(input ...[]byte) ([][]byte, error) {
 	return encryptAesGcm(*a, input)
 }
 
-func (a *AesGcm256) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *AesGcm256) Decrypt(input ...[]byte) ([][]byte, error) {
 	return decryptAesGcm(*a, input)
 }

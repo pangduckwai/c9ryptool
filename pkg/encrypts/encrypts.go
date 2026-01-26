@@ -27,10 +27,10 @@ type Algorithm interface {
 	PopulateKey([]byte) error
 
 	// Encrypt encrypt the given parameters (plain-text and IV respectively), returns the encrypted result.
-	Encrypt(...[]byte) ([]byte, error)
+	Encrypt(...[]byte) ([][]byte, error)
 
 	// Decrypt decrypt the given parameters (plain-text and IV respectively), returns the decrypted result.
-	Decrypt(...[]byte) ([]byte, error)
+	Decrypt(...[]byte) ([][]byte, error)
 }
 
 type AsymAlgorithm interface {

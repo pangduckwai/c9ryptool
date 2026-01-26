@@ -162,14 +162,14 @@ func (a *Secp256k1Decred) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Secp256k1Decred) Encrypt(input ...[]byte) (result []byte, err error) {
+func (a *Secp256k1Decred) Encrypt(input ...[]byte) ([][]byte, error) {
 	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
 
 	ikey, err := secp256k1.GeneratePrivateKey()
 	if err != nil {
-		return
+		return nil, err
 	}
 	ikeyByt := ikey.PubKey().SerializeCompressed()
 	ikeyLen := len(ikeyByt)
@@ -177,19 +177,21 @@ func (a *Secp256k1Decred) Encrypt(input ...[]byte) (result []byte, err error) {
 	cek := sha256.Sum256(secp256k1.GenerateSharedSecret(ikey, a.PublicKey))
 	gcm, err := newGam(cek[:])
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	iv := make([]byte, gcm.NonceSize()) // Since a new ephemeral key is generated for every message ensuring the cek is not re-used, the nonce can be all zeros
-	result = make([]byte, 4+ikeyLen)
+	result := make([]byte, 4+ikeyLen)
 	binary.LittleEndian.PutUint32(result, uint32(ikeyLen)) // record the length of the internal public key first
 	copy(result[4:], ikeyByt)                              // follows with the actual internal public key bytes
-
 	result = gcm.Seal(result, iv, input[0], ikeyByt)
-	return
+
+	results := make([][]byte, 0)
+	results = append(results, result)
+	return results, nil
 }
 
-func (a *Secp256k1Decred) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *Secp256k1Decred) Decrypt(input ...[]byte) ([][]byte, error) {
 	if a.PrivateKey == nil {
 		if a.PublicKey != nil {
 			return nil, fmt.Errorf("public key cannot be used for decryption")
@@ -210,5 +212,11 @@ func (a *Secp256k1Decred) Decrypt(input ...[]byte) ([]byte, error) {
 	}
 
 	iv := make([]byte, gcm.NonceSize())
-	return gcm.Open(nil, iv, input[0][ikeyLen:], input[0][4:ikeyLen])
+	result, err := gcm.Open(nil, iv, input[0][ikeyLen:], input[0][4:ikeyLen])
+	if err != nil {
+		return nil, err
+	}
+	results := make([][]byte, 0)
+	results = append(results, result)
+	return results, nil
 }

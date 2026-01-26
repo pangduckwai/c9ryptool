@@ -9,10 +9,9 @@ import (
 
 func encryptChacha20Poly1305(
 	key []byte,
-	input []byte,
-	iv []byte,
+	inputs [][]byte,
 ) (
-	result []byte,
+	results [][]byte,
 	err error,
 ) {
 	if len(key) <= 0 {
@@ -25,48 +24,82 @@ func encryptChacha20Poly1305(
 		return
 	}
 
+	var iv, aad []byte
+	nsize := aead.NonceSize()
+	switch len(inputs) {
+	case 3:
+		aad = inputs[2]
+	case 2:
+		iv = inputs[1]
+	case 0:
+		err = fmt.Errorf("input missing")
+		return
+	}
 	if iv == nil {
-		iv, err = Generate(aead.NonceSize())
+		iv, err = Generate(nsize)
 		if err != nil {
 			return
 		}
 	}
 
-	result = aead.Seal(iv, iv, input, nil)
+	rst := aead.Seal(iv, iv, inputs[0], aad)
+	tsize := len(rst) - aead.Overhead()
+	results = make([][]byte, 0)
+	results = append(results,
+		rst,              // the complete output
+		rst[:nsize],      // nonce
+		rst[nsize:tsize], // the actual ciphertext
+		rst[tsize:],      // authentication tag
+	)
 	return
 }
 
 func decryptChacha20Poly1305(
 	key []byte,
-	input []byte,
-	iv []byte,
-) (
-	result []byte,
-	err error,
-) {
+	inputs [][]byte,
+) ([][]byte, error) {
 	if len(key) <= 0 {
-		err = fmt.Errorf("[CHACHA] not ready")
-		return
+		return nil, fmt.Errorf("[CHACHA] not ready")
 	}
 
 	aead, err := chacha20poly1305.New(key)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	var txt []byte
+	var pay, iv, tag, aad []byte
+	switch len(inputs) {
+	case 4:
+		aad = inputs[3]
+		fallthrough
+	case 3:
+		tag = inputs[2]
+		fallthrough
+	case 2:
+		iv = inputs[1]
+	case 0:
+		return nil, fmt.Errorf("input missing")
+	}
 	if iv == nil {
-		iv, txt = input[:aead.NonceSize()], input[aead.NonceSize():]
+		iv, pay = inputs[0][:aead.NonceSize()], inputs[0][aead.NonceSize():]
 	} else {
-		if bytes.Index(input, iv) == 0 {
-			txt = input[len(iv):]
+		if bytes.Index(inputs[0], iv) == 0 {
+			pay = inputs[0][len(iv):]
 		} else {
-			txt = input
+			pay = inputs[0]
 		}
 	}
+	if tag != nil {
+		pay = append(pay, tag...)
+	}
 
-	result, err = aead.Open(nil, iv, txt, nil)
-	return
+	rst, err := aead.Open(nil, iv, pay, aad)
+	if err != nil {
+		return nil, err
+	}
+	results := make([][]byte, 0)
+	results = append(results, rst)
+	return results, nil
 }
 
 // ///////////////// //
@@ -98,18 +131,10 @@ func (a *ChaCha20Poly1305) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *ChaCha20Poly1305) Encrypt(input ...[]byte) ([]byte, error) {
-	var iv []byte
-	if len(input) > 1 {
-		iv = input[1]
-	}
-	return encryptChacha20Poly1305(*a, input[0], iv)
+func (a *ChaCha20Poly1305) Encrypt(input ...[]byte) ([][]byte, error) {
+	return encryptChacha20Poly1305(*a, input)
 }
 
-func (a *ChaCha20Poly1305) Decrypt(input ...[]byte) ([]byte, error) {
-	var iv []byte
-	if len(input) > 1 {
-		iv = input[1]
-	}
-	return decryptChacha20Poly1305(*a, input[0], iv)
+func (a *ChaCha20Poly1305) Decrypt(input ...[]byte) ([][]byte, error) {
+	return decryptChacha20Poly1305(*a, input)
 }

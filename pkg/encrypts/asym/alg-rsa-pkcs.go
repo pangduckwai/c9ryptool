@@ -66,19 +66,27 @@ func (a *Rsa2048Pkcs1v15) PopulateKey(key []byte) (err error) {
 	return
 }
 
-func (a *Rsa2048Pkcs1v15) Encrypt(input ...[]byte) ([]byte, error) {
+func (a *Rsa2048Pkcs1v15) Encrypt(input ...[]byte) ([][]byte, error) {
 	if a.PublicKey == nil {
 		return nil, fmt.Errorf("key not ready")
 	}
-	return rsa.EncryptPKCS1v15(rand.Reader, a.PublicKey, input[0])
+	tmp, err := rsa.EncryptPKCS1v15(rand.Reader, a.PublicKey, input[0])
+	if err != nil {
+		return nil, err
+	}
+	return [][]byte{tmp}, nil
 }
 
-func (a *Rsa2048Pkcs1v15) Decrypt(input ...[]byte) ([]byte, error) {
+func (a *Rsa2048Pkcs1v15) Decrypt(input ...[]byte) ([][]byte, error) {
 	if a.PrivateKey == nil {
 		if a.PublicKey != nil {
 			return nil, fmt.Errorf("public key cannot be used for decryption")
 		}
 		return nil, fmt.Errorf("keys not ready")
 	}
-	return rsa.DecryptPKCS1v15(rand.Reader, a.PrivateKey, input[0])
+	tmp, err := rsa.DecryptPKCS1v15(rand.Reader, a.PrivateKey, input[0])
+	if err != nil {
+		return nil, err
+	}
+	return [][]byte{tmp}, nil
 }
