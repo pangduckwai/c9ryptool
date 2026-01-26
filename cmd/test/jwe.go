@@ -13,17 +13,19 @@ import (
 // jweTest generate and encrypt sample data into JWE format
 // Usage:
 //
-//  1. Create: get 5 base64 encode files (./aad.jwe, ./cek.jwe, ./iv.jwe, ./pay.jwe, ./tag.jwe) if successful
+//  0. CD to a test directory
 //     $ cd test
-//     $ ../cmd/test jwe [header path] [payload path] [public key path]
+//
+//  1. Generate JWE formatted encryption results: get 5 base64 encode files (./aad.jwe, ./cek.jwe, ./iv.jwe, ./pay.jwe, ./tag.jwe) if successful
+//     $ ~/test jwe [header path] [payload path] [public key path]
 //     > 2026-01-26T17:19:51.068 finished generating JWE parts
 //
 //  2. Obtain CEK (base64 encoded; ./cek.hex) if successful
-//     $ ../cmd/c9ryptool decrypt -v -a RSA-OAEP-256 -k [private key path] -i cek.jwe --encode-in=base64 -o cek.hex --encode-out=hex
+//     $ ~/c9ryptool decrypt -v -a RSA-OAEP-256 -k [private key path] -i cek.jwe --encode-in=base64 -o cek.hex --encode-out=hex
 //     > 2026-01-26T17:31:37.722 [c9rypTool (version v1.5.3 2026012615)] finished 'decrypt' using 'RSA-2048-OAEP-SHA256' (I:base64/O:hex)
 //
 //  3. Decrypt payload (as console output) if successful
-//     $ ../cmd/c9ryptool decrypt -v -a AES-256-GCM -k cek.hex --encode-key=hex -i pay.jwe --encode-in=base64 --iv=iv.jwe --encode-iv=base64 --tag=tag.jwe --encode-tag=base64 --aad=aad.jwe
+//     $ ~/c9ryptool decrypt -v -a AES-256-GCM -k cek.hex --encode-key=hex -i pay.jwe --encode-in=base64 --iv=iv.jwe --encode-iv=base64 --tag=tag.jwe --encode-tag=base64 --aad=aad.jwe
 //     > [content of payload path in step 1]
 //     > 2026-01-26T17:33:02.277 [c9rypTool (version v1.5.3 2026012615)] finished 'decrypt' using 'AES-256-GCM' (I:base64/V:base64/T:base64/A:nil/O:nil/K:hex)
 func jweTest(hdrPath, inpPath, keyPath string) (err error) {
@@ -111,6 +113,6 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 		return
 	}
 
-	fmt.Printf("\n%v finished generating JWE parts\n", time.Now().Format("2006-01-02T15:04:05.000"))
+	fmt.Printf("\n%v finished generating JWE encryption results\n", time.Now().Format("2006-01-02T15:04:05.000"))
 	return
 }
