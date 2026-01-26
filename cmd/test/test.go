@@ -17,8 +17,11 @@ import (
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
-func usage() {
-	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread|yaml]\n")
+func usage(msg ...string) {
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread|yaml|jwe]\n")
+	if len(msg) > 0 && msg[0] != "" {
+		log.Printf("%v\n", msg[0])
+	}
 	os.Exit(1)
 }
 
@@ -165,6 +168,14 @@ func main() {
 		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
 	case "yaml":
 		err := yamlTest()
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+	case "jwe":
+		if len(os.Args) < 5 {
+			usage(fmt.Sprintf("Command '%v' requires file paths of header, input and public key", cmd))
+		}
+		err := jweTest(os.Args[2], os.Args[3], os.Args[4])
 		if err != nil {
 			log.Fatalf("[TEST][%v][1] %v", cmd, err)
 		}
