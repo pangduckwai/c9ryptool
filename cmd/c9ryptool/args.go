@@ -38,6 +38,14 @@ var COMMANDS = []string{
 	"display", // 7
 }
 
+var ENVIVARS = []string{
+	"C9_BUFFER",
+	"C9_VERBOSE",
+	"C9_ALGORITHM",
+	"C9_ENCODING",
+	"C9_HASHING",
+}
+
 func usage() string {
 	return "Usage:\n c9ryptool\n" +
 		"  [version | help]\n\n" +
@@ -187,13 +195,6 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		return
 	}
 
-	cfg = &cfgs.Config{
-		Buffer:  cfgs.BUFFER,
-		Passwd:  "",
-		SaltLen: sym.SALTLEN,
-		Verbose: false,
-	}
-
 	encd := func(val string) {
 		switch cfg.Command() {
 		case CMD_ENCRYPT:
@@ -207,6 +208,15 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		}
 	}
 
+	// Setup default values
+	cfg = &cfgs.Config{
+		Buffer:  cfgs.BUFFER,
+		Passwd:  "",
+		SaltLen: sym.SALTLEN,
+		Verbose: false,
+	}
+
+	// Parse command
 	idx, _, err := cfgs.CommandMatch(COMMANDS, args[1])
 	if err != nil {
 		err = fmt.Errorf("[CONF] %v", err)
@@ -217,7 +227,36 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 	}
 	cfg.SetCommand(idx)
 
-	var val int
+	// Parse environment variables
+	var num int
+	for _, enm := range ENVIVARS {
+		env := os.Getenv(enm)
+		if env != "" {
+			switch enm {
+			case "C9_BUFFER":
+				num, err = strconv.Atoi(env)
+				if err != nil {
+					err = fmt.Errorf("[CONF] Invalid buffer size value in '%v'", enm)
+					return
+				}
+				cfg.Buffer = num
+			case "C9_VERBOSE":
+				cfg.Verbose, err = strconv.ParseBool(env)
+				if err != nil {
+					err = fmt.Errorf("[CONF] Invalid verbose value in '%v'", enm)
+					return
+				}
+			case "C9_ALGORITHM":
+				cfg.Algr = env
+			case "C9_ENCODING":
+				encd(env)
+			case "C9_HASHING":
+				cfg.Hash = env
+			}
+		}
+	}
+
+	// Parse options. override ENV variables values if any
 	for i := 2; i < len(args); i++ {
 		switch {
 		case args[i] == "-v" || args[i] == "--verbose":
@@ -231,9 +270,9 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 				err = fmt.Errorf("[CONF] Missing buffer size argument")
 				return
 			} else {
-				val, err = strconv.Atoi(args[i])
+				num, err = strconv.Atoi(args[i])
 				if err == nil {
-					cfg.Buffer = val
+					cfg.Buffer = num
 				}
 			}
 		case strings.HasPrefix(args[i], "--buffer="):
@@ -241,9 +280,9 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 				err = fmt.Errorf("[CONF] Missing buffer size")
 				return
 			} else {
-				val, err = strconv.Atoi(args[i][9:])
+				num, err = strconv.Atoi(args[i][9:])
 				if err == nil {
-					cfg.Buffer = val
+					cfg.Buffer = num
 				}
 			}
 		case args[i] == "-a":
@@ -302,9 +341,9 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 				err = fmt.Errorf("[CONF] Missing salt value")
 				return
 			} else {
-				val, err = strconv.Atoi(args[i][7:])
+				num, err = strconv.Atoi(args[i][7:])
 				if err == nil {
-					cfg.SaltLen = val
+					cfg.SaltLen = num
 				}
 			}
 		case args[i] == "-g" || args[i] == "--generate":
@@ -441,6 +480,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		}
 	}
 
+	// Conditional default values
 	switch cfg.Command() {
 	case CMD_ENCRYPT:
 		if cfg.Algr == "" {

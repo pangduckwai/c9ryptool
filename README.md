@@ -59,22 +59,22 @@ A simple cryptographic tool
 > | decrypt | sym  | yaml / json | **[ENC]** | - | - | - |
 > | decrypt | asym | none | _{ENC}_ | - | - | pem |
 > | decrypt | asym | yaml / json | **[ENC]** | - | - | pem |
-
+>
 > ### console input
 > #### 1. password
 > Specify the option `-p` or `--password` to use keys generated from password for the encryption. When
 > `-p` is specified, a prompt will appear for the user to type in the password.
-
+>
 > #### 2. salt
 > To enhance security of the keys used, a random value known as `salt` is needed when generating keys
 > from passwords. A new, random `salt` is generated during encryption. This salt is written to the
 > output at the end of the cipher text, separated with a dot (`.`). During decryption this `salt` is
 > read from the input cipher text.
-
+>
 > #### 3. piped input
 > If input content is piped, the stdin will be put to the EOF state. As a result a password can no
 > longer be entered via the command line. In these cases interactive password input cannot be used.
-
+>
 > #### 4. interactive input
 > If the option `-i` or `--in=` is omitted, the input text to be encryption is read from stdin.
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
@@ -119,6 +119,16 @@ A simple cryptographic tool
 | --- | --- | --- |
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
+
+### 7. Environment variables
+Config values set by environment variables are overrided by values from options.
+| variable | description |
+| --- | --- |
+| `C9_BUFFER` | size of the read buffer in # of bytes |
+| `C9_VERBOSE` | display detail operation messages during processing |
+| `C9_ALGORITHM` | encryption algorithm to use |
+| `C9_ENCODING` | encoding scheme to use, same as `-n` or `--encoding=` for encryption/decryption |
+| `C9_HASHING` | hashing algorithm to use |
 
 ---
 
@@ -177,6 +187,15 @@ Miscellaneous utilities accompany `c9ryptool`
 | `-b SIZE` | `--buffer=SIZE` | `SIZE` is the size of the read buffer in # of bytes |
 | `-v` | `--verbose` |  display detail operation messages during processing |
 
+### 6. Environment variables
+Config values set by environment variables are overrided by values from options.
+| variable | description |
+| --- | --- |
+| `C9_BUFFER` | size of the read buffer in # of bytes |
+| `C9_VERBOSE` | display detail operation messages during processing |
+| `C9_ALGORITHM` | encryption algorithm to use |
+| `C9_ENCODING` | encoding scheme to use |
+
 ---
 
 ## TODO
@@ -187,11 +206,12 @@ Miscellaneous utilities accompany `c9ryptool`
 ---
 
 ## Changelog
-### v1.5.3
+### v1.5.4
 - Combine functions under `/cmd` into `c9utils`
 - Make yaml traversal function more generic
 - Use a 'better' field name for the 'salt' value in yaml encryption with password generated key
 - Add further input encoding control for symmetric encryption
+- Add environment variable handling
 
 ### v1.4.1
 - Add control of encoding of encryption input, output and symmetric key file

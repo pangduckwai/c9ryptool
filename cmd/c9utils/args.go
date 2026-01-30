@@ -25,6 +25,13 @@ var COMMANDS = []string{
 	"split",   // 4
 }
 
+var ENVIVARS = []string{
+	"C9_BUFFER",
+	"C9_VERBOSE",
+	"C9_ALGORITHM",
+	"C9_ENCODING",
+}
+
 func usage() string {
 	return "Usage:\n c9utils\n" +
 		"  [version]\n\n" +
@@ -73,6 +80,31 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 	cfg.SetCommand(idx)
 
 	var val, lgh int
+	for _, enm := range ENVIVARS {
+		env := os.Getenv(enm)
+		if env != "" {
+			switch enm {
+			case "C9_BUFFER":
+				val, err = strconv.Atoi(env)
+				if err != nil {
+					err = fmt.Errorf("[CONF] Invalid buffer size value in '%v'", enm)
+					return
+				}
+				cfg.Buffer = val
+			case "C9_VERBOSE":
+				cfg.Verbose, err = strconv.ParseBool(env)
+				if err != nil {
+					err = fmt.Errorf("[CONF] Invalid verbose value in '%v'", enm)
+					return
+				}
+			case "C9_ALGORITHM":
+				cfg.Algr = env
+			case "C9_ENCODING":
+				cfg.Encd = env
+			}
+		}
+	}
+
 	for i := 2; i < len(args); i++ {
 		lgh = 7
 		switch {
