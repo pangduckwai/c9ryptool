@@ -20,11 +20,11 @@ func (n Hex) Multiple() (int, int) {
 	return 1, 1
 }
 
-func (n Hex) Encode(inp []byte) string {
+func (n Hex) EncodeToString(inp []byte) string {
 	return hex.EncodeToString(inp)
 }
 
-func (n Hex) Decode(inp string) (out []byte, err error) {
+func (n Hex) DecodeString(inp string) (out []byte, err error) {
 	out, err = hex.DecodeString(inp)
 	return
 }

@@ -20,11 +20,11 @@ type Encoding interface {
 	// Multiple return the multiple of number of characters processed in each encoding / decoding invocation.
 	Multiple() (int, int)
 
-	// Encode encode the given input and returns the encoded result.
-	Encode([]byte) string
+	// EncodeToString encode the given input and returns the encoded result.
+	EncodeToString([]byte) string
 
-	// Decode decode the given input and returns the decoded result.
-	Decode(string) ([]byte, error)
+	// DecodeString decode the given input and returns the decoded result.
+	DecodeString(string) ([]byte, error)
 }
 
 var eNCODINGS = map[string]Encoding{
@@ -87,7 +87,7 @@ func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 
 	encode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
-			encoded := n.Encode(inp)
+			encoded := n.EncodeToString(inp)
 			if !isStdout {
 				_, err = fmt.Fprint(wtr, encoded)
 				if err != nil {
@@ -148,7 +148,7 @@ func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 		if ln > 0 {
 			inp = n.Padding(inp)
 			var decoded []byte
-			decoded, err = n.Decode(string(inp))
+			decoded, err = n.DecodeString(string(inp))
 			if err != nil {
 				return
 			}

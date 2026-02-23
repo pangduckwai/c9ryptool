@@ -24,7 +24,7 @@ func encrypt(
 		return
 	}
 	if eci != nil {
-		input, err = eci.Decode(string(input))
+		input, err = eci.DecodeString(string(input))
 		if err != nil {
 			err = fmt.Errorf("[ECY][INP][DCD]%v", err)
 			return
@@ -55,7 +55,7 @@ func encrypt(
 		if eck == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
 			err = utils.Write(cfg.Key, alg.GetKey())
 		} else {
-			err = utils.Write(cfg.Key, []byte(eck.Encode(alg.GetKey())))
+			err = utils.Write(cfg.Key, []byte(eck.EncodeToString(alg.GetKey())))
 		}
 		if err != nil {
 			return
@@ -69,7 +69,7 @@ func encrypt(
 		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = eck.Decode(string(key))
+			buf, err = eck.DecodeString(string(key))
 			if err != nil {
 				err = fmt.Errorf("[ECY][POP][DCD]%v", err)
 				return
@@ -89,7 +89,7 @@ func encrypt(
 			return
 		}
 		if ecv != nil {
-			iv, err = ecv.Decode(string(iv))
+			iv, err = ecv.DecodeString(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[ECY][IV][DCD]%v", err)
 				return
@@ -104,7 +104,7 @@ func encrypt(
 			return
 		}
 		if eca != nil {
-			aad, err = eca.Decode(string(aad))
+			aad, err = eca.DecodeString(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[ECY][AAD][DCD]%v", err)
 				return
@@ -128,7 +128,7 @@ func encrypt(
 	if eco == nil {
 		err = utils.Write(cfg.Output, result)
 	} else {
-		err = utils.Write(cfg.Output, []byte(eco.Encode(result)))
+		err = utils.Write(cfg.Output, []byte(eco.EncodeToString(result)))
 	}
 	if err != nil {
 		err = fmt.Errorf("[ECY][OUT]%v", err)
@@ -150,7 +150,7 @@ func decrypt(
 		return
 	}
 	if eci != nil {
-		input, err = eci.Decode(string(input))
+		input, err = eci.DecodeString(string(input))
 		if err != nil {
 			err = fmt.Errorf("[DCY][INP][DCD]%v", err)
 			return
@@ -184,7 +184,7 @@ func decrypt(
 		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = eck.Decode(string(key))
+			buf, err = eck.DecodeString(string(key))
 			if err != nil {
 				err = fmt.Errorf("[DCY][POP][DCD]%v", err)
 				return
@@ -204,7 +204,7 @@ func decrypt(
 			return
 		}
 		if ecv != nil {
-			iv, err = ecv.Decode(string(iv))
+			iv, err = ecv.DecodeString(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[DCY][IV][DCD]%v", err)
 				return
@@ -219,7 +219,7 @@ func decrypt(
 			return
 		}
 		if ect != nil {
-			tag, err = ect.Decode(string(tag))
+			tag, err = ect.DecodeString(string(tag))
 			if err != nil {
 				err = fmt.Errorf("[DCY][TAG][DCD]%v", err)
 				return
@@ -234,7 +234,7 @@ func decrypt(
 			return
 		}
 		if eca != nil {
-			aad, err = eca.Decode(string(aad))
+			aad, err = eca.DecodeString(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[DCY][AAD][DCD]%v", err)
 				return
@@ -259,7 +259,7 @@ func decrypt(
 	if eco == nil {
 		err = utils.Write(cfg.Output, result)
 	} else {
-		err = utils.Write(cfg.Output, []byte(eco.Encode(result)))
+		err = utils.Write(cfg.Output, []byte(eco.EncodeToString(result)))
 	}
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)

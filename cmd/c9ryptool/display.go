@@ -142,7 +142,7 @@ func display(
 			if ln > 0 {
 				inp = ecd.Padding(inp)
 				var decoded []byte
-				decoded, err = ecd.Decode(string(inp))
+				decoded, err = ecd.DecodeString(string(inp))
 				if err != nil {
 					return
 				}

@@ -52,7 +52,7 @@ func yamlEncrypt(
 		if eck == nil || !alg.Type() {
 			err = utils.Write(cfg.Key, alg.GetKey())
 		} else {
-			err = utils.Write(cfg.Key, []byte(eck.Encode(alg.GetKey())))
+			err = utils.Write(cfg.Key, []byte(eck.EncodeToString(alg.GetKey())))
 		}
 		if err != nil {
 			return
@@ -66,7 +66,7 @@ func yamlEncrypt(
 		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = eck.Decode(string(key))
+			buf, err = eck.DecodeString(string(key))
 			if err != nil {
 				err = fmt.Errorf("[YAML][ECY][POP][DCD]%v", err)
 				return
@@ -86,7 +86,7 @@ func yamlEncrypt(
 			return
 		}
 		if ecv != nil {
-			iv, err = ecv.Decode(string(iv))
+			iv, err = ecv.DecodeString(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[YAML][ECY][IV][DCD]%v", err)
 				return
@@ -101,7 +101,7 @@ func yamlEncrypt(
 			return
 		}
 		if eca != nil {
-			aad, err = eca.Decode(string(aad))
+			aad, err = eca.DecodeString(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[YAML][ECY][AAD][DCD]%v", err)
 				return
@@ -118,7 +118,7 @@ func yamlEncrypt(
 			} else if len(enc) < 1 || enc[0] == nil {
 				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc[0]), nil
+			return eco.EncodeToString(enc[0]), nil
 		case int:
 			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
 			if err != nil {
@@ -126,7 +126,7 @@ func yamlEncrypt(
 			} else if len(enc) < 1 || enc[0] == nil {
 				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc[0]), nil
+			return eco.EncodeToString(enc[0]), nil
 		case bool:
 			enc, err := alg.Encrypt([]byte(fmt.Sprintf("%v", typ)), iv, aad)
 			if err != nil {
@@ -134,7 +134,7 @@ func yamlEncrypt(
 			} else if len(enc) < 1 || enc[0] == nil {
 				return nil, fmt.Errorf("[YAML][ECY] result missing")
 			}
-			return eco.Encode(enc[0]), nil
+			return eco.EncodeToString(enc[0]), nil
 		default:
 			return inp, nil
 		}
@@ -154,7 +154,7 @@ func yamlEncrypt(
 	}
 
 	if salt != nil {
-		sec = append(sec, yaml.MapItem{Key: sALT, Value: eco.Encode(salt)})
+		sec = append(sec, yaml.MapItem{Key: sALT, Value: eco.EncodeToString(salt)})
 	}
 
 	output, err = yaml.Marshal(sec)
@@ -192,7 +192,7 @@ func yamlDecrypt(
 
 	for i, itm := range inp {
 		if itm.Key.(string) == sALT {
-			salt, err = eci.Decode(itm.Value.(string))
+			salt, err = eci.DecodeString(itm.Value.(string))
 			inp = append(inp[:i], inp[i+1:]...)
 			break
 		}
@@ -225,7 +225,7 @@ func yamlDecrypt(
 		if eck == nil || !alg.Type() {
 			err = alg.PopulateKey(key)
 		} else {
-			buf, err = eck.Decode(string(key))
+			buf, err = eck.DecodeString(string(key))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][POP][DCD]%v", err)
 				return
@@ -245,7 +245,7 @@ func yamlDecrypt(
 			return
 		}
 		if ecv != nil {
-			iv, err = ecv.Decode(string(iv))
+			iv, err = ecv.DecodeString(string(iv))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][IV][DCD]%v", err)
 				return
@@ -260,7 +260,7 @@ func yamlDecrypt(
 			return
 		}
 		if ect != nil {
-			tag, err = ect.Decode(string(tag))
+			tag, err = ect.DecodeString(string(tag))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][TAG][DCD]%v", err)
 				return
@@ -275,7 +275,7 @@ func yamlDecrypt(
 			return
 		}
 		if eca != nil {
-			aad, err = eca.Decode(string(aad))
+			aad, err = eca.DecodeString(string(aad))
 			if err != nil {
 				err = fmt.Errorf("[YAML][DCY][AAD][DCD]%v", err)
 				return
@@ -286,7 +286,7 @@ func yamlDecrypt(
 	decrypt := func(inp interface{}) (interface{}, error) {
 		switch typ := inp.(type) {
 		case string:
-			enc, err := eci.Decode(typ)
+			enc, err := eci.DecodeString(typ)
 			if err != nil {
 				return nil, err
 			}

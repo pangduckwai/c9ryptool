@@ -18,7 +18,7 @@ import (
 )
 
 func usage(msg ...string) {
-	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread|yaml|jwe]\n")
+	log.Printf("Usage: ./cmd/test [1line|mline|crenc|encdec|eckeygen|eckeyread|yaml|jwe|zip|unzip]\n")
 	if len(msg) > 0 && msg[0] != "" {
 		log.Printf("%v\n", msg[0])
 	}
@@ -176,6 +176,16 @@ func main() {
 			usage(fmt.Sprintf("Command '%v' requires file paths of header, input and public key", cmd))
 		}
 		err := jweTest(os.Args[2], os.Args[3], os.Args[4])
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+	case "zip":
+		err := zipTest()
+		if err != nil {
+			log.Fatalf("[TEST][%v][1] %v", cmd, err)
+		}
+	case "unzip":
+		err := unzipTest()
 		if err != nil {
 			log.Fatalf("[TEST][%v][1] %v", cmd, err)
 		}

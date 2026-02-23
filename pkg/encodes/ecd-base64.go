@@ -42,11 +42,11 @@ func (n Base64) Multiple() (int, int) {
 	return 3, 4
 }
 
-func (n Base64) Encode(inp []byte) string {
+func (n Base64) EncodeToString(inp []byte) string {
 	return base64.StdEncoding.EncodeToString(inp)
 }
 
-func (n Base64) Decode(inp string) (out []byte, err error) {
+func (n Base64) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.StdEncoding.DecodeString(inp)
 	return
 }
@@ -71,11 +71,11 @@ func (n Base64Url) Multiple() (int, int) {
 	return 3, 4
 }
 
-func (n Base64Url) Encode(inp []byte) string {
+func (n Base64Url) EncodeToString(inp []byte) string {
 	return base64.URLEncoding.EncodeToString(inp)
 }
 
-func (n Base64Url) Decode(inp string) (out []byte, err error) {
+func (n Base64Url) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.URLEncoding.DecodeString(inp)
 	return
 }
@@ -96,11 +96,11 @@ func (n RawBase64Url) Multiple() (int, int) {
 	return 3, 4
 }
 
-func (n RawBase64Url) Encode(inp []byte) string {
+func (n RawBase64Url) EncodeToString(inp []byte) string {
 	return base64.RawURLEncoding.EncodeToString(inp)
 }
 
-func (n RawBase64Url) Decode(inp string) (out []byte, err error) {
+func (n RawBase64Url) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.RawURLEncoding.DecodeString(inp)
 	return
 }

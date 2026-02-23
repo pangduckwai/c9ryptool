@@ -57,14 +57,14 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 		err = fmt.Errorf("[TEST][JWE][CEK][ECY] result missing")
 		return
 	}
-	cek := []byte(ecdr.Encode(tmp[0])) // OUTPUT 1
+	cek := []byte(ecdr.EncodeToString(tmp[0])) // OUTPUT 1
 
 	hdr, err := utils.Read(hdrPath, cfgs.BUFFER, true)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][HDR][RDR]%v", err)
 		return
 	}
-	hdr = []byte(ecdr.Encode(hdr)) // OUTPUT 0
+	hdr = []byte(ecdr.EncodeToString(hdr)) // OUTPUT 0
 
 	pay, err := utils.Read(inpPath, cfgs.BUFFER, true)
 	if err != nil {
@@ -79,9 +79,9 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 		err = fmt.Errorf("[TEST][JWE][INP][ECY] result missing")
 		return
 	}
-	iv := []byte(ecdr.Encode(tmp[1]))  // OUTPUT 2
-	pay = []byte(ecdr.Encode(tmp[2]))  // OUTPUT 3
-	tag := []byte(ecdr.Encode(tmp[3])) // OUTPUT 4
+	iv := []byte(ecdr.EncodeToString(tmp[1]))  // OUTPUT 2
+	pay = []byte(ecdr.EncodeToString(tmp[2]))  // OUTPUT 3
+	tag := []byte(ecdr.EncodeToString(tmp[3])) // OUTPUT 4
 
 	err = utils.Write("aad.jwe", hdr)
 	if err != nil {
