@@ -2,10 +2,19 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 )
+
+type Encoder interface {
+	Encode(io.Reader, io.Writer) error
+}
+
+type Decoder interface {
+	Decode(io.Reader, io.Writer) error
+}
 
 func BufferedRead(
 	rdr *bufio.Reader,
@@ -51,7 +60,7 @@ func BufferedRead(
 func Read(
 	path string,
 	buffer int,
-	verbose bool,
+	dec Decoder,
 ) (
 	dat []byte,
 	err error,
@@ -67,25 +76,29 @@ func Read(
 	}
 
 	rdr := bufio.NewReaderSize(inp, buffer)
-	if rdr.Size() != buffer {
-		if verbose {
-			fmt.Printf("Read buffer size %v mismatching with the specified size %v, changing buffer size...\n", rdr.Size(), buffer)
-		}
-		buffer = rdr.Size()
-		rdr = bufio.NewReaderSize(inp, buffer)
-	}
 
-	dat = make([]byte, 0, buffer*2)
-	err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) error {
-		dat = append(dat, buf...)
-		return nil
-	})
+	if dec == nil {
+		dat = make([]byte, 0, buffer*2)
+		err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) error {
+			dat = append(dat, buf...)
+			return nil
+		})
+	} else {
+		var buf bytes.Buffer
+		wtr := bufio.NewWriter(&buf)
+		err = dec.Decode(rdr, wtr)
+		if err != nil {
+			return
+		}
+		dat = buf.Bytes()
+	}
 	return
 }
 
 func Write(
 	path string,
 	dat []byte,
+	enc Encoder,
 ) (err error) {
 	var out *os.File
 	var wtr *bufio.Writer
@@ -99,10 +112,23 @@ func Write(
 		defer out.Close()
 	}
 
-	if wtr == nil {
-		fmt.Printf("%s", dat)
+	if enc == nil {
+		if wtr == nil {
+			fmt.Printf("%s", dat)
+		} else {
+			fmt.Fprintf(wtr, "%s", dat)
+			wtr.Flush()
+		}
 	} else {
-		fmt.Fprintf(wtr, "%s", dat)
+		rdr := bytes.NewReader(dat)
+		if wtr == nil {
+			wtr = bufio.NewWriter(os.Stdout)
+		}
+		err = enc.Encode(rdr, wtr)
+		if err != nil {
+			err = fmt.Errorf("[WRITE_ENCODED] %v", err)
+			return
+		}
 		wtr.Flush()
 	}
 	return

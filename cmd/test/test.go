@@ -42,14 +42,14 @@ func main() {
 		fmt.Printf("[TEST][%v] Your input is '%v' (%v)\n", cmd, inp[:len(inp)-1], len(inp))
 	case "mline":
 		fmt.Println("02. Test read multiple lines...")
-		buff, err := utils.Read("", 32768, true)
+		buff, err := utils.Read("", 32768, nil)
 		if err != nil {
 			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
 		fmt.Printf("[TEST][%v] Result:\n'%v'\n", cmd, string(buff))
 	case "crenc":
 		fmt.Println("03. Test encrypt with CR public key...")
-		buff, err := utils.Read("test/cr.pem", 32768, false)
+		buff, err := utils.Read("test/cr.pem", 32768, nil)
 		if err != nil {
 			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
@@ -74,7 +74,7 @@ func main() {
 		fmt.Printf("[TEST][%v] cipher text:\n%v\n", cmd, base64.StdEncoding.EncodeToString(cipher))
 	case "encdec":
 		fmt.Println("04. Test encrypt with public key then decrypt with private key...")
-		buff, err := utils.Read("test/self.key", 32768, false)
+		buff, err := utils.Read("test/self.key", 32768, nil)
 		if err != nil {
 			log.Fatalf("[TEST][%v] %v", cmd, err)
 		}
@@ -126,7 +126,7 @@ func main() {
 		fmt.Printf("[TEST][%v] Public key\n%s\n", cmd, pub)
 	case "eckeyread":
 		fmt.Println("06. Test reading secp256k1 keys")
-		prvb, err := utils.Read("test/c9.pem", 65535, false)
+		prvb, err := utils.Read("test/c9.pem", 65535, nil)
 		if err != nil {
 			log.Fatalf("[TEST][%v][0] %v", cmd, err)
 		}
@@ -136,7 +136,7 @@ func main() {
 		}
 		fmt.Printf("[TEST][%v] Private key\n%v\n", cmd, key)
 
-		pubb, err := utils.Read("test/c9-pub.pem", 65535, false)
+		pubb, err := utils.Read("test/c9-pub.pem", 65535, nil)
 		if err != nil {
 			log.Fatalf("[TEST][%v][1] %v", cmd, err)
 		}

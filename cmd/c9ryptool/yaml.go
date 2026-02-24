@@ -20,9 +20,9 @@ func yamlEncrypt(
 	alg encrypts.Algorithm,
 	eco, eck, ecv, eca encodes.Encoding,
 ) (err error) {
-	var buf, key, input, output, salt, iv, aad []byte
+	var key, input, output, salt, iv, aad []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, nil)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][INP]%v", err)
 		return
@@ -50,29 +50,28 @@ func yamlEncrypt(
 			return
 		}
 		if eck == nil || !alg.Type() {
-			err = utils.Write(cfg.Key, alg.GetKey())
+			err = utils.Write(cfg.Key, alg.GetKey(), nil)
 		} else {
-			err = utils.Write(cfg.Key, []byte(eck.EncodeToString(alg.GetKey())))
+			err = utils.Write(cfg.Key, alg.GetKey(), eck)
 		}
 		if err != nil {
 			return
 		}
 	} else {
-		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
-		if err != nil {
-			err = fmt.Errorf("[YAML][ECY][KEY]%v", err)
-			return
-		}
 		if eck == nil || !alg.Type() {
-			err = alg.PopulateKey(key)
-		} else {
-			buf, err = eck.DecodeString(string(key))
+			key, err = utils.Read(cfg.Key, cfg.Buffer, nil)
 			if err != nil {
-				err = fmt.Errorf("[YAML][ECY][POP][DCD]%v", err)
+				err = fmt.Errorf("[YAML][ECY][KEY]%v", err)
 				return
 			}
-			err = alg.PopulateKey(buf)
+		} else {
+			key, err = utils.Read(cfg.Key, cfg.Buffer, eck)
+			if err != nil {
+				err = fmt.Errorf("[YAML][ECY][KEY]%v", err)
+				return
+			}
 		}
+		err = alg.PopulateKey(key)
 		if err != nil {
 			err = fmt.Errorf("[YAML][ECY][POP]%v", err)
 			return
@@ -80,32 +79,18 @@ func yamlEncrypt(
 	}
 
 	if cfg.Iv != "" {
-		iv, err = utils.Read(cfg.Iv, cfg.Buffer, cfg.Verbose)
+		iv, err = utils.Read(cfg.Iv, cfg.Buffer, ecv)
 		if err != nil {
 			err = fmt.Errorf("[YAML][ECY][IV]%v", err)
 			return
 		}
-		if ecv != nil {
-			iv, err = ecv.DecodeString(string(iv))
-			if err != nil {
-				err = fmt.Errorf("[YAML][ECY][IV][DCD]%v", err)
-				return
-			}
-		}
 	}
 
 	if cfg.Aad != "" {
-		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
+		aad, err = utils.Read(cfg.Aad, cfg.Buffer, eca)
 		if err != nil {
 			err = fmt.Errorf("[YAML][ECY][AAD]%v", err)
 			return
-		}
-		if eca != nil {
-			aad, err = eca.DecodeString(string(aad))
-			if err != nil {
-				err = fmt.Errorf("[YAML][ECY][AAD][DCD]%v", err)
-				return
-			}
 		}
 	}
 
@@ -163,7 +148,7 @@ func yamlEncrypt(
 		return
 	}
 
-	err = utils.Write(cfg.Output, output)
+	err = utils.Write(cfg.Output, output, nil)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][OUT]%v", err)
 	}
@@ -175,9 +160,9 @@ func yamlDecrypt(
 	alg encrypts.Algorithm,
 	eci, eck, ecv, ect, eca encodes.Encoding,
 ) (err error) {
-	var buf, key, input, output, salt, iv, tag, aad []byte
+	var key, input, output, salt, iv, tag, aad []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, nil)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][INP]%v", err)
 		return
@@ -217,21 +202,20 @@ func yamlDecrypt(
 		err = fmt.Errorf("[YAML][DCY][GEN] generate new key for decryption makes no sense")
 		return
 	} else {
-		key, err = utils.Read(cfg.Key, cfg.Buffer, cfg.Verbose)
-		if err != nil {
-			err = fmt.Errorf("[YAML][DCY][KEY]%v", err)
-			return
-		}
 		if eck == nil || !alg.Type() {
-			err = alg.PopulateKey(key)
-		} else {
-			buf, err = eck.DecodeString(string(key))
+			key, err = utils.Read(cfg.Key, cfg.Buffer, nil)
 			if err != nil {
-				err = fmt.Errorf("[YAML][DCY][POP][DCD]%v", err)
+				err = fmt.Errorf("[YAML][DCY][KEY]%v", err)
 				return
 			}
-			err = alg.PopulateKey(buf)
+		} else {
+			key, err = utils.Read(cfg.Key, cfg.Buffer, eck)
+			if err != nil {
+				err = fmt.Errorf("[YAML][DCY][KEY]%v", err)
+				return
+			}
 		}
+		err = alg.PopulateKey(key)
 		if err != nil {
 			err = fmt.Errorf("[YAML][DCY][POP]%v", err)
 			return
@@ -239,47 +223,26 @@ func yamlDecrypt(
 	}
 
 	if cfg.Iv != "" {
-		iv, err = utils.Read(cfg.Iv, cfg.Buffer, cfg.Verbose)
+		iv, err = utils.Read(cfg.Iv, cfg.Buffer, ecv)
 		if err != nil {
 			err = fmt.Errorf("[YAML][DCY][IV]%v", err)
 			return
 		}
-		if ecv != nil {
-			iv, err = ecv.DecodeString(string(iv))
-			if err != nil {
-				err = fmt.Errorf("[YAML][DCY][IV][DCD]%v", err)
-				return
-			}
-		}
 	}
 
 	if cfg.Tag != "" {
-		tag, err = utils.Read(cfg.Tag, cfg.Buffer, cfg.Verbose)
+		tag, err = utils.Read(cfg.Tag, cfg.Buffer, ect)
 		if err != nil {
 			err = fmt.Errorf("[YAML][DCY][TAG]%v", err)
 			return
 		}
-		if ect != nil {
-			tag, err = ect.DecodeString(string(tag))
-			if err != nil {
-				err = fmt.Errorf("[YAML][DCY][TAG][DCD]%v", err)
-				return
-			}
-		}
 	}
 
 	if cfg.Aad != "" {
-		aad, err = utils.Read(cfg.Aad, cfg.Buffer, cfg.Verbose)
+		aad, err = utils.Read(cfg.Aad, cfg.Buffer, eca)
 		if err != nil {
 			err = fmt.Errorf("[YAML][DCY][AAD]%v", err)
 			return
-		}
-		if eca != nil {
-			aad, err = eca.DecodeString(string(aad))
-			if err != nil {
-				err = fmt.Errorf("[YAML][DCY][AAD][DCD]%v", err)
-				return
-			}
 		}
 	}
 
@@ -325,7 +288,7 @@ func yamlDecrypt(
 		return
 	}
 
-	err = utils.Write(cfg.Output, output)
+	err = utils.Write(cfg.Output, output, nil)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][OUT]%v", err)
 	}

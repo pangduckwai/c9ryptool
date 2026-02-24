@@ -10,7 +10,7 @@ import (
 func split(
 	cfg *cfgs.Config,
 ) (err error) {
-	input, err := utils.Read(cfg.Input, cfg.Buffer, cfg.Verbose)
+	input, err := utils.Read(cfg.Input, cfg.Buffer, nil)
 	if err != nil {
 		err = fmt.Errorf("[SPLIT][INP]%v", err)
 		return
@@ -21,13 +21,13 @@ func split(
 		lgth = len(input) + lgth // counting backward
 	}
 
-	err = utils.Write(cfg.Output, input[:lgth])
+	err = utils.Write(cfg.Output, input[:lgth], nil)
 	if err != nil {
 		err = fmt.Errorf("[SPLIT][OUT0] %v", err)
 		return
 	}
 
-	err = utils.Write(cfg.Key, input[lgth:])
+	err = utils.Write(cfg.Key, input[lgth:], nil)
 	if err != nil {
 		err = fmt.Errorf("[SPLIT][OUT1] %v", err)
 	}

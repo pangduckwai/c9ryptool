@@ -8,7 +8,7 @@ import (
 )
 
 func yamlTest() (err error) {
-	input, err := utils.Read("test/test2.yaml", 65535, true)
+	input, err := utils.Read("test/test2.yaml", 65535, nil)
 	if err != nil {
 		return
 	}

@@ -32,7 +32,7 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 	ecdr := encodes.Get(encodes.Parse("base64"))
 
 	alg0 := encrypts.Get(encrypts.Parse("RSA-OAEP-256"))
-	kek, err := utils.Read(keyPath, cfgs.BUFFER, true)
+	kek, err := utils.Read(keyPath, cfgs.BUFFER, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][KEK][RDR]%v", err)
 		return
@@ -59,14 +59,14 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 	}
 	cek := []byte(ecdr.EncodeToString(tmp[0])) // OUTPUT 1
 
-	hdr, err := utils.Read(hdrPath, cfgs.BUFFER, true)
+	hdr, err := utils.Read(hdrPath, cfgs.BUFFER, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][HDR][RDR]%v", err)
 		return
 	}
 	hdr = []byte(ecdr.EncodeToString(hdr)) // OUTPUT 0
 
-	pay, err := utils.Read(inpPath, cfgs.BUFFER, true)
+	pay, err := utils.Read(inpPath, cfgs.BUFFER, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][INP][RDR]%v", err)
 		return
@@ -83,31 +83,31 @@ func jweTest(hdrPath, inpPath, keyPath string) (err error) {
 	pay = []byte(ecdr.EncodeToString(tmp[2]))  // OUTPUT 3
 	tag := []byte(ecdr.EncodeToString(tmp[3])) // OUTPUT 4
 
-	err = utils.Write("aad.jwe", hdr)
+	err = utils.Write("aad.jwe", hdr, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][OUT][AAD]%v", err)
 		return
 	}
 
-	err = utils.Write("cek.jwe", cek)
+	err = utils.Write("cek.jwe", cek, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][OUT][CEK]%v", err)
 		return
 	}
 
-	err = utils.Write("iv.jwe", iv)
+	err = utils.Write("iv.jwe", iv, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][OUT][IV]%v", err)
 		return
 	}
 
-	err = utils.Write("pay.jwe", pay)
+	err = utils.Write("pay.jwe", pay, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][OUT][PAY]%v", err)
 		return
 	}
 
-	err = utils.Write("tag.jwe", tag)
+	err = utils.Write("tag.jwe", tag, nil)
 	if err != nil {
 		err = fmt.Errorf("[TEST][JWE][OUT][TAG]%v", err)
 		return
