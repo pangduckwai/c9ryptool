@@ -15,6 +15,9 @@ type Encoding interface {
 	// Name algorithm name.
 	Name() string
 
+	// Type type of encoding. 'true' is 'normal' encoding, false is compression algorithms
+	Type() bool
+
 	// Padding fill the input with the specific padding.
 	Padding([]byte) []byte
 

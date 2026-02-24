@@ -13,6 +13,10 @@ func (n Hex) Name() string {
 	return "hex"
 }
 
+func (n Hex) Type() bool {
+	return true
+}
+
 func (n Hex) Padding(inp []byte) []byte {
 	return inp
 }

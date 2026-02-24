@@ -17,6 +17,10 @@ func (n Gzip) Name() string {
 	return "gzip"
 }
 
+func (n Gzip) Type() bool {
+	return false
+}
+
 func (n Gzip) Padding(inp []byte) []byte {
 	return inp
 }

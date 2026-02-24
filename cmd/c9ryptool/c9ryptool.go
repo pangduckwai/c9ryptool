@@ -132,7 +132,12 @@ func main() {
 		if cfg.IsList() {
 			fmt.Println(desc())
 			for i, n := range encodes.List() {
-				fmt.Printf(" %2v - %v\n", i+1, n)
+				c := encodes.Get(n)
+				if c.Type() {
+					fmt.Printf(" %2v encode   %v\n", i+1, n)
+				} else {
+					fmt.Printf(" %2v compress %v\n", i+1, n)
+				}
 			}
 			return
 		}

@@ -31,9 +31,9 @@ func encode(
 		rdr = bufio.NewReaderSize(inp, cfg.Buffer)
 	}
 
-	var out *os.File
-	var wtr *bufio.Writer
+	wtr := bufio.NewWriter(os.Stdout)
 	if cfg.Output != "" {
+		var out *os.File
 		out, err = os.Create(cfg.Output)
 		if err != nil {
 			err = fmt.Errorf("[WRITE] %v", err)
@@ -73,9 +73,9 @@ func decode(
 		rdr = bufio.NewReaderSize(inp, cfg.Buffer)
 	}
 
-	var out *os.File
-	var wtr *bufio.Writer
+	wtr := bufio.NewWriter(os.Stdout)
 	if cfg.Output != "" {
+		var out *os.File
 		out, err = os.Create(cfg.Output)
 		if err != nil {
 			err = fmt.Errorf("[WRITE] %v", err)
@@ -89,5 +89,6 @@ func decode(
 	if err != nil {
 		err = fmt.Errorf("[DECODE] %v", err)
 	}
+	err = wtr.Flush()
 	return
 }
