@@ -3,6 +3,7 @@ package encodes
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 )
 
 func padding(inp []byte) (out []byte, err error) {
@@ -46,9 +47,17 @@ func (n Base64) EncodeToString(inp []byte) string {
 	return base64.StdEncoding.EncodeToString(inp)
 }
 
+func (n Base64) Encode(in io.Reader, out io.Writer) error {
+	return encode(n, in, out)
+}
+
 func (n Base64) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.StdEncoding.DecodeString(inp)
 	return
+}
+
+func (n Base64) Decode(in io.Reader, out io.Writer) error {
+	return decode(n, in, out)
 }
 
 // ///////// //
@@ -75,9 +84,17 @@ func (n Base64Url) EncodeToString(inp []byte) string {
 	return base64.URLEncoding.EncodeToString(inp)
 }
 
+func (n Base64Url) Encode(in io.Reader, out io.Writer) error {
+	return encode(n, in, out)
+}
+
 func (n Base64Url) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.URLEncoding.DecodeString(inp)
 	return
+}
+
+func (n Base64Url) Decode(in io.Reader, out io.Writer) error {
+	return decode(n, in, out)
 }
 
 // //////////// //
@@ -100,7 +117,15 @@ func (n RawBase64Url) EncodeToString(inp []byte) string {
 	return base64.RawURLEncoding.EncodeToString(inp)
 }
 
+func (n RawBase64Url) Encode(in io.Reader, out io.Writer) error {
+	return encode(n, in, out)
+}
+
 func (n RawBase64Url) DecodeString(inp string) (out []byte, err error) {
 	out, err = base64.RawURLEncoding.DecodeString(inp)
 	return
+}
+
+func (n RawBase64Url) Decode(in io.Reader, out io.Writer) error {
+	return decode(n, in, out)
 }

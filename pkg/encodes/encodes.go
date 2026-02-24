@@ -3,9 +3,11 @@ package encodes
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 
+	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
@@ -23,8 +25,14 @@ type Encoding interface {
 	// EncodeToString encode the given input and returns the encoded result.
 	EncodeToString([]byte) string
 
+	// Encode read the given input and write the encoded result to the given output.
+	Encode(io.Reader, io.Writer) error
+
 	// DecodeString decode the given input and returns the decoded result.
 	DecodeString(string) ([]byte, error)
+
+	// Decode read the given input and write the decoded result to the given output.
+	Decode(io.Reader, io.Writer) error
 }
 
 var eNCODINGS = map[string]Encoding{
@@ -77,7 +85,17 @@ func Parse(inp string) (name string) {
 	return
 }
 
-func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+func encode(n Encoding, r io.Reader, w io.Writer) (err error) {
+	rdr, ok := r.(*bufio.Reader)
+	if !ok {
+		rdr = bufio.NewReaderSize(r, cfgs.BUFFER)
+	}
+
+	wtr, ok := w.(*bufio.Writer)
+	if !ok {
+		wtr = bufio.NewWriter(w)
+	}
+
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
@@ -136,7 +154,17 @@ func Encode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	return
 }
 
-func Decode(n Encoding, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
+func decode(n Encoding, r io.Reader, w io.Writer) (err error) {
+	rdr, ok := r.(*bufio.Reader)
+	if !ok {
+		rdr = bufio.NewReaderSize(r, cfgs.BUFFER)
+	}
+
+	wtr, ok := w.(*bufio.Writer)
+	if !ok {
+		wtr = bufio.NewWriter(w)
+	}
+
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
