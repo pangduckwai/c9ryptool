@@ -47,6 +47,7 @@ func encode(
 	if err != nil {
 		err = fmt.Errorf("[ENCODE] %v", err)
 	}
+	err = wtr.Flush()
 	return
 }
 

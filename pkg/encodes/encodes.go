@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"sort"
-	"strings"
 
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/utils"
@@ -38,9 +37,10 @@ type Encoding interface {
 var eNCODINGS = map[string]Encoding{
 	//"direct": nil,
 	"base64":       Base64(0),
-	"base64url":    Base64Url(0),
-	"rawbase64url": RawBase64Url(0),
-	"hex":          Hex(0),
+	"base64url":    Base64Url(1),
+	"rawbase64url": RawBase64Url(2),
+	"hex":          Hex(3),
+	"gzip":         Gzip(4),
 }
 
 func Default() string {
@@ -99,28 +99,18 @@ func encode(n Encoding, r io.Reader, w io.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
-	isStdout := wtr == nil
-	var buf strings.Builder
 	enc, _ := n.Multiple()
 
 	encode := func(inp []byte, ln int, flush bool) (err error) {
 		if ln > 0 {
 			encoded := n.EncodeToString(inp)
-			if !isStdout {
-				_, err = fmt.Fprint(wtr, encoded)
-				if err != nil {
-					return
-				}
-			} else {
-				buf.WriteString(encoded)
+			_, err = fmt.Fprint(wtr, encoded)
+			if err != nil {
+				return
 			}
 		}
 		if flush {
-			if !isStdout {
-				err = wtr.Flush()
-			} else {
-				fmt.Print(buf.String())
-			}
+			err = wtr.Flush()
 		}
 		return
 	}
@@ -168,8 +158,6 @@ func decode(n Encoding, r io.Reader, w io.Writer) (err error) {
 	size := rdr.Size()
 	lgh := 0
 	dat := make([]byte, 0, size*2)
-	isStdout := wtr == nil
-	buf := make([]byte, 0)
 	_, dec := n.Multiple()
 
 	decode := func(inp []byte, ln int, flush bool) (err error) {
@@ -180,21 +168,13 @@ func decode(n Encoding, r io.Reader, w io.Writer) (err error) {
 			if err != nil {
 				return
 			}
-			if !isStdout {
-				_, err = wtr.Write(decoded)
-				if err != nil {
-					return
-				}
-			} else {
-				buf = append(buf, decoded...)
+			_, err = wtr.Write(decoded)
+			if err != nil {
+				return
 			}
 		}
 		if flush {
-			if !isStdout {
-				err = wtr.Flush()
-			} else {
-				fmt.Printf("%s", buf) // Show string (%s) or hex encoding (%x) ?
-			}
+			err = wtr.Flush()
 		}
 		return
 	}

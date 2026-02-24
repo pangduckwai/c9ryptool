@@ -78,6 +78,37 @@ A simple cryptographic tool
 > #### 4. interactive input
 > If the option `-i` or `--in=` is omitted, the input text to be encryption is read from stdin.
 > Type a period (`.`) then press `<enter>` in a new line to finish inputting.
+>
+> ### examples
+> ```bash
+> $ go run ./cmd/c9utils genkey -n base64 -o tmp.key
+> c9utils (version v1.5.4 2026022414) finished generating new key for 'ChaCha20-Poly1305'
+> $
+> $ cat README.md | go run ./cmd/c9ryptool encrypt -k tmp.key --encode-key=base64 | go run ./cmd/c9ryptool decrypt -k tmp.key --encode-key=base64
+> ...
+> ### v0.1.0
+> - initial commit
+> $
+> $ go run ./cmd/c9utils genkey -a ECIES-DECRED -o tmp.pem -p tmp-pub.pem
+> c9utils (version v1.5.4 2026022414) finished generating new key for 'ECIES-SECP256K1-DECRED'
+> $
+> $ cat README.md | go run ./cmd/c9ryptool encrypt -a ECIES-DECRED -k tmp-pub.pem | go run ./cmd/c9ryptool decrypt -a ECIES-DECRED -k tmp.pem
+> ...
+> ### v0.1.0
+> - initial commit
+> $
+> $ go run ./cmd/c9ryptool encrypt -a AES256GCM -n base64 -p -i README.md -o tmp.enc
+> c9rypTool (version v1.5.4 2026022414):
+> Enter password: : abcd1234
+> $ go run ./cmd/c9ryptool decrypt -a AES256GCM -n base64 -p -i tmp.enc
+> c9rypTool (version v1.5.4 2026022414):
+> Enter password: : abcd1234
+> ...
+> ### v0.1.0
+> - initial commit
+> $
+> $ rm tmp*
+> ```
 
 ### 3. Encoding
 | command | description |
