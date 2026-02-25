@@ -230,6 +230,9 @@ Config values set by environment variables are overrided by values from options.
 ---
 
 ## TODO
+### 2026-02-25
+- Work on zip -> allows zip in both encode/decode? or has a new interface entirely?
+
 ### 2025-10-14
 - Work on AES-CBC
 - Check if the handling of `tag`/`aad` for `ChaCha20-Poly1305` is needed or not
