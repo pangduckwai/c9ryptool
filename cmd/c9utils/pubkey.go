@@ -14,7 +14,7 @@ func pubkey(
 ) (err error) {
 	var input []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, nil)
+	input, err = utils.Read(cfg.Input, cfg.Buffer)
 	if err != nil {
 		err = fmt.Errorf("[PUBKEY][INP]%v", err)
 		return
@@ -26,7 +26,7 @@ func pubkey(
 		return
 	}
 
-	err = utils.Write(cfg.Output, alg.GetPublicKey(), nil) // since asymmetric keys uses PEM encoding
+	err = utils.Write(cfg.Output, alg.GetPublicKey()) // since asymmetric keys uses PEM encoding
 	if err != nil {
 		err = fmt.Errorf("[PUBKEY][OUT]%v", err)
 	}

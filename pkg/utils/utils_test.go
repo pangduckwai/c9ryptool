@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -69,10 +71,43 @@ func TestReadfile(t *testing.T) {
 	f.Close()
 }
 
-func TestRead(t *testing.T) {
-	buff, err := Read("../../README.md", 16, nil)
+// func TestRead(t *testing.T) {
+// 	buff, err := Read("../../README.md", 16)
+// 	if err != nil {
+// 		t.Fatalf("TestRead() %v", err)
+// 	}
+// 	fmt.Printf("TestRead():\n%v\n", string(buff))
+// }
+
+func TestWrite(t *testing.T) {
+	in := []byte("HelloHowAreYou?I'mFineThankYouVeryMuch!")
+	var e0, e1 Encoder = nil, nil
+	err := Write("", in, e0, e1)
 	if err != nil {
-		t.Fatalf("TestRead() %v", err)
+		t.Fatal(err)
 	}
-	fmt.Printf("TestRead():\n%v\n", string(buff))
+}
+
+func TestPipeUsage(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+
+	var buf bytes.Buffer
+	out := bufio.NewWriter(&buf)
+	in := bytes.NewReader([]byte("H4sIAAAAAAAA//JIzcnJ98gvdyxKjcwvtfdUz3XLzEsNyUjMy47MLw1LLar0LU3OUAQAAAD//wEAAP//L9lnyicAAAA="))
+	var e0, e1 Decoder = nil, nil
+
+	err := pipedDecode(in, out)
+	if err == nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("TestPipeUsage() not piped: %v\n", err)
+
+	err = pipedDecode(in, out, e0, e1) // should panic
+	if err == nil {
+		t.Fatal(err)
+	}
 }

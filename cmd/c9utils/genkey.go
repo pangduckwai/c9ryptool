@@ -21,7 +21,7 @@ func genkey(
 	}
 
 	if ecd == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
-		err = utils.Write(cfg.Output, alg.GetKey(), nil)
+		err = utils.Write(cfg.Output, alg.GetKey())
 	} else {
 		err = utils.Write(cfg.Output, alg.GetKey(), ecd)
 	}
@@ -32,7 +32,7 @@ func genkey(
 
 	if !alg.Type() && cfg.Key != "" {
 		if aslg, ok := alg.(encrypts.AsymAlgorithm); ok {
-			err = utils.Write(cfg.Key, aslg.GetPublicKey(), nil)
+			err = utils.Write(cfg.Key, aslg.GetPublicKey())
 			if err != nil {
 				err = fmt.Errorf("[GENKEY][PUB]%v", err)
 			}

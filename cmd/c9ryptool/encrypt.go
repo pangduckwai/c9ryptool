@@ -46,7 +46,7 @@ func encrypt(
 			return
 		}
 		if eck == nil || !alg.Type() { // since asymmetric keys uses PEM encoding
-			err = utils.Write(cfg.Key, alg.GetKey(), nil)
+			err = utils.Write(cfg.Key, alg.GetKey())
 		} else {
 			err = utils.Write(cfg.Key, alg.GetKey(), eck)
 		}
@@ -55,7 +55,7 @@ func encrypt(
 		}
 	} else {
 		if eck == nil || !alg.Type() {
-			key, err = utils.Read(cfg.Key, cfg.Buffer, nil)
+			key, err = utils.Read(cfg.Key, cfg.Buffer)
 			if err != nil {
 				err = fmt.Errorf("[ECY][KEY]%v", err)
 				return
@@ -144,7 +144,7 @@ func decrypt(
 		return
 	} else {
 		if eck == nil || !alg.Type() {
-			key, err = utils.Read(cfg.Key, cfg.Buffer, nil)
+			key, err = utils.Read(cfg.Key, cfg.Buffer)
 			if err != nil {
 				err = fmt.Errorf("[DCY][KEY]%v", err)
 				return

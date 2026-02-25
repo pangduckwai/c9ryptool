@@ -39,11 +39,11 @@ type Encoding interface {
 
 var eNCODINGS = map[string]Encoding{
 	//"direct": nil,
-	"base64":       Base64(0),
-	"base64url":    Base64Url(1),
-	"rawbase64url": RawBase64Url(2),
-	"hex":          Hex(3),
-	"gzip":         Gzip(4),
+	"base64":       Base64(10),
+	"base64url":    Base64Url(11),
+	"rawbase64url": RawBase64Url(12),
+	"hex":          Hex(13),
+	"gzip":         Gzip(14),
 }
 
 func Default() string {

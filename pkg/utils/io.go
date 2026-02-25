@@ -16,6 +16,130 @@ type Decoder interface {
 	Decode(io.Reader, io.Writer) error
 }
 
+func pipedEncode(in io.Reader, out io.Writer, encoders ...Encoder) (err error) {
+	// for i, n := range encoders {
+	// 	if n == nil {
+	// 		err = fmt.Errorf("[PIPE][ENCODE] encoder %v is null", i)
+	// 		return
+	// 	}
+	// }
+	lgth := len(encoders)
+	// if lgth < 2 {
+	// 	err = fmt.Errorf("[PIPE][ENCODE] must have at least 2 encoders to pipe")
+	// 	return
+	// }
+	cs := make([]chan error, 0)
+	rs := make([]io.Reader, 0)
+	ws := make([]io.Writer, 0)
+	for i := 1; i < lgth; i++ {
+		r, w := io.Pipe()
+		cs = append(cs, make(chan error))
+		rs = append(rs, r)
+		ws = append(ws, w)
+	}
+	last := len(cs) - 1
+
+	for i := range encoders[1 : lgth-1] {
+		go func() {
+			var err error
+			err = encoders[i+1].Encode(rs[i], ws[i+1])
+			if err != nil {
+				cs[i] <- err
+			}
+			cs[i] <- ws[i+1].(*io.PipeWriter).CloseWithError(nil)
+		}()
+	}
+	go func() {
+		cs[last] <- encoders[lgth-1].Encode(rs[last], out)
+	}()
+
+	for j, c := range cs[:last] {
+		go func() {
+			for e := range c {
+				if e != nil {
+					cs[last] <- fmt.Errorf("[PIPE][ENCODE] %v: %v", j, e)
+				}
+			}
+		}()
+	}
+
+	err = encoders[0].Encode(in, ws[0])
+	if err != nil {
+		err = fmt.Errorf("[PIPE][ENCODE] %v", err)
+		return
+	}
+	err = ws[0].(*io.PipeWriter).CloseWithError(nil)
+	if err != nil {
+		err = fmt.Errorf("[PIPE][ENCODE][CLOSE] %v", err)
+		return
+	}
+
+	err = <-cs[last]
+	return
+}
+
+func pipedDecode(in io.Reader, out io.Writer, decoders ...Decoder) (err error) {
+	// for i, n := range decoders {
+	// 	if n == nil {
+	// 		err = fmt.Errorf("[PIPE][DECODE] decoder %v is null", i)
+	// 		return
+	// 	}
+	// }
+	lgth := len(decoders)
+	// if lgth < 2 {
+	// 	err = fmt.Errorf("[PIPE][DECODE] must have at least 2 encoders to pipe")
+	// 	return
+	// }
+	cs := make([]chan error, 0)
+	rs := make([]io.Reader, 0)
+	ws := make([]io.Writer, 0)
+	for i := 1; i < lgth; i++ {
+		r, w := io.Pipe()
+		cs = append(cs, make(chan error))
+		rs = append(rs, r)
+		ws = append(ws, w)
+	}
+	last := len(cs) - 1
+
+	for i := range decoders[1 : lgth-1] {
+		go func() {
+			var err error
+			err = decoders[i+1].Decode(rs[i], ws[i+1])
+			if err != nil {
+				cs[i] <- err
+			}
+			cs[i] <- ws[i+1].(*io.PipeWriter).CloseWithError(nil)
+		}()
+	}
+	go func() {
+		cs[last] <- decoders[lgth-1].Decode(rs[last], out)
+	}()
+
+	for j, c := range cs[:last] {
+		go func() {
+			for e := range c {
+				if e != nil {
+					cs[last] <- fmt.Errorf("[PIPE][DECODE] %v: %v", j, e)
+				}
+			}
+		}()
+	}
+
+	err = decoders[0].Decode(in, ws[0])
+	if err != nil {
+		err = fmt.Errorf("[PIPE][DECODE] %v", err)
+		return
+	}
+	err = ws[0].(*io.PipeWriter).CloseWithError(nil)
+	if err != nil {
+		err = fmt.Errorf("[PIPE][DECODE][CLOSE] %v", err)
+		return
+	}
+
+	err = <-cs[last]
+	return
+}
+
 func BufferedRead(
 	rdr *bufio.Reader,
 	size int,
@@ -60,7 +184,7 @@ func BufferedRead(
 func Read(
 	path string,
 	buffer int,
-	dec Decoder,
+	dec ...Decoder,
 ) (
 	dat []byte,
 	err error,
@@ -74,10 +198,16 @@ func Read(
 		}
 		defer inp.Close()
 	}
-
 	rdr := bufio.NewReaderSize(inp, buffer)
 
-	if dec == nil {
+	var empty bool
+	for _, n := range dec {
+		if n == nil {
+			empty = true
+			break
+		}
+	}
+	if len(dec) <= 0 || empty {
 		dat = make([]byte, 0, buffer*2)
 		err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) error {
 			dat = append(dat, buf...)
@@ -86,9 +216,16 @@ func Read(
 	} else {
 		var buf bytes.Buffer
 		wtr := bufio.NewWriter(&buf)
-		err = dec.Decode(rdr, wtr)
-		if err != nil {
-			return
+		if len(dec) <= 1 {
+			err = dec[0].Decode(rdr, wtr)
+			if err != nil {
+				return
+			}
+		} else {
+			err = pipedDecode(rdr, wtr, dec...)
+			if err != nil {
+				return
+			}
 		}
 		dat = buf.Bytes()
 	}
@@ -98,7 +235,7 @@ func Read(
 func Write(
 	path string,
 	dat []byte,
-	enc Encoder,
+	enc ...Encoder,
 ) (err error) {
 	var out *os.File
 	var wtr *bufio.Writer
@@ -112,7 +249,14 @@ func Write(
 		defer out.Close()
 	}
 
-	if enc == nil {
+	var empty bool
+	for _, n := range enc {
+		if n == nil {
+			empty = true
+			break
+		}
+	}
+	if len(enc) <= 0 || empty {
 		if wtr == nil {
 			fmt.Printf("%s", dat)
 		} else {
@@ -124,10 +268,16 @@ func Write(
 		if wtr == nil {
 			wtr = bufio.NewWriter(os.Stdout)
 		}
-		err = enc.Encode(rdr, wtr)
-		if err != nil {
-			err = fmt.Errorf("[WRITE_ENCODED] %v", err)
-			return
+		if len(enc) <= 1 {
+			err = enc[0].Encode(rdr, wtr)
+			if err != nil {
+				return
+			}
+		} else {
+			err = pipedEncode(rdr, wtr, enc...)
+			if err != nil {
+				return
+			}
 		}
 		wtr.Flush()
 	}
