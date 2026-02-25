@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"testing"
 )
 
@@ -51,4 +53,30 @@ func TestDecode(t *testing.T) {
 	if string(rslt) != string(ctrl) {
 		t.Fatalf("TestDecode() '%s' and '%s' mismatched", rslt, ctrl)
 	}
+}
+
+func TestPipe(t *testing.T) {
+	str := "534756736247394962336442636d565a6233552f53536474526d6c755a56526f5957357257573931566d56796555313159326768"
+	b64 := Get("base64")
+	hex := Get("hex")
+
+	ri, wi := io.Pipe()
+
+	ro := bytes.NewReader([]byte(str))
+
+	var buf bytes.Buffer
+	wd := bufio.NewWriter(&buf)
+
+	err := hex.Decode(ro, wi)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = b64.Decode(ri, wd)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rslt := buf.Bytes()
+	fmt.Printf("TestPipe() - '%s'\n", rslt)
 }

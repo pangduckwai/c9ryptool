@@ -251,11 +251,11 @@ func validate(cfg *cfgs.Config) (err error) {
 
 	var algTyp bool
 	if cfg.Command() != CMD_SPLIT {
-		if algTyp, err = encrypts.Validate(cfg.Algr, 0); err != nil {
+		if algTyp, err = encrypts.Validate(cfg.Algr, 1); err != nil {
 			errs = append(errs, err)
 		}
 		if cfg.Encd != "" {
-			if err = encodes.Validate(cfg.Encd); err != nil {
+			if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
 				errs = append(errs, err)
 			}
 		}

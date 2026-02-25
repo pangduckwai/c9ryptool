@@ -56,12 +56,13 @@ func main() {
 			log.Fatalf("[MAIN] unsupported algorithm '%v'", cfg.Algr)
 		}
 
-		enci := encodes.Get(cfg.Encd)
-		encv := encodes.Get(cfg.Encv)
-		enct := encodes.Get(cfg.Enct)
-		enca := encodes.Get(cfg.Enca)
-		enco := encodes.Get(cfg.Enco)
-		enck := encodes.Get(cfg.Enck)
+		enci := encodes.Get(encodes.Parse(cfg.Encd))
+		encv := encodes.Get(encodes.Parse(cfg.Encv))
+		enct := encodes.Get(encodes.Parse(cfg.Enct))
+		enca := encodes.Get(encodes.Parse(cfg.Enca))
+		enco := encodes.Get(encodes.Parse(cfg.Enco))
+		enck := encodes.Get(encodes.Parse(cfg.Enck))
+		zip := encodes.Get(encodes.Parse(cfg.Zip))
 
 		switch cfg.Format {
 		case FORMAT_YAML:
@@ -80,9 +81,9 @@ func main() {
 			// TODO HERE!!! add json value encryption!
 		default:
 			if cfg.Command() == CMD_ENCRYPT {
-				err = encrypt(cfg, algr, enci, enco, enck, encv, enca)
+				err = encrypt(cfg, algr, enci, enco, enck, encv, enca, zip)
 			} else {
-				err = decrypt(cfg, algr, enci, enco, enck, encv, enct, enca)
+				err = decrypt(cfg, algr, enci, enco, enck, encv, enct, enca, zip)
 			}
 		}
 		if cfg.Verbose {
@@ -163,7 +164,7 @@ func main() {
 
 		var encd encodes.Encoding
 		if cfg.Encd != "" {
-			encd = encodes.Get(cfg.Encd)
+			encd = encodes.Get(encodes.Parse(cfg.Encd))
 			if encd == nil {
 				log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 			}

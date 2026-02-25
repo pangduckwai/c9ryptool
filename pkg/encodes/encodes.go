@@ -64,10 +64,22 @@ func Get(scheme string) Encoding {
 }
 
 // Validate validate the given scheme name.
-func Validate(inp string) (err error) {
+// typ: -1 - compression; 0 - don't care; 1 - encoding
+// returns t: 'true' is encoding, false is compression
+func Validate(inp string, typ int) (t bool, err error) {
 	scheme := Parse(inp)
 	if scheme == "" {
-		err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", inp)
+		err = fmt.Errorf("[ENCD] invalid encoding scheme name pattern '%v'", inp)
+	} else {
+		s, k := eNCODINGS[scheme]
+		if !k {
+			err = fmt.Errorf("[ENCD] unsupported encoding scheme '%v'", scheme)
+		} else if typ < 0 && s.Type() {
+			err = fmt.Errorf("[ENCD] %v is not a compression algorithm as expected", s.Name())
+		} else if typ > 0 && !s.Type() {
+			err = fmt.Errorf("[ENCD] %v is not an encoding scheme as expected", s.Name())
+		}
+		t = s.Type()
 	}
 	return
 }

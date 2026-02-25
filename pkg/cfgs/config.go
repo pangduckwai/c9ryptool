@@ -17,26 +17,27 @@ const MASK_FLAG = 127
 
 type Config struct {
 	cmd     uint8  // 0 - encrypt; 1 - decrypt
-	Algr    string // encryption algorithms
-	Encd    string // encoding schemes
-	Encv    string // encoding schemes for IV
-	Enct    string // encoding schemes for TAG
-	Enca    string // encoding schemes for AAD
-	Enco    string // encoding schemes for outputs
-	Enck    string // encoding schemes for symmetric keys
-	Hash    string // hashing algorithm
+	Algr    string // encryption algorithm name
+	Encd    string // encoding schemes name
+	Encv    string // encoding schemes name for IV
+	Enct    string // encoding schemes name for TAG
+	Enca    string // encoding schemes name for AAD
+	Enco    string // encoding schemes name for outputs
+	Enck    string // encoding schemes name for symmetric keys
+	Hash    string // hashing algorithm name
 	Input   string // input file path, nil - stdin
 	Output  string // output file path, nil - stdout
-	Format  string // specify input file format
+	Format  string // input file format
 	Key     string // secret key file path
 	Iv      string // initialization vector file path, nil - auto-gen
 	Tag     string // message authentication tag file path
-	Aad     string // additional authenticated data
+	Aad     string // additional authenticated data file path
 	Genkey  bool   // generate key enabled
 	Passwd  string // key-generating password
 	SaltLen int    // length of salt to use for generating keys from password
 	Buffer  int    // buffer size
 	Verbose bool
+	Zip     string // compression algorithm name
 }
 
 func (cfg *Config) IsList() bool {

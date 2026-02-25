@@ -13,7 +13,7 @@ import (
 func encrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck, ecv, eca encodes.Encoding,
+	eci, eco, eck, ecv, eca, zip encodes.Encoding,
 ) (err error) {
 	var results [][]byte
 	var key, input, result, salt, iv, aad []byte
@@ -113,7 +113,7 @@ func encrypt(
 func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck, ecv, ect, eca encodes.Encoding,
+	eci, eco, eck, ecv, ect, eca, zip encodes.Encoding,
 ) (err error) {
 	var results [][]byte
 	var key, input, result, salt, iv, tag, aad []byte

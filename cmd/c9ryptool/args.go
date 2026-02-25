@@ -14,6 +14,7 @@ import (
 	"sea9.org/go/c9ryptool/pkg/hashes"
 )
 
+const FORMAT_NONE = "none"
 const FORMAT_YAML = "yaml"
 const FORMAT_JSON = "json"
 const PWD_INTERACTIVE = "{[INTERACTIVE]}"
@@ -69,7 +70,8 @@ func usage() string {
 		"   {--encode-tag=ENC}\n" +
 		"   {--encode-aad=ENC}\n" +
 		"   {--encode-out=ENC}\n" +
-		"   {--encode-key=ENC}\n\n" +
+		"   {--encode-key=ENC}\n" +
+		"   {-z ALGR | --compress=ALGR}\n\n" +
 		"  [encode | decode]\n" +
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
@@ -141,7 +143,9 @@ func help() string {
 		"    --encode-out=ENC\n"+
 		"       encoding scheme of encryption/decryption output\n"+
 		"    --encode-key=ENC\n"+
-		"       encoding scheme of the symmetric key (when option -k / --key is specified)\n\n"+
+		"       encoding scheme of the symmetric key (when option -k / --key is specified)\n"+
+		"    -z ALGR, --compress=ALGR\n"+
+		"       compression algorithm for output (encryption) and input (decryption)\n\n"+
 		" # encoding\n"+
 		" . encode - convert the given input into the specified encoding\n"+
 		" . decode - convert the given input back from the specified encoding\n"+
@@ -468,11 +472,26 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 				cfg.Format = args[i]
 			}
 		case strings.HasPrefix(args[i], "--format="):
-			if len(args[i]) <= 6 {
+			if len(args[i]) <= 9 {
 				err = fmt.Errorf("[CONF] Missing input file format")
 				return
 			} else {
 				cfg.Format = args[i][9:]
+			}
+		case args[i] == "-z":
+			i++
+			if i >= len(args) {
+				err = fmt.Errorf("[CONF] Missing compression algorithm argument")
+				return
+			} else {
+				cfg.Zip = args[i]
+			}
+		case strings.HasPrefix(args[i], "--compress="):
+			if len(args[i]) <= 11 {
+				err = fmt.Errorf("[CONF] Missing compression algorithm")
+				return
+			} else {
+				cfg.Zip = args[i][11:]
 			}
 		default:
 			err = fmt.Errorf("[CONF] Invalid option '%v'", args[i])
@@ -486,14 +505,14 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		if cfg.Algr == "" {
 			cfg.Algr = encrypts.Default()
 		}
-		if cfg.Enco == "" && cfg.Format != "" && cfg.Format != "none" {
+		if cfg.Enco == "" && cfg.Format != "" && cfg.Format != FORMAT_NONE {
 			cfg.Enco = encodes.Default()
 		}
 	case CMD_DECRYPT:
 		if cfg.Algr == "" {
 			cfg.Algr = encrypts.Default()
 		}
-		if cfg.Encd == "" && cfg.Format != "" && cfg.Format != "none" {
+		if cfg.Encd == "" && cfg.Format != "" && cfg.Format != FORMAT_NONE {
 			cfg.Encd = encodes.Default()
 		}
 	case CMD_ENCODE:
@@ -593,19 +612,68 @@ func validate(cfg *cfgs.Config) (err error) {
 			errs = append(errs, err)
 		}
 
+		if cfg.Encd != "" {
+			if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
+				errs = append(errs, err)
+			}
+		}
+		if cfg.Enco != "" {
+			if _, err = encodes.Validate(cfg.Enco, 1); err != nil {
+				errs = append(errs, err)
+			}
+		}
+		if typ > 0 {
+			if cfg.Encv != "" {
+				if _, err = encodes.Validate(cfg.Encv, 1); err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if cfg.Enct != "" {
+				if _, err = encodes.Validate(cfg.Enct, 1); err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if cfg.Enca != "" {
+				if _, err = encodes.Validate(cfg.Enca, 1); err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if cfg.Enck != "" {
+				if _, err = encodes.Validate(cfg.Enck, 1); err != nil {
+					errs = append(errs, err)
+				}
+			}
+		}
+
+		if cfg.Format != "" {
+			if cfg.Format != FORMAT_NONE && cfg.Format != FORMAT_YAML && cfg.Format != FORMAT_JSON {
+				err = fmt.Errorf("[VLDT] unsupported file format '%v'", cfg.Format)
+			}
+		}
+
+		if cfg.Zip != "" {
+			if cfg.Format != "" && cfg.Format != FORMAT_NONE {
+				err = fmt.Errorf("[VLDT] incompatable options '-z' and '-f'")
+				return
+			}
+			if _, err = encodes.Validate(cfg.Zip, -1); err != nil {
+				errs = append(errs, err)
+			}
+		}
+
 	case CMD_ENCODE:
 		fallthrough
 	case CMD_DECODE:
 		if cfg.IsList() {
 			break
 		}
-		if err = encodes.Validate(cfg.Encd); err != nil {
+		if _, err = encodes.Validate(cfg.Encd, 0); err != nil {
 			errs = append(errs, err)
 		}
 
 	case CMD_DISPLAY:
 		if cfg.Encd != "" {
-			err = encodes.Validate(cfg.Encd)
+			_, err = encodes.Validate(cfg.Encd, 1)
 		}
 
 	case CMD_HASHING:
