@@ -47,6 +47,7 @@ A simple cryptographic tool
 | - | `--encode-aad=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for aad input |
 | - | `--encode-out=ENC` | all | `ENC` is the name of the encoding scheme to use for output<br/>NOTE: `none` is not allowed when input format is is `yaml` or `json` |
 | - | `--encode-key=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for encoding/decoding symmetric keys (when option -k / --key is specified) when writing/reading the key files<br/>NOTE: ignored for asymmetric encryption, as asymmetric keys are encoded in PEM format |
+| `-z ALGR` | `--compress=ALGR` | all | `ALGR` is the name of the compression algorithm to use. `ALGR` compression is applied before encryption, and `ALGR` decompression is applied after decryption |
 
 > ### default encoding
 > | command | type | format | inputs | aad | output | key |
@@ -115,11 +116,12 @@ A simple cryptographic tool
 | --- | --- |
 | `encode` | convert the given input into the specified encoding |
 | `decode` | convert the given input back from the specified encoding |
+| `archive` | compress/decompress the given input base on the selected compression algorithm |
 
 | option | 2<sup>nd</sup> form | description |
 | --- | --- | --- |
 | `-l` | `--list` | list the supported encoding schemes |
-| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme to use |
+| `-n ENC` | `--encoding=ENC` | `ENC` is the name of the encoding scheme / compression algorithm to use |
 | `-i FILE` | `--in=FILE` | `FILE` is the path of the input file, omitting means input from stdin |
 | `-o FILE` | `--out=FILE` | `FILE` is the path of the output file, omitting means output to stdout |
 
@@ -230,8 +232,8 @@ Config values set by environment variables are overrided by values from options.
 ---
 
 ## TODO
-### 2026-02-25
-- Work on zip -> allows zip in both encode/decode? or has a new interface entirely?
+### 2026-02-27
+- Add more compression algorithms
 
 ### 2025-10-14
 - Work on AES-CBC
@@ -240,6 +242,10 @@ Config values set by environment variables are overrided by values from options.
 ---
 
 ## Changelog
+### v2.0.0
+- Add `gzip` and the command `archive` to encoding
+- Add option `--compress` to encryption
+
 ### v1.5.4
 - Combine functions under `/cmd` into `c9utils`
 - Make yaml traversal function more generic

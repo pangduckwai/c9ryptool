@@ -13,8 +13,8 @@ func (n Hex) Name() string {
 	return "hex"
 }
 
-func (n Hex) Type() bool {
-	return true
+func (n Hex) Type() int {
+	return 0
 }
 
 func (n Hex) Padding(inp []byte) []byte {

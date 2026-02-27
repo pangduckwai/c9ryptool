@@ -31,8 +31,8 @@ func (n Base64) Name() string {
 	return "base64"
 }
 
-func (n Base64) Type() bool {
-	return true
+func (n Base64) Type() int {
+	return 0
 }
 
 func (n Base64) Padding(inp []byte) []byte {
@@ -72,8 +72,8 @@ func (n Base64Url) Name() string {
 	return "base64url"
 }
 
-func (n Base64Url) Type() bool {
-	return true
+func (n Base64Url) Type() int {
+	return 0
 }
 
 func (n Base64Url) Padding(inp []byte) []byte {
@@ -113,8 +113,8 @@ func (n RawBase64Url) Name() string {
 	return "raw-base64url"
 }
 
-func (n RawBase64Url) Type() bool {
-	return true
+func (n RawBase64Url) Type() int {
+	return 0
 }
 
 func (n RawBase64Url) Padding(inp []byte) []byte {

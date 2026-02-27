@@ -18,7 +18,7 @@ func encrypt(
 	var results [][]byte
 	var key, input, result, salt, iv, aad []byte
 
-	input, err = utils.Read(cfg.Input, cfg.Buffer, eci)
+	input, err = utils.Read(cfg.Input, cfg.Buffer, eci, zip) // decode, then zip before encrypt
 	if err != nil {
 		err = fmt.Errorf("[ECY][INP]%v", err)
 		return
@@ -113,7 +113,7 @@ func encrypt(
 func decrypt(
 	cfg *cfgs.Config,
 	alg encrypts.Algorithm,
-	eci, eco, eck, ecv, ect, eca, zip encodes.Encoding,
+	eci, eco, eck, ecv, ect, eca, unzip encodes.Encoding,
 ) (err error) {
 	var results [][]byte
 	var key, input, result, salt, iv, tag, aad []byte
@@ -201,7 +201,7 @@ func decrypt(
 	}
 
 	result = results[0]
-	err = utils.Write(cfg.Output, result, eco)
+	err = utils.Write(cfg.Output, result, unzip, eco)
 	if err != nil {
 		err = fmt.Errorf("[DCY][OUT]%v", err)
 	}

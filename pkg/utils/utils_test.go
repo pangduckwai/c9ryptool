@@ -86,6 +86,7 @@ func TestWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println("\nTestWrite() test okay")
 }
 
 func TestPipeUsage(t *testing.T) {
@@ -110,4 +111,34 @@ func TestPipeUsage(t *testing.T) {
 	if err == nil {
 		t.Fatal(err)
 	}
+	fmt.Println("TestPipeUsage() test okay")
+}
+
+type TestIfc interface {
+	Name() string
+}
+
+type TestTyp int
+
+func (n TestTyp) Name() string {
+	return "HAHA"
+}
+
+func testStruct(x ...TestIfc) (count, total int) {
+	total = len(x)
+	for _, s := range x {
+		if s != nil {
+			count++
+		}
+	}
+	return
+}
+
+func TestVarArgs(t *testing.T) {
+	var a, b, c, d TestIfc = nil, nil, TestTyp(197), TestTyp(203)
+	cnt, ttl := testStruct(a, b, c, d)
+	if cnt != 2 || ttl != 4 {
+		t.Fatal("TestVarArgs() test failed!")
+	}
+	fmt.Println("TestVarArgs() test okay")
 }

@@ -9,6 +9,28 @@ import (
 	"testing"
 )
 
+type TestIfc interface {
+	Process() bool
+}
+
+type TestTyp int
+
+func (n TestTyp) Process() bool {
+	if n > 0 {
+		return true
+	} else if n < 0 {
+		return false
+	}
+	panic("Invalid value '0'")
+}
+
+func TestType(t *testing.T) {
+	var o, p TestIfc = TestTyp(77), TestTyp(-8)
+
+	fmt.Printf("TestType() 1: %v > 0 is %v\n", o, o.Process())
+	fmt.Printf("TestType() 2: %v > 0 is %v\n", p, p.Process())
+}
+
 func TestList(t *testing.T) {
 	var val int
 	for i, k := range List() {

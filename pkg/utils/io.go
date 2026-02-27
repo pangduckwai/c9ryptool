@@ -17,17 +17,7 @@ type Decoder interface {
 }
 
 func pipedEncode(in io.Reader, out io.Writer, encoders ...Encoder) (err error) {
-	// for i, n := range encoders {
-	// 	if n == nil {
-	// 		err = fmt.Errorf("[PIPE][ENCODE] encoder %v is null", i)
-	// 		return
-	// 	}
-	// }
 	lgth := len(encoders)
-	// if lgth < 2 {
-	// 	err = fmt.Errorf("[PIPE][ENCODE] must have at least 2 encoders to pipe")
-	// 	return
-	// }
 	cs := make([]chan error, 0)
 	rs := make([]io.Reader, 0)
 	ws := make([]io.Writer, 0)
@@ -79,17 +69,7 @@ func pipedEncode(in io.Reader, out io.Writer, encoders ...Encoder) (err error) {
 }
 
 func pipedDecode(in io.Reader, out io.Writer, decoders ...Decoder) (err error) {
-	// for i, n := range decoders {
-	// 	if n == nil {
-	// 		err = fmt.Errorf("[PIPE][DECODE] decoder %v is null", i)
-	// 		return
-	// 	}
-	// }
 	lgth := len(decoders)
-	// if lgth < 2 {
-	// 	err = fmt.Errorf("[PIPE][DECODE] must have at least 2 encoders to pipe")
-	// 	return
-	// }
 	cs := make([]chan error, 0)
 	rs := make([]io.Reader, 0)
 	ws := make([]io.Writer, 0)
@@ -184,7 +164,7 @@ func BufferedRead(
 func Read(
 	path string,
 	buffer int,
-	dec ...Decoder,
+	decr ...Decoder,
 ) (
 	dat []byte,
 	err error,
@@ -200,14 +180,13 @@ func Read(
 	}
 	rdr := bufio.NewReaderSize(inp, buffer)
 
-	var empty bool
-	for _, n := range dec {
-		if n == nil {
-			empty = true
-			break
+	dec := make([]Decoder, 0)
+	for _, n := range decr {
+		if n != nil {
+			dec = append(dec, n)
 		}
 	}
-	if len(dec) <= 0 || empty {
+	if len(dec) <= 0 {
 		dat = make([]byte, 0, buffer*2)
 		err = BufferedRead(rdr, buffer, func(cnt int, buf []byte) error {
 			dat = append(dat, buf...)
@@ -227,6 +206,10 @@ func Read(
 				return
 			}
 		}
+		err = wtr.Flush()
+		if err != nil {
+			return
+		}
 		dat = buf.Bytes()
 	}
 	return
@@ -235,7 +218,7 @@ func Read(
 func Write(
 	path string,
 	dat []byte,
-	enc ...Encoder,
+	encr ...Encoder,
 ) (err error) {
 	var out *os.File
 	var wtr *bufio.Writer
@@ -249,14 +232,13 @@ func Write(
 		defer out.Close()
 	}
 
-	var empty bool
-	for _, n := range enc {
-		if n == nil {
-			empty = true
-			break
+	enc := make([]Encoder, 0)
+	for _, n := range encr {
+		if n != nil {
+			enc = append(enc, n)
 		}
 	}
-	if len(enc) <= 0 || empty {
+	if len(enc) <= 0 {
 		if wtr == nil {
 			fmt.Printf("%s", dat)
 		} else {
@@ -279,7 +261,7 @@ func Write(
 				return
 			}
 		}
-		wtr.Flush()
+		err = wtr.Flush()
 	}
 	return
 }

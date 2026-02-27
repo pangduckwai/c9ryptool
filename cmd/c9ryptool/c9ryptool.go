@@ -122,6 +122,25 @@ func main() {
 			fmt.Printf("\n%v [%v] finished '%v' using '%v' (I:%v%v%v%v/O:%v%v)\n", time.Now().Format(LOG_FRM_MILLI), desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
 		}
 
+	case CMD_ARCHIVE:
+		if cfg.IsList() {
+			i := 1
+			fmt.Println(desc())
+			for _, n := range encodes.List() {
+				c := encodes.Get(n)
+				t := c.Type()
+				if t == 0 {
+					continue
+				} else if t > 0 {
+					fmt.Printf(" %2v compress   %v\n", i, n)
+				} else {
+					fmt.Printf(" %2v decompress %v\n", i, n)
+				}
+				i++
+			}
+			return
+		}
+		fallthrough
 	case CMD_ENCODE:
 		fallthrough
 	case CMD_DECODE:
@@ -131,13 +150,16 @@ func main() {
 		}
 
 		if cfg.IsList() {
+			i := 1
 			fmt.Println(desc())
-			for i, n := range encodes.List() {
+			for _, n := range encodes.List() {
 				c := encodes.Get(n)
-				if c.Type() {
-					fmt.Printf(" %2v encode   %v\n", i+1, n)
+				t := c.Type()
+				if t == 0 {
+					fmt.Printf(" %2v %v\n", i, n)
+					i++
 				} else {
-					fmt.Printf(" %2v compress %v\n", i+1, n)
+					continue
 				}
 			}
 			return
@@ -147,9 +169,12 @@ func main() {
 		if encd == nil {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
-		if cfg.Command() == CMD_ENCODE {
+		switch cfg.Command() {
+		case CMD_ARCHIVE: // don't care encode or decode for archiving
+			fallthrough
+		case CMD_ENCODE:
 			err = encode(cfg, encd)
-		} else {
+		case CMD_DECODE:
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {

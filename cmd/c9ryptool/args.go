@@ -27,6 +27,7 @@ const CMD_ENCODE = 4
 const CMD_DECODE = 5
 const CMD_HASHING = 6
 const CMD_DISPLAY = 7
+const CMD_ARCHIVE = 8
 
 var COMMANDS = []string{
 	"help",    // 0
@@ -37,6 +38,7 @@ var COMMANDS = []string{
 	"decode",  // 5
 	"hash",    // 6
 	"display", // 7
+	"archive", // 8
 }
 
 var ENVIVARS = []string{
@@ -72,7 +74,7 @@ func usage() string {
 		"   {--encode-out=ENC}\n" +
 		"   {--encode-key=ENC}\n" +
 		"   {-z ALGR | --compress=ALGR}\n\n" +
-		"  [encode | decode]\n" +
+		"  [encode | decode | archive]\n" +
 		"   {-l | --list}\n" +
 		"   {-i FILE | --in=FILE}\n" +
 		"   {-o FILE | --out=FILE}\n" +
@@ -145,10 +147,11 @@ func help() string {
 		"    --encode-key=ENC\n"+
 		"       encoding scheme of the symmetric key (when option -k / --key is specified)\n"+
 		"    -z ALGR, --compress=ALGR\n"+
-		"       compression algorithm for output (encryption) and input (decryption)\n\n"+
+		"       compression algorithm for encryption (compression of input) and decryption (decompression of output)\n\n"+
 		" # encoding\n"+
-		" . encode - convert the given input into the specified encoding\n"+
-		" . decode - convert the given input back from the specified encoding\n"+
+		" . encode  - convert the given input into the specified encoding\n"+
+		" . decode  - convert the given input back from the specified encoding\n"+
+		" . archive - compress/decompress the given input base on the selected compression algorithm\n"+
 		"   * options:\n"+
 		"    -l, --list\n"+
 		"       list the supported algorithms or encoding schemes\n"+
@@ -157,7 +160,7 @@ func help() string {
 		"    -o FILE, --out=FILE\n"+
 		"       path of the output file, omitting means output to stdout\n"+
 		"    -n ENC, --encoding=ENC\n"+
-		"       encoding scheme to use, default: '%v'\n\n"+
+		"       encoding scheme / compression algorithm to use; encoding default: '%v'\n\n"+
 		" # hash - hash input using the specified algorithm\n"+
 		"   * options:\n"+
 		"    -l, --list\n"+
@@ -557,19 +560,46 @@ func validate(cfg *cfgs.Config) (err error) {
 		}
 	}
 
+	zipChecked := false
 	switch cfg.Command() {
 	case CMD_ENCRYPT:
 		if cfg.IsList() {
 			break
 		}
+
 		if cfg.Tag != "" {
 			err = fmt.Errorf("[VLDT] unsupported option '--tag'") // authentication tags are generated during encryption, not being provided
 			return
+		}
+
+		if cfg.Zip != "" {
+			if cfg.Format != "" && cfg.Format != FORMAT_NONE {
+				err = fmt.Errorf("[VLDT] incompatable options '-z' and '-f'")
+				return
+			}
+			zipChecked = true
+			if t, err := encodes.Validate(cfg.Zip, -1); err != nil {
+				errs = append(errs, err)
+			} else if t <= 0 {
+				errs = append(errs, fmt.Errorf("expects compression for encryption"))
+			}
 		}
 		fallthrough
 	case CMD_DECRYPT:
 		if cfg.IsList() {
 			break
+		}
+
+		if !zipChecked && cfg.Zip != "" {
+			if cfg.Format != "" && cfg.Format != FORMAT_NONE {
+				err = fmt.Errorf("[VLDT] incompatable options '-z' and '-f'")
+				return
+			}
+			if t, err := encodes.Validate(cfg.Zip, -1); err != nil {
+				errs = append(errs, err)
+			} else if t >= 0 {
+				errs = append(errs, fmt.Errorf("expects decompression for decryption"))
+			}
 		}
 
 		if cfg.Passwd != "" && cfg.Genkey {
@@ -593,7 +623,7 @@ func validate(cfg *cfgs.Config) (err error) {
 				errs = append(errs, fmt.Errorf("key file '%v' already exists", cfg.Key))
 			}
 		} else if cfg.Passwd == "" {
-			errs = append(errs, fmt.Errorf("encryption key filename missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
+			errs = append(errs, fmt.Errorf("encryption key missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
 		}
 
 		if cfg.Command() == CMD_DECRYPT && cfg.Genkey {
@@ -651,23 +681,20 @@ func validate(cfg *cfgs.Config) (err error) {
 			}
 		}
 
-		if cfg.Zip != "" {
-			if cfg.Format != "" && cfg.Format != FORMAT_NONE {
-				err = fmt.Errorf("[VLDT] incompatable options '-z' and '-f'")
-				return
-			}
-			if _, err = encodes.Validate(cfg.Zip, -1); err != nil {
-				errs = append(errs, err)
-			}
-		}
-
 	case CMD_ENCODE:
 		fallthrough
 	case CMD_DECODE:
 		if cfg.IsList() {
 			break
 		}
-		if _, err = encodes.Validate(cfg.Encd, 0); err != nil {
+		if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
+			errs = append(errs, err)
+		}
+	case CMD_ARCHIVE:
+		if cfg.IsList() {
+			break
+		}
+		if _, err = encodes.Validate(cfg.Encd, -1); err != nil {
 			errs = append(errs, err)
 		}
 
