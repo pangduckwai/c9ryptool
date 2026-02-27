@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"sort"
+	"strconv"
 	"testing"
 )
 
@@ -27,8 +29,8 @@ func (n TestTyp) Process() bool {
 func TestType(t *testing.T) {
 	var o, p TestIfc = TestTyp(77), TestTyp(-8)
 
-	fmt.Printf("TestType() 1: %v > 0 is %v\n", o, o.Process())
-	fmt.Printf("TestType() 2: %v > 0 is %v\n", p, p.Process())
+	fmt.Printf("TestType() 1: %04v > 0 is %v\n", o, o.Process())
+	fmt.Printf("TestType() 2: %04v > 0 is %v\n", p, p.Process())
 }
 
 func TestList(t *testing.T) {
@@ -47,6 +49,40 @@ func TestList(t *testing.T) {
 			val = int(typ)
 		}
 		fmt.Printf("TestList() - %v %v %v\n", i, val, eNCODINGS[k].Name())
+	}
+}
+
+func TestSort(t *testing.T) {
+	lst := make([]Encoding, 0)
+	for k := range eNCODINGS {
+		l := len(lst)
+		s, _ := strconv.Atoi(fmt.Sprintf("%v", eNCODINGS[k]))
+		if s < 0 {
+			s = (-s << 1) + 1
+		} else {
+			s = s << 1
+		}
+
+		idx := sort.Search(l, func(i int) bool {
+			t, _ := strconv.Atoi(fmt.Sprintf("%v", lst[i]))
+			if t < 0 {
+				t = (-t << 1) + 1
+			} else {
+				t = t << 1
+			}
+			return t >= s
+		})
+
+		if idx >= l {
+			lst = append(lst, eNCODINGS[k])
+		} else {
+			lst = append(lst[:idx+1], lst[idx:]...)
+			lst[idx] = eNCODINGS[k]
+		}
+	}
+
+	for _, n := range lst {
+		fmt.Printf("TestSort() %v(%v)\n", n.Name(), n)
 	}
 }
 

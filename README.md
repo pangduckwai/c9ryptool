@@ -242,9 +242,10 @@ Config values set by environment variables are overrided by values from options.
 ---
 
 ## Changelog
-### v2.0.0
+### v2.0.1
 - Add `gzip` and the command `archive` to encoding
 - Add option `--compress` to encryption
+- Add `zlib` and `flate` compression algorithms
 
 ### v1.5.4
 - Combine functions under `/cmd` into `c9utils`

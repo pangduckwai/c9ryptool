@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strconv"
 
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/utils"
@@ -39,12 +40,16 @@ type Encoding interface {
 
 var eNCODINGS = map[string]Encoding{
 	//"direct": nil,
-	"base64":       Base64(10),
-	"base64url":    Base64Url(11),
-	"rawbase64url": RawBase64Url(12),
-	"hex":          Hex(13),
-	"gzip":         Gzip(14),
-	"gunzip":       Gzip(-14),
+	"base64":       Base64(11),
+	"base64url":    Base64Url(13),
+	"rawbase64url": RawBase64Url(15),
+	"hex":          Hex(17),
+	"gzip":         Gzip(19),
+	"gunzip":       Gzip(-19),
+	"zlib":         Zlib(21),
+	"unzlib":       Zlib(-21),
+	"flate":        Flate(23),
+	"inflate":      Flate(-23),
 }
 
 func Default() string {
@@ -53,10 +58,32 @@ func Default() string {
 
 func List() (list []string) {
 	list = make([]string, 0)
+	lst := make([]Encoding, 0)
 	for k := range eNCODINGS {
-		list = append(list, k)
+		l := len(lst)
+		s, _ := strconv.Atoi(fmt.Sprintf("%v", eNCODINGS[k]))
+		if s < 0 {
+			s = -s + 1
+		}
+
+		idx := sort.Search(l, func(i int) bool {
+			t, _ := strconv.Atoi(fmt.Sprintf("%v", lst[i]))
+			if t < 0 {
+				t = -t + 1
+			}
+			return t >= s
+		})
+
+		if idx >= l {
+			lst = append(lst, eNCODINGS[k])
+			list = append(list, k)
+		} else {
+			lst = append(lst[:idx+1], lst[idx:]...)
+			lst[idx] = eNCODINGS[k]
+			list = append(list[:idx+1], list[idx:]...)
+			list[idx] = k
+		}
 	}
-	sort.Strings(list)
 	return
 }
 

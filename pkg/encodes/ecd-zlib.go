@@ -2,7 +2,7 @@ package encodes
 
 import (
 	"bufio"
-	"compress/gzip"
+	"compress/zlib"
 	"fmt"
 	"io"
 
@@ -10,13 +10,13 @@ import (
 	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
-func compressGzip(in io.Reader, out io.Writer) error {
+func compressZlib(in io.Reader, out io.Writer) error {
 	rdr, ok := in.(*bufio.Reader)
 	if !ok {
 		rdr = bufio.NewReaderSize(in, cfgs.BUFFER)
 	}
 
-	wtr := gzip.NewWriter(out)
+	wtr := zlib.NewWriter(out)
 	defer wtr.Close()
 
 	err := utils.BufferedRead(
@@ -35,12 +35,12 @@ func compressGzip(in io.Reader, out io.Writer) error {
 	return err
 }
 
-func decompressGzip(in io.Reader, out io.Writer) error {
+func decompressZlib(in io.Reader, out io.Writer) error {
 	rbf, ok := in.(*bufio.Reader)
 	if !ok {
 		rbf = bufio.NewReaderSize(in, cfgs.BUFFER)
 	}
-	rz, err := gzip.NewReader(in)
+	rz, err := zlib.NewReader(in)
 	if err != nil {
 		return err
 	}
@@ -69,52 +69,52 @@ func decompressGzip(in io.Reader, out io.Writer) error {
 }
 
 // //// //
-// Gzip
-type Gzip int
+// Zlib
+type Zlib int
 
-func (n Gzip) Name() string {
-	return "gzip"
+func (n Zlib) Name() string {
+	return "zlib"
 }
 
-func (n Gzip) Type() int {
+func (n Zlib) Type() int {
 	if n == 0 {
 		panic(fmt.Sprintf("'%v' has invalid value %v", n.Name(), n))
 	}
 	return int(n)
 }
 
-func (n Gzip) Padding(inp []byte) []byte {
+func (n Zlib) Padding(inp []byte) []byte {
 	return inp
 }
 
-func (n Gzip) Multiple() (int, int) {
+func (n Zlib) Multiple() (int, int) {
 	return 1, 1
 }
 
-func (n Gzip) EncodeToString(inp []byte) string {
-	panic("'EncodeToString' not supported for 'gzip'")
+func (n Zlib) EncodeToString(inp []byte) string {
+	panic("'EncodeToString' not supported for 'zlib'")
 }
 
-// Encode read input from 'in' and write gzipped result to 'out'
-func (n Gzip) Encode(in io.Reader, out io.Writer) error {
+// Encode read input from 'in' and write zlib compressed result to 'out'
+func (n Zlib) Encode(in io.Reader, out io.Writer) error {
 	if n > 0 {
-		return compressGzip(in, out)
+		return compressZlib(in, out)
 	} else if n < 0 {
-		return decompressGzip(in, out)
+		return decompressZlib(in, out)
 	}
 	panic(fmt.Sprintf("'%v' has invalid value %v", n.Name(), n))
 }
 
-func (n Gzip) DecodeString(inp string) (out []byte, err error) {
-	panic("'DecodeString' not supported for 'gzip'")
+func (n Zlib) DecodeString(inp string) (out []byte, err error) {
+	panic("'DecodeString' not supported for 'zlib'")
 }
 
-// Decode read input from 'in' and write ungzipped result to 'out'
-func (n Gzip) Decode(in io.Reader, out io.Writer) error {
+// Decode read input from 'in' and write zlib decompressed result to 'out'
+func (n Zlib) Decode(in io.Reader, out io.Writer) error {
 	if n > 0 {
-		return compressGzip(in, out)
+		return compressZlib(in, out)
 	} else if n < 0 {
-		return decompressGzip(in, out)
+		return decompressZlib(in, out)
 	}
 	panic(fmt.Sprintf("'%v' has invalid value %v", n.Name(), n))
 }
