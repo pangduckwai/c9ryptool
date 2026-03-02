@@ -49,17 +49,17 @@ A simple cryptographic tool
 | - | `--encode-key=ENC` | symmetric | `ENC` is the name of the encoding scheme to use for encoding/decoding symmetric keys (when option -k / --key is specified) when writing/reading the key files<br/>NOTE: ignored for asymmetric encryption, as asymmetric keys are encoded in PEM format |
 | `-z ALGR` | `--compress=ALGR` | all | `ALGR` is the name of the compression algorithm to use. `ALGR` compression is applied before encryption, and `ALGR` decompression is applied after decryption |
 
-> ### default encoding
-> | command | type | format | inputs | aad | output | key |
-> | --- | --- | --- | --- | --- | --- | --- |
-> | encrypt | sym  | none | - | - | _{ENC}_ | - |
-> | encrypt | sym  | yaml / json | - | - | **[ENC]** | - |
-> | encrypt | asym | none | - | - | _{ENC}_ | pem |
-> | encrypt | asym | yaml / json | - | - | **[ENC]** | pem |
-> | decrypt | sym  | none | _{ENC}_ | - | - | - |
-> | decrypt | sym  | yaml / json | **[ENC]** | - | - | - |
-> | decrypt | asym | none | _{ENC}_ | - | - | pem |
-> | decrypt | asym | yaml / json | **[ENC]** | - | - | pem |
+> ### default encoding (by the option `-n` / `--encoding=`)
+> | command | type | format | input | iv | tag | aad | output | key |
+> | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+> | encrypt | sym  | none | - | - | N/A | - | _{ENC}_ | _{ENC}_ |
+> | decrypt | sym  | none | _{ENC}_ | _{ENC}_ | _{ENC}_ | - | - | _{ENC}_ |
+> | encrypt | asym | none | - | N/A | N/A | N/A | _{ENC}_ | pem |
+> | decrypt | asym | none | _{ENC}_ | N/A | N/A | N/A | - | pem |
+> | encrypt | sym  | yaml / json | - | - | N/A | - | **[ENC]** | **[ENC]** |
+> | decrypt | sym  | yaml / json | **[ENC]** | **[ENC]** | **[ENC]** | - | - | **[ENC]** |
+> | encrypt | asym | yaml / json | - | N/A | N/A | N/A | **[ENC]** | pem |
+> | decrypt | asym | yaml / json | **[ENC]** | N/A | N/A | N/A | - | pem |
 >
 > ### console input
 > #### 1. password
@@ -243,10 +243,12 @@ Config values set by environment variables are overrided by values from options.
 ---
 
 ## Changelog
-### v2.0.1
+### v2.0.2
 - Add `gzip` and the command `archive` to encoding
 - Add option `--compress` to encryption
 - Add `zlib` and `flate` compression algorithms
+- Add environment variable `C9_ZIP`
+- Update behaviour of `-n` (`--encoding=`)
 
 ### v1.5.4
 - Combine functions under `/cmd` into `c9utils`

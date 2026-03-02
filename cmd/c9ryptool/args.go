@@ -195,10 +195,12 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		switch cfg.Cmd() {
 		case CMD_ENCRYPT:
 			cfg.Enco = val
+			cfg.Enck = val
 		case CMD_DECRYPT:
 			cfg.Encd = val
 			cfg.Encv = val
 			cfg.Enct = val
+			cfg.Enck = val
 		default:
 			cfg.Encd = val
 		}
