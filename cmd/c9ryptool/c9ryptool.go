@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("[MAIN]%v\n%v\n%v\n", err, desc(), usage())
 	}
 
-	switch cfg.Command() {
+	switch cfg.Cmd() {
 	case CMD_HELP:
 		fmt.Printf("%v\n%v\n", desc(), help())
 	case CMD_VERSION:
@@ -66,7 +66,7 @@ func main() {
 
 		switch cfg.Format {
 		case FORMAT_YAML:
-			if cfg.Command() == CMD_ENCRYPT {
+			if cfg.Cmd() == CMD_ENCRYPT {
 				if enco == nil {
 					log.Fatalf("[MAIN] unsupported output encoding '%v'", cfg.Enco)
 				}
@@ -80,46 +80,14 @@ func main() {
 		case FORMAT_JSON:
 			// TODO HERE!!! add json value encryption!
 		default:
-			if cfg.Command() == CMD_ENCRYPT {
+			if cfg.Cmd() == CMD_ENCRYPT {
 				err = encrypt(cfg, algr, enci, enco, enck, encv, enca, zip)
 			} else {
 				err = decrypt(cfg, algr, enci, enco, enck, encv, enct, enca, zip)
 			}
 		}
 		if cfg.Verbose {
-			cd, ei, ev, et, ea, eo, ek := COMMANDS[cfg.Command()], "nil", "", "", "", "nil", ""
-			if cfg.Format == FORMAT_YAML || cfg.Format == FORMAT_JSON {
-				cd = fmt.Sprintf("%v(%v)", cd, cfg.Format)
-			}
-			if enci != nil {
-				ei = enci.Name()
-			}
-			if enco != nil {
-				eo = enco.Name()
-			}
-			if algr.Type() {
-				if encv != nil {
-					ev = fmt.Sprintf("/V:%v", encv.Name())
-				} else {
-					ev = "/V:nil"
-				}
-				if enct != nil {
-					et = fmt.Sprintf("/T:%v", enct.Name())
-				} else {
-					et = "/T:nil"
-				}
-				if enca != nil {
-					ea = fmt.Sprintf("/A:%v", enca.Name())
-				} else {
-					ea = "/A:nil"
-				}
-				if enck != nil {
-					ek = fmt.Sprintf("/K:%v", enck.Name())
-				} else {
-					ek = "/K:nil"
-				}
-			}
-			fmt.Printf("\n%v [%v] finished '%v' using '%v' (I:%v%v%v%v/O:%v%v)\n", time.Now().Format(LOG_FRM_MILLI), desc(), cd, algr.Name(), ei, ev, et, ea, eo, ek)
+			fmt.Printf("\n%v [%v] finished:\n%v\n", time.Now().Format(LOG_FRM_MILLI), desc(), cfg)
 		}
 
 	case CMD_ARCHIVE:
@@ -169,7 +137,7 @@ func main() {
 		if encd == nil {
 			log.Fatalf("[MAIN] unsupported encoding '%v'", cfg.Encd)
 		}
-		switch cfg.Command() {
+		switch cfg.Cmd() {
 		case CMD_ARCHIVE: // don't care encode or decode for archiving
 			fallthrough
 		case CMD_ENCODE:
@@ -178,7 +146,7 @@ func main() {
 			err = decode(cfg, encd)
 		}
 		if cfg.Verbose {
-			fmt.Printf("\n%v [%v] finished '%v' using '%v'\n", time.Now().Format(LOG_FRM_MILLI), desc(), COMMANDS[cfg.Command()], encd.Name())
+			fmt.Printf("\n%v [%v] finished:\n%v\n", time.Now().Format(LOG_FRM_MILLI), desc(), cfg)
 		}
 
 	case CMD_DISPLAY:
@@ -216,11 +184,11 @@ func main() {
 		}
 		err = calcHash(cfg, hshs)
 		if cfg.Verbose {
-			fmt.Printf("\n%v [%v] finished '%v' using '%v'\n", time.Now().Format(LOG_FRM_MILLI), desc(), COMMANDS[cfg.Command()], cfg.Hash)
+			fmt.Printf("\n%v [%v] finished:\n%v\n", time.Now().Format(LOG_FRM_MILLI), desc(), cfg)
 		}
 
 	default:
-		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())
+		err = fmt.Errorf(" unsupported command '%v'", cfg.Cmd())
 	}
 
 	if err != nil {

@@ -29,24 +29,13 @@ const CMD_HASHING = 6
 const CMD_DISPLAY = 7
 const CMD_ARCHIVE = 8
 
-var COMMANDS = []string{
-	"help",    // 0
-	"version", // 1
-	"encrypt", // 2
-	"decrypt", // 3
-	"encode",  // 4
-	"decode",  // 5
-	"hash",    // 6
-	"display", // 7
-	"archive", // 8
-}
-
 var ENVIVARS = []string{
 	"C9_BUFFER",
 	"C9_VERBOSE",
-	"C9_ALGORITHM",
+	"C9_ENCRYPTION",
 	"C9_ENCODING",
 	"C9_HASHING",
+	"C9_ZIP",
 }
 
 func usage() string {
@@ -203,7 +192,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 	}
 
 	encd := func(val string) {
-		switch cfg.Command() {
+		switch cfg.Cmd() {
 		case CMD_ENCRYPT:
 			cfg.Enco = val
 		case CMD_DECRYPT:
@@ -215,16 +204,21 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		}
 	}
 
-	// Setup default values
-	cfg = &cfgs.Config{
-		Buffer:  cfgs.BUFFER,
-		Passwd:  "",
-		SaltLen: sym.SALTLEN,
-		Verbose: false,
-	}
+	cfg = cfgs.New([]string{
+		"help",    // 0
+		"version", // 1
+		"encrypt", // 2
+		"decrypt", // 3
+		"encode",  // 4
+		"decode",  // 5
+		"hash",    // 6
+		"display", // 7
+		"archive", // 8
+	})
+	cfg.SaltLen = sym.SALTLEN
 
 	// Parse command
-	idx, _, err := cfgs.CommandMatch(COMMANDS, args[1])
+	idx, _, err := cfg.CommandMatch(args[1])
 	if err != nil {
 		err = fmt.Errorf("[CONF] %v", err)
 		return
@@ -232,7 +226,6 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		err = fmt.Errorf("[CONF] Invalid command '%v'", args[1])
 		return
 	}
-	cfg.SetCommand(idx)
 
 	// Parse environment variables
 	var num int
@@ -253,12 +246,14 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 					err = fmt.Errorf("[CONF] Invalid verbose value in '%v'", enm)
 					return
 				}
-			case "C9_ALGORITHM":
+			case "C9_ENCRYPTION":
 				cfg.Algr = env
 			case "C9_ENCODING":
 				encd(env)
 			case "C9_HASHING":
 				cfg.Hash = env
+			case "C9_ZIP":
+				cfg.Zip = env
 			}
 		}
 	}
@@ -503,7 +498,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 	}
 
 	// Conditional default values
-	switch cfg.Command() {
+	switch cfg.Cmd() {
 	case CMD_ENCRYPT:
 		if cfg.Algr == "" {
 			cfg.Algr = encrypts.Default()
@@ -561,7 +556,7 @@ func validate(cfg *cfgs.Config) (err error) {
 	}
 
 	zipChecked := false
-	switch cfg.Command() {
+	switch cfg.Cmd() {
 	case CMD_ENCRYPT:
 		if cfg.IsList() {
 			break
@@ -626,7 +621,7 @@ func validate(cfg *cfgs.Config) (err error) {
 			errs = append(errs, fmt.Errorf("encryption key missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
 		}
 
-		if cfg.Command() == CMD_DECRYPT && cfg.Genkey {
+		if cfg.Cmd() == CMD_DECRYPT && cfg.Genkey {
 			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > c9ryptool d -g {-k key.txt} -i README.md
 		}
 

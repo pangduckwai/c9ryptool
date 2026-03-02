@@ -17,18 +17,10 @@ const CMD_GENKEY = 2
 const CMD_PUBKEY = 3
 const CMD_SPLIT = 4
 
-var COMMANDS = []string{
-	"help",    // 0
-	"version", // 1
-	"genkey",  // 2
-	"pubkey",  // 3
-	"split",   // 4
-}
-
 var ENVIVARS = []string{
 	"C9_BUFFER",
 	"C9_VERBOSE",
-	"C9_ALGORITHM",
+	"C9_ENCRYPTION",
 	"C9_ENCODING",
 }
 
@@ -63,13 +55,16 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		return
 	}
 
-	cfg = &cfgs.Config{
-		Buffer:  cfgs.BUFFER,
-		Verbose: false,
-		Algr:    encrypts.Default(),
-	}
+	cfg = cfgs.New([]string{
+		"help",    // 0
+		"version", // 1
+		"genkey",  // 2
+		"pubkey",  // 3
+		"split",   // 4
+	})
+	cfg.Algr = encrypts.Default()
 
-	idx, _, err := cfgs.CommandMatch(COMMANDS, args[1])
+	idx, _, err := cfg.CommandMatch(args[1])
 	if err != nil {
 		err = fmt.Errorf("[CONF] %v", err)
 		return
@@ -77,7 +72,6 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		err = fmt.Errorf("[CONF] Invalid command '%v'", args[1])
 		return
 	}
-	cfg.SetCommand(idx)
 
 	var val, lgh int
 	for _, enm := range ENVIVARS {
@@ -97,7 +91,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 					err = fmt.Errorf("[CONF] Invalid verbose value in '%v'", enm)
 					return
 				}
-			case "C9_ALGORITHM":
+			case "C9_ENCRYPTION":
 				cfg.Algr = env
 			case "C9_ENCODING":
 				cfg.Encd = env
@@ -111,7 +105,7 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 		case args[i] == "-v" || args[i] == "--verbose":
 			cfg.Verbose = true
 		case args[i] == "-l":
-			if cfg.Command() == CMD_SPLIT {
+			if cfg.Cmd() == CMD_SPLIT {
 				i++
 				if i >= len(args) {
 					err = fmt.Errorf("[CONF] Missing split length argument")
@@ -250,7 +244,7 @@ func validate(cfg *cfgs.Config) (err error) {
 	errs := make([]error, 0)
 
 	var algTyp bool
-	if cfg.Command() != CMD_SPLIT {
+	if cfg.Cmd() != CMD_SPLIT {
 		if algTyp, err = encrypts.Validate(cfg.Algr, 1); err != nil {
 			errs = append(errs, err)
 		}
@@ -261,7 +255,7 @@ func validate(cfg *cfgs.Config) (err error) {
 		}
 	}
 
-	switch cfg.Command() {
+	switch cfg.Cmd() {
 	case CMD_GENKEY:
 		if cfg.IsList() {
 			break
@@ -320,7 +314,7 @@ func validate(cfg *cfgs.Config) (err error) {
 		}
 	}
 
-	if cfg.Command() != CMD_PUBKEY && !algTyp {
+	if cfg.Cmd() != CMD_PUBKEY && !algTyp {
 		if cfg.Key != "" {
 			if _, err = os.Stat(cfg.Key); err == nil {
 				errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Key))

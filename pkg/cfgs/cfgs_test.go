@@ -20,15 +20,74 @@ func TestBitwise(t *testing.T) {
 }
 
 func TestCommand(t *testing.T) {
-	cfg := &Config{
-		Buffer:  BUFFER,
-		Verbose: false,
-	}
+	cfg := New(nil)
 	fmt.Printf("TestCommand() 0: %x\n", cfg.cmd)
 	cfg.SetList()
 	fmt.Printf("TestCommand() 1: %x\n", cfg.cmd)
-	cfg.SetCommand(3)
+	cfg.SetCmd(3)
 	fmt.Printf("TestCommand() 2: %x\n", cfg.cmd)
+}
+
+var cmds []string = []string{
+	"help",    // 0
+	"version", // 1
+	"encrypt", // 2
+	"decrypt", // 3
+	"encode",  // 4
+	"decode",  // 5
+	"hash",    // 6
+	"display", // 7
+	"archive", // 8
+}
+
+func TestDisplayEncrypt(t *testing.T) {
+	cfg := &Config{
+		cmds:    cmds,
+		cmd:     3,
+		Algr:    "AES-128-GCM",
+		Format:  "", //yaml
+		Encd:    "base64",
+		Input:   "./input.b64",
+		Enco:    "base64url",
+		Output:  "",
+		Enck:    "base64",
+		Key:     "./key.b64",
+		Genkey:  false,
+		Passwd:  "", //{INTERACTIVE}
+		SaltLen: 16,
+		Encv:    "base64",
+		Iv:      "./iv.b64",
+		Enct:    "base64",
+		Tag:     "./tag.b64",
+		Enca:    "base64",
+		Aad:     "./aad.b64",
+		Zip:     "gzip",
+		Buffer:  4096,
+		Verbose: true,
+	}
+	fmt.Printf("TestDisplayEncrypt()\n%v\n", cfg)
+}
+
+func TestDisplayHashing(t *testing.T) {
+	cfg := &Config{
+		cmds:   cmds,
+		cmd:    6,
+		Hash:   "sha1",
+		Input:  "",
+		Output: "./output.txt",
+	}
+	fmt.Printf("TestDisplayHashing()\n%v\n", cfg)
+}
+
+func TestDisplayEncoding(t *testing.T) {
+	cfg := &Config{
+		cmds:   cmds,
+		cmd:    8,
+		Hash:   "gzip",
+		Input:  "",
+		Output: "",
+	}
+	fmt.Printf("TestDisplayEncoding()\n%v\n", cfg)
 }
 
 // func TestMatch(t *testing.T) {

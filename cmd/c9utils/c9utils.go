@@ -33,7 +33,7 @@ func main() {
 	}
 
 	var typ int
-	switch cfg.Command() {
+	switch cfg.Cmd() {
 	case CMD_VERSION:
 		fmt.Println(desc())
 
@@ -53,7 +53,7 @@ func main() {
 
 		algr := encrypts.Get(encrypts.Parse(cfg.Algr))
 		encd := encodes.Get(cfg.Encd)
-		if cfg.Command() == CMD_GENKEY {
+		if cfg.Cmd() == CMD_GENKEY {
 			err = genkey(cfg, algr, encd)
 			if err == nil {
 				if cfg.Verbose {
@@ -101,7 +101,7 @@ func main() {
 		}
 
 	default:
-		err = fmt.Errorf(" unsupported command '%v'", cfg.Command())
+		err = fmt.Errorf(" unsupported command '%v'", cfg.Cmd())
 	}
 
 	if err != nil {

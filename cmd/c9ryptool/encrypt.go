@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
@@ -27,7 +28,11 @@ func encrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+			hdr := ""
+			if cfg.Verbose {
+				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
+			}
+			pwd, err = utils.InteractiveSingle(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -127,7 +132,11 @@ func decrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+			hdr := ""
+			if cfg.Verbose {
+				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
+			}
+			pwd, err = utils.InteractiveSingle(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,

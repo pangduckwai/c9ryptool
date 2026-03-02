@@ -269,7 +269,9 @@ func Write(
 // InteractiveSingle get a single line interactive input from the prompt
 func InteractiveSingle(header, prompt string) (str string, err error) {
 	rdr := bufio.NewReader(os.Stdin)
-	fmt.Printf("%v:\n", header)
+	if header != "" {
+		fmt.Printf("%v:\n", header)
+	}
 	fmt.Printf("%v: ", prompt)
 	str, err = rdr.ReadString('\n')
 	if err != nil {

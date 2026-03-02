@@ -159,9 +159,10 @@ Config values set by environment variables are overrided by values from options.
 | --- | --- |
 | `C9_BUFFER` | size of the read buffer in # of bytes |
 | `C9_VERBOSE` | display detail operation messages during processing |
-| `C9_ALGORITHM` | encryption algorithm to use |
+| `C9_ENCRYPTION` | encryption algorithm to use |
 | `C9_ENCODING` | encoding scheme to use, same as `-n` or `--encoding=` for encryption/decryption |
 | `C9_HASHING` | hashing algorithm to use |
+| `C9_ZIP` | zip algorithm to use, same as `-z` or `--compress=` for encryption/decryption |
 
 ---
 
@@ -226,7 +227,7 @@ Config values set by environment variables are overrided by values from options.
 | --- | --- |
 | `C9_BUFFER` | size of the read buffer in # of bytes |
 | `C9_VERBOSE` | display detail operation messages during processing |
-| `C9_ALGORITHM` | encryption algorithm to use |
+| `C9_ENCRYPTION` | encryption algorithm to use |
 | `C9_ENCODING` | encoding scheme to use |
 
 ---
