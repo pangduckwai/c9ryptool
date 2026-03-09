@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Traverse traverse a 'MapSlice'
+// Traverse traverse a yaml while preserving order.
 func Traverse(
 	inp []yaml.MapItem,
 	action func(interface{}) (interface{}, error),
@@ -36,59 +36,70 @@ func _traverse(
 ) {
 	switch typ := ifc.(type) {
 	case []yaml.MapItem:
-		nxt, err := Traverse(typ, action)
+		var nxt []yaml.MapItem
+		nxt, err = Traverse(typ, action)
 		if err != nil {
-			return nil, err
+			break
 		}
 		out = append(out, yaml.MapItem{Key: key, Value: nxt})
 	case []interface{}:
+		var itm interface{}
 		nxt := make([]interface{}, len(typ))
-		out = append(out, yaml.MapItem{Key: key, Value: nxt})
 		for i, f := range typ {
-			err = __traverse(key, i, f, nxt, action)
+			itm, err = __traverse(f, action)
 			if err != nil {
+				err = fmt.Errorf("[%v][%v]%v", key, i, err)
 				break
 			}
+			nxt[i] = itm
 		}
+		out = append(out, yaml.MapItem{Key: key, Value: nxt})
 	default:
 		var act interface{}
 		act, err = action(typ)
 		if err != nil {
 			err = fmt.Errorf("[%v]%v", key, err)
-		} else {
-			out = append(out, yaml.MapItem{Key: key, Value: act})
+			break
 		}
+		out = append(out, yaml.MapItem{Key: key, Value: act})
 	}
 	return
 }
 
 func __traverse(
-	key string, idx int,
 	ifc interface{},
-	out []interface{},
 	action func(interface{}) (interface{}, error),
-) (err error) {
+) (
+	out interface{},
+	err error,
+) {
 	switch typ := ifc.(type) {
 	case []yaml.MapItem:
-		nxt, err := Traverse(typ, action)
+		var nxt []yaml.MapItem
+		nxt, err = Traverse(typ, action)
 		if err != nil {
-			return err
+			break
 		}
-		out[idx] = nxt
+		out = nxt
 	case []interface{}:
+		var itm interface{}
 		nxt := make([]interface{}, len(typ))
-		out[idx] = nxt
 		for i, f := range typ {
-			err = __traverse(key, i, f, nxt, action)
+			itm, err = __traverse(f, action)
 			if err != nil {
+				err = fmt.Errorf("[%v]%v", i, err)
 				break
 			}
+			nxt[i] = itm
 		}
+		out = nxt
 	default:
-		out[idx], err = action(typ)
+		var act interface{}
+		act, err = action(typ)
 		if err != nil {
-			err = fmt.Errorf("[%v][%v]%v", key, idx, err)
+			break
 		}
+		out = act
 	}
 	return
 }

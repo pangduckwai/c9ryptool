@@ -31,7 +31,7 @@ func yamlEncrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+			pwd, err = utils.Prompt(desc(), "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -186,7 +186,7 @@ func yamlDecrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.InteractiveSingle(desc(), "Enter password: ")
+			pwd, err = utils.Prompt(desc(), "Enter password: ")
 		}
 		_, err = sym.PopulateKeyFromPassword(
 			pwd,

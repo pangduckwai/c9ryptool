@@ -32,7 +32,7 @@ func encrypt(
 			if cfg.Verbose {
 				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
 			}
-			pwd, err = utils.InteractiveSingle(hdr, "Enter password: ")
+			pwd, err = utils.Prompt(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -136,7 +136,7 @@ func decrypt(
 			if cfg.Verbose {
 				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
 			}
-			pwd, err = utils.InteractiveSingle(hdr, "Enter password: ")
+			pwd, err = utils.Prompt(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
