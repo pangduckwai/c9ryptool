@@ -10,7 +10,7 @@ A collection of cryptographic related tools
 A simple cryptographic tool
 
 ```bash
-> ./cmd/c9ryptool [command] {options}
+$ ./cmd/c9ryptool [command] {options}
 ```
 
 ### 1. Miscellaneous
@@ -170,7 +170,7 @@ Config values set by environment variables are overrided by values from options.
 Miscellaneous utilities accompany `c9ryptool`
 
 ```bash
-> ./cmd/c9utils [command] {options}
+$ ./cmd/c9utils [command] {options}
 ```
 
 ### 1. Miscellaneous

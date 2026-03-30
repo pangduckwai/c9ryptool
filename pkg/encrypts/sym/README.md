@@ -25,16 +25,16 @@ Apparent JWE libraries behaviour (without very clear documentation):
 
 ## Example
 ```bash
-> c9ryptool decrypt -a RSA-2048-OAEP-SHA256 \
->   -k private.key \
->   -i cek.jwe --encode-in=rawbase64url \
->   -o cek.hex --encode-out=hex
+$ c9ryptool decrypt -a RSA-2048-OAEP-SHA256 \
+    -k private.key \
+    -i cek.jwe --encode-in=rawbase64url \
+    -o cek.hex --encode-out=hex
 
-> c9ryptool decrypt -a AES-256-GCM \
->   -k cek.hex     --encode-key=hex \
->   -i payload.jwe --encode-in=rawbase64url \
->   --iv=iv.jwe    --encode-iv=rawbase64url \
->   --tag=tag.jwe  --encode-tag=rawbase64url \
->   --aad=aad.jwe \
->   -o token.jws
+$ c9ryptool decrypt -a AES-256-GCM \
+    -k cek.hex     --encode-key=hex \
+    -i payload.jwe --encode-in=rawbase64url \
+    --iv=iv.jwe    --encode-iv=rawbase64url \
+    --tag=tag.jwe  --encode-tag=rawbase64url \
+    --aad=aad.jwe \
+    -o token.jws
 ```
