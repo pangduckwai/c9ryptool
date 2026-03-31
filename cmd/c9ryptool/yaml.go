@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/pangduckwai/sea9go/pkg/inout/prompt"
+	"github.com/pangduckwai/sea9go/pkg/traverse/ordered"
 	"gopkg.in/yaml.v2"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
@@ -31,7 +33,7 @@ func yamlEncrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.Prompt(desc(), "Enter password: ")
+			pwd, err = prompt.Prompt(desc(), "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -94,7 +96,7 @@ func yamlEncrypt(
 		}
 	}
 
-	encrypt := func(inp interface{}) (interface{}, error) {
+	encrypt := func(keys []string, inp interface{}) (interface{}, error) {
 		switch typ := inp.(type) {
 		case string:
 			enc, err := alg.Encrypt([]byte(typ), iv, aad)
@@ -132,7 +134,7 @@ func yamlEncrypt(
 		return
 	}
 
-	sec, err := utils.Traverse(inp, encrypt)
+	sec, err := ordered.Traverse(inp, encrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][ECY][NAV]%v", err)
 		return
@@ -186,7 +188,7 @@ func yamlDecrypt(
 	if cfg.Passwd != "" {
 		pwd := cfg.Passwd
 		if cfg.Passwd == PWD_INTERACTIVE {
-			pwd, err = utils.Prompt(desc(), "Enter password: ")
+			pwd, err = prompt.Prompt(desc(), "Enter password: ")
 		}
 		_, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -246,7 +248,7 @@ func yamlDecrypt(
 		}
 	}
 
-	decrypt := func(inp interface{}) (interface{}, error) {
+	decrypt := func(keys []string, inp interface{}) (interface{}, error) {
 		switch typ := inp.(type) {
 		case string:
 			enc, err := eci.DecodeString(typ)
@@ -276,7 +278,7 @@ func yamlDecrypt(
 		}
 	}
 
-	clr, err := utils.Traverse(inp, decrypt)
+	clr, err := ordered.Traverse(inp, decrypt)
 	if err != nil {
 		err = fmt.Errorf("[YAML][DCY][NAV]%v", err)
 		return

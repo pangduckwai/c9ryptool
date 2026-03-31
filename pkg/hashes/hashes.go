@@ -11,7 +11,8 @@ import (
 	"hash/fnv"
 	"sort"
 
-	"sea9.org/go/c9ryptool/pkg/utils"
+	"github.com/pangduckwai/sea9go/pkg/inout"
+	"github.com/pangduckwai/sea9go/pkg/strings/match"
 )
 
 var hASHINGS = map[string]hash.Hash{
@@ -57,7 +58,7 @@ func Parse(inp string) (name string) {
 		i++
 	}
 
-	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	indices, str, _ := match.BestMatch(inp, algrs, true)
 	if len(indices) == 1 {
 		name = str
 	}
@@ -68,7 +69,7 @@ func Hash(h hash.Hash, rdr *bufio.Reader, wtr *bufio.Writer) (err error) {
 	size := rdr.Size()
 	isStdout := wtr == nil
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, buf []byte) error {
+	err = inout.BufferedRead(rdr, size, func(cnt int, buf []byte) error {
 		_, err := h.Write(buf)
 		return err
 	})

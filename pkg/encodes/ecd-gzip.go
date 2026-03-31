@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/pangduckwai/sea9go/pkg/inout"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
-	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 func compressGzip(in io.Reader, out io.Writer) error {
@@ -19,7 +19,7 @@ func compressGzip(in io.Reader, out io.Writer) error {
 	wtr := gzip.NewWriter(out)
 	defer wtr.Close()
 
-	err := utils.BufferedRead(
+	err := inout.BufferedRead(
 		rdr, rdr.Size(),
 		func(cnt int, inp []byte) (err error) {
 			if cnt > 0 {
@@ -52,7 +52,7 @@ func decompressGzip(in io.Reader, out io.Writer) error {
 		wtr = bufio.NewWriter(out)
 	}
 
-	err = utils.BufferedRead(
+	err = inout.BufferedRead(
 		rdr, rdr.Size(),
 		func(cnt int, inp []byte) (err error) {
 			if cnt > 0 {

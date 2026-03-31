@@ -7,8 +7,9 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/pangduckwai/sea9go/pkg/inout"
+	"github.com/pangduckwai/sea9go/pkg/strings/match"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
-	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 // Encoding encoding scheme
@@ -121,7 +122,7 @@ func Parse(inp string) (name string) {
 		i++
 	}
 
-	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	indices, str, _ := match.BestMatch(inp, algrs, true)
 	if len(indices) == 1 {
 		name = str
 	}
@@ -158,7 +159,7 @@ func encode(n Encoding, r io.Reader, w io.Writer) (err error) {
 		return
 	}
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
+	err = inout.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
 		if enc > 1 {
 			lgh += cnt
 			dat = append(dat, inp...)
@@ -222,7 +223,7 @@ func decode(n Encoding, r io.Reader, w io.Writer) (err error) {
 		return
 	}
 
-	err = utils.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
+	err = inout.BufferedRead(rdr, size, func(cnt int, inp []byte) (err error) {
 		if dec > 1 {
 			lgh += cnt
 			dat = append(dat, inp...)

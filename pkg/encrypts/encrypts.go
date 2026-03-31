@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/pangduckwai/sea9go/pkg/strings/match"
 	"sea9.org/go/c9ryptool/pkg/encrypts/asym"
 	"sea9.org/go/c9ryptool/pkg/encrypts/sym"
-	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 // Algorithm encryption algorithms
@@ -123,7 +123,7 @@ func Parse(inp string) (name string) {
 		i++
 	}
 
-	indices, str, _ := utils.BestMatch(inp, algrs, true)
+	indices, str, _ := match.BestMatch(inp, algrs, true)
 	if len(indices) == 1 {
 		name = str
 	}

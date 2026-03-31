@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"sea9.org/go/c9ryptool/pkg/utils"
+	"github.com/pangduckwai/sea9go/pkg/inout"
 )
 
 func zipTest() (err error) {
@@ -26,7 +26,7 @@ func zipTest() (err error) {
 	defer wz.Close()
 
 	count := 0
-	err = utils.BufferedRead(
+	err = inout.BufferedRead(
 		rb, rb.Size(),
 		func(cnt int, inp []byte) (err error) {
 			if cnt > 0 {
@@ -65,7 +65,7 @@ func unzipTest() (err error) {
 	wb := bufio.NewWriter(out)
 
 	count := 0
-	err = utils.BufferedRead(
+	err = inout.BufferedRead(
 		rb, rb.Size(),
 		func(cnt int, inp []byte) (err error) {
 			if cnt > 0 {

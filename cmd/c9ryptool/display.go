@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pangduckwai/sea9go/pkg/inout"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
-	"sea9.org/go/c9ryptool/pkg/utils"
 )
 
 const SIZE_VERIFY = 5
@@ -123,7 +123,7 @@ func display(
 		return nil
 	}
 
-	err = utils.BufferedRead(rdr, cfg.Buffer, action)
+	err = inout.BufferedRead(rdr, cfg.Buffer, action)
 	if err != nil {
 		err = fmt.Errorf("[READ] %v", err)
 		return

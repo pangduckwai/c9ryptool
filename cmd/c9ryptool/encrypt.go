@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pangduckwai/sea9go/pkg/inout/prompt"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
@@ -32,7 +33,7 @@ func encrypt(
 			if cfg.Verbose {
 				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
 			}
-			pwd, err = utils.Prompt(hdr, "Enter password: ")
+			pwd, err = prompt.Prompt(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,
@@ -136,7 +137,7 @@ func decrypt(
 			if cfg.Verbose {
 				hdr = fmt.Sprintf("%v [%v]", time.Now().Format(LOG_FRM_MILLI), desc())
 			}
-			pwd, err = utils.Prompt(hdr, "Enter password: ")
+			pwd, err = prompt.Prompt(hdr, "Enter password: ")
 		}
 		salt, err = sym.PopulateKeyFromPassword(
 			pwd,

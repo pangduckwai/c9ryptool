@@ -3,11 +3,11 @@ package cfgs
 import (
 	"fmt"
 
-	"sea9.org/go/c9ryptool/pkg/utils"
+	"github.com/pangduckwai/sea9go/pkg/strings/match"
 )
 
 func Version() string {
-	return "v2.0.2 2026030610"
+	return "v2.1.0 2026033110"
 }
 
 const BUFFER = 1048576 // 1024x1024
@@ -76,7 +76,7 @@ func (cfg *Config) CommandMatch(
 ) (
 	idx int, mth string, err error,
 ) {
-	indices, str, typ := utils.BestMatch(inp, cfg.cmds, false)
+	indices, str, typ := match.BestMatch(inp, cfg.cmds, false)
 	switch len(indices) {
 	case 0:
 		idx = -1

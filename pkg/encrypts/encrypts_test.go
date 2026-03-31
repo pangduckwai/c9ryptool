@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"sea9.org/go/c9ryptool/pkg/utils"
+	"github.com/pangduckwai/sea9go/pkg/strings/match"
 )
 
 // func display(i int, s string) {
@@ -30,7 +30,7 @@ func display(i int, s string) {
 		algrs = append(algrs, n.Name())
 	}
 
-	indices, str, _ := utils.BestMatch(s, algrs, true)
+	indices, str, _ := match.BestMatch(s, algrs, true)
 	switch len(indices) {
 	case 0:
 		fmt.Printf("TestParse() %2v x false %-23v (0) -> match not found ('%v')\n", i, s, Parse(s))
