@@ -123,7 +123,7 @@ func Parse(inp string) (name string) {
 		i++
 	}
 
-	indices, str, _ := match.BestMatch(inp, algrs, true)
+	indices, str, _ := match.Best(inp, algrs, true)
 	if len(indices) == 1 {
 		name = str
 	}

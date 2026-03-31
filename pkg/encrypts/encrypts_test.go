@@ -30,7 +30,7 @@ func display(i int, s string) {
 		algrs = append(algrs, n.Name())
 	}
 
-	indices, str, _ := match.BestMatch(s, algrs, true)
+	indices, str, _ := match.Best(s, algrs, true)
 	switch len(indices) {
 	case 0:
 		fmt.Printf("TestParse() %2v x false %-23v (0) -> match not found ('%v')\n", i, s, Parse(s))

@@ -10,8 +10,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-replace github.com/pangduckwai/sea9go v0.3.0 => ../sea9go
-
 require (
 	github.com/ethereum/go-ethereum v1.16.7 // indirect
 	golang.org/x/sys v0.39.0 // indirect

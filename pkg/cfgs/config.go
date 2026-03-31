@@ -7,7 +7,7 @@ import (
 )
 
 func Version() string {
-	return "v2.1.0 2026033110"
+	return "v2.1.0 2026033114"
 }
 
 const BUFFER = 1048576 // 1024x1024
@@ -76,7 +76,7 @@ func (cfg *Config) CommandMatch(
 ) (
 	idx int, mth string, err error,
 ) {
-	indices, str, typ := match.BestMatch(inp, cfg.cmds, false)
+	indices, str, typ := match.Best(inp, cfg.cmds, false)
 	switch len(indices) {
 	case 0:
 		idx = -1
