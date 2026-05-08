@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pangduckwai/sea9go/pkg/errs"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
@@ -537,11 +538,11 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 // - Passwd : mutally exclusive with 'Genkey' (gen new key), generate encryption key from a passphrase which is input interactively
 // - Algr : encryption algorithm name
 func validate(cfg *cfgs.Config) (err error) {
-	errs := make([]error, 0)
+	var errx error = errs.New(true)
 
 	if cfg.Input != "" {
 		if _, err = os.Stat(cfg.Input); errors.Is(err, os.ErrNotExist) {
-			errs = append(errs, fmt.Errorf("input file '%v' does not exist", cfg.Input))
+			errx = errs.Append(errx, fmt.Errorf("[IN] input file '%v' does not exist", cfg.Input))
 		} else if err != nil {
 			err = fmt.Errorf("[VLDT] %v", err)
 			return
@@ -550,7 +551,7 @@ func validate(cfg *cfgs.Config) (err error) {
 
 	if cfg.Output != "" {
 		if _, err = os.Stat(cfg.Output); err == nil {
-			errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Output))
+			errx = errs.Append(errx, fmt.Errorf("[OUT] output file '%v' already exists", cfg.Output))
 		} else if !errors.Is(err, os.ErrNotExist) {
 			err = fmt.Errorf("[VLDT] %v", err)
 			return
@@ -576,9 +577,9 @@ func validate(cfg *cfgs.Config) (err error) {
 			}
 			zipChecked = true
 			if t, err := encodes.Validate(cfg.Zip, -1); err != nil {
-				errs = append(errs, err)
+				errx = errs.Append(errx, err)
 			} else if t <= 0 {
-				errs = append(errs, fmt.Errorf("expects compression for encryption"))
+				errx = errs.Append(errx, fmt.Errorf("[ZIP] expects compression for encryption"))
 			}
 		}
 		fallthrough
@@ -593,9 +594,9 @@ func validate(cfg *cfgs.Config) (err error) {
 				return
 			}
 			if t, err := encodes.Validate(cfg.Zip, -1); err != nil {
-				errs = append(errs, err)
+				errx = errs.Append(errx, err)
 			} else if t >= 0 {
-				errs = append(errs, fmt.Errorf("expects decompression for decryption"))
+				errx = errs.Append(errx, fmt.Errorf("[UNZIP] expects decompression for decryption"))
 			}
 		}
 
@@ -611,20 +612,20 @@ func validate(cfg *cfgs.Config) (err error) {
 			}
 			if _, err = os.Stat(cfg.Key); errors.Is(err, os.ErrNotExist) {
 				if !cfg.Genkey {
-					errs = append(errs, fmt.Errorf("key file '%v' does not exist", cfg.Key))
+					errx = errs.Append(errx, fmt.Errorf("[KEY] key file '%v' does not exist", cfg.Key))
 				}
 			} else if err != nil {
 				err = fmt.Errorf("[VLDT] %v", err)
 				return
 			} else if cfg.Genkey {
-				errs = append(errs, fmt.Errorf("key file '%v' already exists", cfg.Key))
+				errx = errs.Append(errx, fmt.Errorf("[KEY] key file '%v' already exists", cfg.Key))
 			}
 		} else if cfg.Passwd == "" {
-			errs = append(errs, fmt.Errorf("encryption key missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
+			errx = errs.Append(errx, fmt.Errorf("[KEY] encryption key missing")) // > go run ./cmd/c9ryptool e|d {-g} -i README.md
 		}
 
 		if cfg.Cmd() == CMD_DECRYPT && cfg.Genkey {
-			errs = append(errs, fmt.Errorf("cannot generate new key for decryption")) // > c9ryptool d -g {-k key.txt} -i README.md
+			errx = errs.Append(errx, fmt.Errorf("[KEY] cannot generate new key for decryption")) // > c9ryptool d -g {-k key.txt} -i README.md
 		}
 
 		var typ int
@@ -636,38 +637,38 @@ func validate(cfg *cfgs.Config) (err error) {
 		}
 
 		if _, err = encrypts.Validate(cfg.Algr, typ); err != nil {
-			errs = append(errs, err)
+			errx = errs.Append(errx, err)
 		}
 
 		if cfg.Encd != "" {
 			if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
-				errs = append(errs, err)
+				errx = errs.Append(errx, err)
 			}
 		}
 		if cfg.Enco != "" {
 			if _, err = encodes.Validate(cfg.Enco, 1); err != nil {
-				errs = append(errs, err)
+				errx = errs.Append(errx, err)
 			}
 		}
 		if typ > 0 {
 			if cfg.Encv != "" {
 				if _, err = encodes.Validate(cfg.Encv, 1); err != nil {
-					errs = append(errs, err)
+					errx = errs.Append(errx, err)
 				}
 			}
 			if cfg.Enct != "" {
 				if _, err = encodes.Validate(cfg.Enct, 1); err != nil {
-					errs = append(errs, err)
+					errx = errs.Append(errx, err)
 				}
 			}
 			if cfg.Enca != "" {
 				if _, err = encodes.Validate(cfg.Enca, 1); err != nil {
-					errs = append(errs, err)
+					errx = errs.Append(errx, err)
 				}
 			}
 			if cfg.Enck != "" {
 				if _, err = encodes.Validate(cfg.Enck, 1); err != nil {
-					errs = append(errs, err)
+					errx = errs.Append(errx, err)
 				}
 			}
 		}
@@ -685,14 +686,14 @@ func validate(cfg *cfgs.Config) (err error) {
 			break
 		}
 		if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
-			errs = append(errs, err)
+			errx = errs.Append(errx, err)
 		}
 	case CMD_ARCHIVE:
 		if cfg.IsList() {
 			break
 		}
 		if _, err = encodes.Validate(cfg.Encd, -1); err != nil {
-			errs = append(errs, err)
+			errx = errs.Append(errx, err)
 		}
 
 	case CMD_DISPLAY:
@@ -705,17 +706,11 @@ func validate(cfg *cfgs.Config) (err error) {
 			break
 		}
 		if err = hashes.Validate(cfg.Hash); err != nil {
-			errs = append(errs, err)
+			errx = errs.Append(errx, err)
 		}
 	}
-
-	if len(errs) > 0 {
-		var buf strings.Builder
-		fmt.Fprintf(&buf, "[\n - %v", errs[0])
-		for _, err := range errs[1:] {
-			fmt.Fprintf(&buf, "\n - %v", err)
-		}
-		err = fmt.Errorf("[VLDT]%v\n]", buf.String())
+	if errs.Count(errx) > 0 {
+		err = errs.Wrap(errx, "VLDT")
 	}
 	return
 }

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pangduckwai/sea9go/pkg/errs"
 	"sea9.org/go/c9ryptool/pkg/cfgs"
 	"sea9.org/go/c9ryptool/pkg/encodes"
 	"sea9.org/go/c9ryptool/pkg/encrypts"
@@ -241,16 +242,16 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 }
 
 func validate(cfg *cfgs.Config) (err error) {
-	errs := make([]error, 0)
+	var errx error = errs.New(true)
 
 	var algTyp bool
 	if cfg.Cmd() != CMD_SPLIT {
 		if algTyp, err = encrypts.Validate(cfg.Algr, 1); err != nil {
-			errs = append(errs, err)
+			errx = errs.Append(errx, err)
 		}
 		if cfg.Encd != "" {
 			if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
-				errs = append(errs, err)
+				errx = errs.Append(errx, err)
 			}
 		}
 	}
@@ -261,42 +262,42 @@ func validate(cfg *cfgs.Config) (err error) {
 			break
 		}
 		if cfg.Output == "" {
-			errs = append(errs, fmt.Errorf("[VLDT] missing output key filename"))
+			errx = errs.Append(errx, fmt.Errorf("[GENKEY] missing output key filename"))
 		}
 		if !algTyp && cfg.Encd != "" {
-			errs = append(errs, fmt.Errorf("[VLDT] asymmetric keys must be PEM encoded, cannot use '%v'", cfg.Encd))
+			errx = errs.Append(errx, fmt.Errorf("[GENKEY] asymmetric keys must be PEM encoded, cannot use '%v'", cfg.Encd))
 		}
 	case CMD_PUBKEY:
 		if cfg.IsList() {
 			break
 		}
 		if cfg.Input == "" {
-			errs = append(errs, fmt.Errorf("[VLDT] missing input key filename"))
+			errx = errs.Append(errx, fmt.Errorf("[PUBKEY] missing input key filename"))
 		}
 		if cfg.Output == "" {
-			errs = append(errs, fmt.Errorf("[VLDT] missing output public key filename"))
+			errx = errs.Append(errx, fmt.Errorf("[PUBKEY] missing output public key filename"))
 		}
 		if algTyp {
-			errs = append(errs, fmt.Errorf("[VLDT] extracting public key not supported for %v", cfg.Algr))
+			errx = errs.Append(errx, fmt.Errorf("[PUBKEY] extracting public key not supported for %v", cfg.Algr))
 		}
 		if cfg.Encd != "" {
-			errs = append(errs, fmt.Errorf("[VLDT] asymmetric keys must be PEM encoded"))
+			errx = errs.Append(errx, fmt.Errorf("[PUBKEY] asymmetric keys must be PEM encoded"))
 		}
 	case CMD_SPLIT:
 		if cfg.SaltLen == 0 {
-			errs = append(errs, fmt.Errorf("[VLDT] missing split length"))
+			errx = errs.Append(errx, fmt.Errorf("[SPLIT] missing split length"))
 		}
 		if cfg.Output == "" {
-			errs = append(errs, fmt.Errorf("[VLDT] missing 1st output filename"))
+			errx = errs.Append(errx, fmt.Errorf("[SPLIT] missing 1st output filename"))
 		}
 		if cfg.Key == "" {
-			errs = append(errs, fmt.Errorf("[VLDT] missing 2nd output filename"))
+			errx = errs.Append(errx, fmt.Errorf("[SPLIT] missing 2nd output filename"))
 		}
 	}
 
 	if cfg.Input != "" {
 		if _, err = os.Stat(cfg.Input); errors.Is(err, os.ErrNotExist) {
-			errs = append(errs, fmt.Errorf("input file '%v' does not exist", cfg.Input))
+			errx = errs.Append(errx, fmt.Errorf("[IN] input file '%v' does not exist", cfg.Input))
 		} else if err != nil {
 			err = fmt.Errorf("[VLDT] %v", err)
 			return
@@ -305,7 +306,7 @@ func validate(cfg *cfgs.Config) (err error) {
 
 	if cfg.Output != "" {
 		if _, err = os.Stat(cfg.Output); err == nil {
-			errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Output))
+			errx = errs.Append(errx, fmt.Errorf("[OUT] output file '%v' already exists", cfg.Output))
 		} else if !errors.Is(err, os.ErrNotExist) {
 			err = fmt.Errorf("[VLDT] %v", err)
 			return
@@ -317,7 +318,7 @@ func validate(cfg *cfgs.Config) (err error) {
 	if cfg.Cmd() != CMD_PUBKEY && !algTyp {
 		if cfg.Key != "" {
 			if _, err = os.Stat(cfg.Key); err == nil {
-				errs = append(errs, fmt.Errorf("output file '%v' already exists", cfg.Key))
+				errx = errs.Append(errx, fmt.Errorf("[KEY] output file '%v' already exists", cfg.Key))
 			} else if !errors.Is(err, os.ErrNotExist) {
 				err = fmt.Errorf("[VLDT] %v", err)
 				return
@@ -327,13 +328,8 @@ func validate(cfg *cfgs.Config) (err error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		var buf strings.Builder
-		fmt.Fprintf(&buf, "[\n - %v", errs[0])
-		for _, err := range errs[1:] {
-			fmt.Fprintf(&buf, "\n - %v", err)
-		}
-		err = fmt.Errorf("[VLDT]%v\n]", buf.String())
+	if errs.Count(errx) > 0 {
+		err = errs.Wrap(errx, "VLDT")
 	}
 	return
 }

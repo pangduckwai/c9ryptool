@@ -6,7 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"strings"
+
+	"github.com/pangduckwai/sea9go/pkg/errs"
 )
 
 // parseKey parse the given input into a key in one of the PEM formats.
@@ -17,43 +18,38 @@ func parseKey(k []byte) (
 	typ bool,
 	err error,
 ) {
-	errs := make([]error, 0)
+	err = errs.New(true)
 	blk, _ := pem.Decode(k)
 	if blk == nil {
 		err = fmt.Errorf("[RSA] non-PEM input not supported")
 		return
 	}
-	key, err = x509.ParsePKCS8PrivateKey(blk.Bytes)
-	if err != nil {
-		errs = append(errs, err)
-		key, err = x509.ParsePKCS1PrivateKey(blk.Bytes)
-		if err != nil {
-			errs = append(errs, err)
-			key, err = x509.ParseECPrivateKey(blk.Bytes)
-			if err != nil {
-				errs = append(errs, err)
+	key, er := x509.ParsePKCS8PrivateKey(blk.Bytes)
+	if er != nil {
+		err = errs.Append(err, er)
+		key, er = x509.ParsePKCS1PrivateKey(blk.Bytes)
+		if er != nil {
+			err = errs.Append(err, er)
+			key, er = x509.ParseECPrivateKey(blk.Bytes)
+			if er != nil {
+				err = errs.Append(err, er)
 				typ = true // try read as public key from this point forward
-				key, err = x509.ParsePKIXPublicKey(blk.Bytes)
-				if err != nil {
-					errs = append(errs, err)
-					key, err = x509.ParsePKCS1PublicKey(blk.Bytes)
-					if err != nil {
-						errs = append(errs, err)
+				key, er = x509.ParsePKIXPublicKey(blk.Bytes)
+				if er != nil {
+					err = errs.Append(err, er)
+					key, er = x509.ParsePKCS1PublicKey(blk.Bytes)
+					if er != nil {
+						err = errs.Append(err, er)
 					}
 				}
 			}
 		}
 	}
-
-	if err != nil {
-		var buf strings.Builder
-		fmt.Fprintf(&buf, "[\n - %v", errs[0])
-		for _, err := range errs[1:] {
-			fmt.Fprintf(&buf, "\n - %v", err)
-		}
-		err = fmt.Errorf("[ASYM]%v\n]", buf.String())
+	if errs.Count(err) > 0 {
+		err = errs.Wrap(err, "ASYM")
+	} else {
+		err = nil
 	}
-
 	return
 }
 
