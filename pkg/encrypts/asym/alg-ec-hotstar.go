@@ -1,6 +1,8 @@
 package asym
 
 import (
+	"encoding/pem"
+
 	"github.com/hotstar/ecies"
 )
 
@@ -21,6 +23,24 @@ func (a *Secp256k1Hotstar) Type() bool {
 
 func (a *Secp256k1Hotstar) KeyLength() int {
 	return 256
+}
+
+func (a *Secp256k1Hotstar) GetKey() []byte {
+	buf := ecies.SerializePrivateKey(a.PrivateKey)
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: buf,
+	})
+	return rst
+}
+
+func (a *Secp256k1Hotstar) GetPublicKey() []byte {
+	buf := ecies.SerializePublicKey(a.PublicKey)
+	rst := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: buf,
+	})
+	return rst
 }
 
 // func main() {
