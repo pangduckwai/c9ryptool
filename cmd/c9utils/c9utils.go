@@ -41,7 +41,7 @@ func main() {
 		typ = -1
 		fallthrough
 	case CMD_GENKEY:
-		err = validate(cfg)
+		err = validate(cfg, typ)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}
@@ -82,7 +82,7 @@ func main() {
 		}
 
 	case CMD_SPLIT:
-		err = validate(cfg)
+		err = validate(cfg, typ)
 		if err != nil {
 			log.Fatalf("[MAIN]%v", err)
 		}

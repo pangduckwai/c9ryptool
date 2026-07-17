@@ -7,7 +7,7 @@ import (
 )
 
 func Version() string {
-	return "v2.1.1 2026050817"
+	return "v2.1.1 2026071715"
 }
 
 const BUFFER = 1048576 // 1024x1024

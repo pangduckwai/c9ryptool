@@ -241,16 +241,17 @@ func parse(args []string) (cfg *cfgs.Config, err error) {
 	return
 }
 
-func validate(cfg *cfgs.Config) (err error) {
+func validate(cfg *cfgs.Config, typ int) (err error) {
 	var errx error = errs.New(true)
 
 	var algTyp bool
 	if cfg.Cmd() != CMD_SPLIT {
-		if algTyp, err = encrypts.Validate(cfg.Algr, 1); err != nil {
+		if algTyp, err = encrypts.Validate(cfg.Algr, typ); err != nil {
+			fmt.Printf("HUUHHH?")
 			errx = errs.Append(errx, err)
 		}
 		if cfg.Encd != "" {
-			if _, err = encodes.Validate(cfg.Encd, 1); err != nil {
+			if _, err = encodes.Validate(cfg.Encd, typ); err != nil {
 				errx = errs.Append(errx, err)
 			}
 		}
