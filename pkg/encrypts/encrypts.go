@@ -55,6 +55,7 @@ var aSYMALGORITHMS = map[string]AsymAlgorithm{
 	"RSA-2048-PKCS1v15":       &asym.Rsa2048Pkcs1v15{},
 	"ECIES-SECP256K1-DECRED":  &asym.Secp256k1Decred{},
 	"ECIES-SECP256K1-ECIESGO": &asym.Secp256k1Eciesgo{},
+	"ECIES-SECP256K1-HOTSTAR": &asym.Secp256k1Hotstar{},
 }
 
 func Default() string {
